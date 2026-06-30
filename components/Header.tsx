@@ -9,8 +9,6 @@ import { Routes } from "@/types";
 export function Header() {
   const { user, loading } = useUser();
 
-  console.log("user", user);
-
   return (
     <header className="w-full border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
