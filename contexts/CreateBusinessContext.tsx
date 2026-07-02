@@ -11,15 +11,15 @@ import {
 import type { BusinessFormData } from "@/lib/schemas/businessFormSchema";
 import { UploadImage } from "@/components/business/BusinessImagesUpload";
 
-export type BusinessDraft = {
+export type BusinessUploadDraft = {
   form: BusinessFormData;
   logo: File | null;
   images: UploadImage[];
 };
 
 type CreateBusinessContextType = {
-  draft: BusinessDraft | null;
-  setDraft: (draft: BusinessDraft) => void;
+  draft: BusinessUploadDraft | null;
+  setDraft: (draft: BusinessUploadDraft) => void;
   clearDraft: () => void;
 };
 
@@ -28,13 +28,13 @@ const CreateBusinessContext = createContext<
 >(undefined);
 
 export function CreateBusinessProvider({ children }: { children: ReactNode }) {
-  const [draft, setDraftState] = useState<BusinessDraft | null>(null);
+  const [draft, setDraftState] = useState<BusinessUploadDraft | null>(null);
 
   const value = useMemo(
     () => ({
       draft,
 
-      setDraft: (draft: BusinessDraft) => {
+      setDraft: (draft: BusinessUploadDraft) => {
         setDraftState(draft);
       },
 

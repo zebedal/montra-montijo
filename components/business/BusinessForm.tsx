@@ -36,7 +36,11 @@ import {
 } from "@/contexts/CreateBusinessContext";
 import { useRouter } from "next/navigation";
 import { Routes } from "@/types";
-import { saveBusinessDraft, validateExistingBusiness } from "@/lib/helpers";
+import {
+  prepareBusinessMedia,
+  saveBusinessDraft,
+  validateExistingBusiness
+} from "@/lib/helpers";
 
 type Categoria = {
   id: string;
@@ -67,6 +71,8 @@ export default function BusinessForm() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [categorySearch, setCategorySearch] = useState<string>("");
+
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const { draft, setDraft } = useCreateBusiness();
   const router = useRouter();
@@ -109,25 +115,45 @@ export default function BusinessForm() {
       return;
     }
 
-    const draft: BusinessDraft = {
-      form: data,
-      logo: logoFile,
-      images
-    };
+    try {
+      setIsPublishing(true);
 
-    setDraft(draft);
+      /**
+       * 1. Gerar ID do draft
+       */
+      const draftId = crypto.randomUUID();
 
-    /**
-     * 1. Guardar draft na BD (SEM FILES)
-     */
-    const draftId = await saveBusinessDraft({
-      form: data
-    });
+      /**
+       * 2. Optimizar + fazer upload da media
+       */
+      const { logoUrl, imageUrls } = await prepareBusinessMedia(
+        draftId,
+        logoFile,
+        images
+      );
 
-    /**
-     * 2. Ir para página do plano com ID persistente
-     */
-    router.push(`${Routes.CRIAR_NEGOCIO_PLANO}?draft=${draftId}`);
+      /**
+       * 3. Guardar draft persistente
+       */
+      await saveBusinessDraft(draftId, {
+        form: data,
+        logoUrl,
+        imageUrls
+      });
+
+      /**
+       * 4. Ir para a escolha do plano
+       */
+      router.push(`${Routes.CRIAR_NEGOCIO_PLANO}?draft=${draftId}`);
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Não foi possível preparar o anúncio.", {
+        position: "top-center"
+      });
+    } finally {
+      setIsPublishing(false);
+    }
   }
 
   const copyMondayToAll = () => {

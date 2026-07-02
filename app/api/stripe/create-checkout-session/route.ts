@@ -50,13 +50,31 @@ export async function POST(req: Request) {
       ],
 
       metadata: {
-        draftId,
-        userId: user.id
+        draftId
       },
 
-      success_url: `${origin}/criar-negocio/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/criar-negocio/plano`
+      success_url: `${origin}/criar-negocio/publicacao?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/criar-negocio/plano?draft=${draftId}`
     });
+
+    const { error } = await supabase.from("stripe_checkouts").insert({
+      session_id: session.id,
+      draft_id: draftId,
+      status: "processing"
+    });
+
+    if (error) {
+      await stripe.checkout.sessions.expire(session.id);
+
+      return NextResponse.json(
+        {
+          error: "Erro ao criar checkout."
+        },
+        {
+          status: 500
+        }
+      );
+    }
 
     return NextResponse.json({
       url: session.url

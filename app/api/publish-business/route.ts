@@ -1,0 +1,61 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { publishBusiness } from "@/lib/helpers";
+
+export async function POST(req: Request) {
+  const supabase = await createClient();
+
+  try {
+    const { draftId, isFeatured } = await req.json();
+
+    if (!draftId) {
+      return NextResponse.json({ error: "DraftId em falta." }, { status: 400 });
+    }
+
+    /**
+     * AUTH
+     */
+
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+    }
+
+    /**
+     * GET DRAFT
+     */
+    const { data: draft, error: draftError } = await supabase
+      .from("business_drafts")
+      .select("data")
+      .eq("id", draftId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (draftError || !draft) {
+      return NextResponse.json({ error: "Draft inválido." }, { status: 404 });
+    }
+
+    /**
+     * CALL HELPER
+     */
+    const businessId = await publishBusiness({
+      supabase,
+      userId: user.id,
+      draft: draft.data,
+      isFeatured
+    });
+
+    return NextResponse.json({ businessId });
+  } catch (error) {
+    console.error("PUBLISH ERROR:", error);
+
+    return NextResponse.json(
+      { error: "Erro ao publicar negócio." },
+      { status: 500 }
+    );
+  }
+}

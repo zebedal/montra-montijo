@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCreateBusiness } from "@/contexts/CreateBusinessContext";
 import { Routes } from "@/types";
-import { publishBusiness } from "@/lib/helpers";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { supabase } from "@/lib/supabase/client";
 
 export default function BusinessPlanPage() {
   const router = useRouter();
@@ -18,7 +18,9 @@ export default function BusinessPlanPage() {
   const [isPublishing, setIsPublishing] = useState(false);
 
   const searchParams = useSearchParams();
-  const draftId = searchParams.get("draft");
+  const urlDraftId = searchParams.get("draft");
+
+  const [draftId, setDraftId] = useState<string | null>(urlDraftId);
 
   // Se não existir draft, significa que alguém entrou diretamente nesta página.
   /* if (!draft) {
@@ -26,12 +28,54 @@ export default function BusinessPlanPage() {
     return null;
   } */
 
+  useEffect(() => {
+    if (draftId) return;
+
+    const load = async () => {
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("business_drafts")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (data) {
+        setDraftId(data.id);
+      }
+    };
+
+    load();
+  }, [draftId]);
+
   const publishFree = async () => {
-    if (!draft) return;
+    if (!draftId) return;
 
     try {
       setIsPublishing(true);
-      await publishBusiness({ draft, isFeatured: false });
+
+      const res = await fetch("/api/publish-business", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          draftId,
+          isFeatured: false
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error);
+      }
 
       clearDraft();
 
@@ -40,7 +84,9 @@ export default function BusinessPlanPage() {
       });
 
       router.replace(Routes.MEUS_NEGOCIOS);
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       toast.error("Houve um erro ao publicar o negócio.", {
         position: "top-center"
       });
@@ -50,7 +96,7 @@ export default function BusinessPlanPage() {
   };
 
   const choosePremium = async () => {
-    if (!draft) return;
+    if (!draftId) return;
 
     try {
       setIsPublishing(true);
