@@ -7,6 +7,7 @@ import PremiumCard from "@/components/OnboardingPremiumCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
+import { Routes } from "@/types";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function OnboardingPage() {
             size="lg"
             className="w-full bg-primary-green hover:bg-primary-green/90"
           >
-            <Link href="/add-business">Criar negócio gratuitamente</Link>
+            <Link href={Routes.CRIAR_NEGOCIO}>Criar negócio gratuitamente</Link>
           </Button>
 
           <p className="text-sm text-muted-foreground">

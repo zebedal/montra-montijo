@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { ImagePickerBadge } from "@/components/ImagePicker";
@@ -9,11 +8,11 @@ import { toast } from "sonner";
 
 type Props = {
   onChange: (file: File | null) => void;
+  preview?: string | null;
+  setPreview: (value: string | null) => void;
 };
 
-export function LogoUpload({ onChange }: Props) {
-  const [preview, setPreview] = useState<string | null>(null);
-
+export function LogoUpload({ onChange, preview, setPreview }: Props) {
   const handleChange = (file: File | null) => {
     if (!file) return;
 
@@ -25,14 +24,14 @@ export function LogoUpload({ onChange }: Props) {
     }
 
     const url = URL.createObjectURL(file);
-    setPreview(url);
 
     onChange(file);
+    setPreview(url);
   };
 
   const removeLogo = () => {
-    setPreview(null);
     onChange(null);
+    setPreview(null);
   };
 
   return (

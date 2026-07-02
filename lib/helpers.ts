@@ -1,3 +1,9 @@
+import { supabase } from "./supabase/client";
+
+import imageCompression from "browser-image-compression";
+import { uploadFile } from "./supabase/upload";
+import { BusinessDraft } from "@/contexts/CreateBusinessContext";
+
 export const MAX_LOGO_SIZE_MB = 2;
 export const MAX_IMAGE_SIZE_MB = 3;
 
@@ -11,4 +17,197 @@ export function validateImage(file: File, maxMB: number) {
   }
 
   return null;
+}
+
+export async function validateExistingBusiness(
+  name: string,
+  categoryId: string
+) {
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("id")
+    .eq("category_id", categoryId)
+    .ilike("name", name.trim())
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return !!data;
+}
+
+export async function optimizeImage(file: File): Promise<File> {
+  const options = {
+    maxSizeMB: 1, // limite final (MB)
+    maxWidthOrHeight: 1920, // resize automático
+    useWebWorker: true,
+    fileType: "image/webp" // converte para WebP
+  };
+
+  const compressed = await imageCompression(file, options);
+
+  return new File([compressed], file.name.replace(/\.\w+$/, ".webp"), {
+    type: "image/webp"
+  });
+}
+
+type PublishBusinessOptions = {
+  draft: BusinessDraft;
+  isFeatured?: boolean;
+};
+
+export async function publishBusiness({
+  draft,
+  isFeatured = false
+}: PublishBusinessOptions): Promise<string> {
+  const businessId = crypto.randomUUID();
+
+  let uploadedLogoPath: string | null = null;
+  const uploadedImages: string[] = [];
+
+  try {
+    const { form, logo: logoFile, images } = draft;
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    /**
+     * BUSINESS
+     */
+
+    const { error: insertError } = await supabase.from("businesses").insert({
+      id: businessId,
+      user_id: user?.id,
+      category_id: form.category_id,
+      name: form.name,
+      description: form.description,
+      phone: form.phone,
+      email: form.email || null,
+      website: form.website || null,
+      facebook: form.facebook || null,
+      instagram: form.instagram || null,
+      address: form.address || null,
+      postal_code: form.postalCode || null,
+      city: form.city || null,
+      // Plano
+      featured: isFeatured,
+      plan: isFeatured ? "premium" : "free"
+    });
+
+    if (insertError) throw insertError;
+
+    /**
+     * LOGO
+     */
+
+    if (logoFile) {
+      const optimizedLogo = await optimizeImage(logoFile);
+
+      uploadedLogoPath = await uploadFile(
+        optimizedLogo,
+        "business-media",
+        `businesses/${businessId}/logo`
+      );
+
+      const { error } = await supabase
+        .from("businesses")
+        .update({
+          logo_url: uploadedLogoPath
+        })
+        .eq("id", businessId);
+
+      if (error) throw error;
+    }
+
+    /**
+     * IMAGES
+     */
+
+    if (images.length > 0) {
+      const imageUrls = await Promise.all(
+        images.map(async (img, index) => {
+          const optimized = await optimizeImage(img.file);
+
+          return uploadFile(
+            optimized,
+            "business-media",
+            `businesses/${businessId}/images/${index}`
+          );
+        })
+      );
+
+      uploadedImages.push(...imageUrls);
+
+      const rows = imageUrls.map((url, index) => ({
+        business_id: businessId,
+        url,
+        position: index
+      }));
+
+      const { error } = await supabase.from("business_images").insert(rows);
+
+      if (error) throw error;
+    }
+
+    /**
+     * OPENING HOURS
+     */
+
+    if (form.openingHours?.length) {
+      const rows = form.openingHours.map((hour) => ({
+        business_id: businessId,
+        day: hour.day,
+        open_time: hour.open || null,
+        close_time: hour.close || null,
+        is_closed: hour.closed
+      }));
+
+      const { error } = await supabase.from("business_hours").insert(rows);
+
+      if (error) throw error;
+    }
+
+    return businessId;
+  } catch (error) {
+    await supabase.from("businesses").delete().eq("id", businessId);
+
+    // TODO:
+    // delete uploaded storage files
+
+    throw error;
+  }
+}
+
+export async function saveBusinessDraft(
+  draft: Pick<BusinessDraft, "form">
+): Promise<string> {
+  const {
+    data: { user },
+    error: authError
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("Utilizador não autenticado.");
+  }
+
+  const draftId = crypto.randomUUID();
+
+  const { data, error } = await supabase
+    .from("business_drafts")
+    .insert({
+      id: draftId,
+      user_id: user.id,
+      data: draft.form,
+      updated_at: new Date().toISOString()
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? "Erro ao criar draft.");
+  }
+
+  return data.id;
 }

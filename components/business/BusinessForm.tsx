@@ -28,8 +28,15 @@ import { OpeningHours } from "./OpeningHours";
 
 import { LogoUpload } from "./UploadLogo";
 import { BusinessImagesUpload } from "./BusinessImagesUpload";
-import { supabase } from "@/lib/supabase/client";
-import { uploadFile } from "@/lib/supabase/upload";
+import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
+import {
+  BusinessDraft,
+  useCreateBusiness
+} from "@/contexts/CreateBusinessContext";
+import { useRouter } from "next/navigation";
+import { Routes } from "@/types";
+import { saveBusinessDraft, validateExistingBusiness } from "@/lib/helpers";
 
 type Categoria = {
   id: string;
@@ -43,11 +50,26 @@ export type UploadImage = {
   preview: string;
 };
 
+export const defaultOpeningHours = [
+  { day: "Segunda", open: "", close: "", closed: false },
+  { day: "Terça", open: "", close: "", closed: false },
+  { day: "Quarta", open: "", close: "", closed: false },
+  { day: "Quinta", open: "", close: "", closed: false },
+  { day: "Sexta", open: "", close: "", closed: false },
+  { day: "Sábado", open: "", close: "", closed: false },
+  { day: "Domingo", open: "", close: "", closed: true }
+];
+
 export default function BusinessForm() {
   const [showHours, setShowHours] = useState(false);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [images, setImages] = useState<UploadImage[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [categorySearch, setCategorySearch] = useState<string>("");
+
+  const { draft, setDraft } = useCreateBusiness();
+  const router = useRouter();
 
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessSchema),
@@ -63,7 +85,7 @@ export default function BusinessForm() {
       city: "Montijo",
       images: [],
       logo: "",
-      openingHours: []
+      openingHours: defaultOpeningHours
     }
   });
 
@@ -77,117 +99,35 @@ export default function BusinessForm() {
   } = form;
 
   async function onSubmit(data: BusinessFormData) {
-    const businessId = crypto.randomUUID();
+    const exists = await validateExistingBusiness(data.name, data.category_id);
 
-    console.log("Submitting business data:", data);
-
-    let uploadedLogoPath: string | null = null;
-    const uploadedImages: string[] = [];
-
-    try {
-      /**
-       * 1. CREATE BUSINESS (SEM MEDIA AINDA)
-       */
-      const { error: insertError } = await supabase.from("businesses").insert({
-        id: businessId,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
-        category_id: data.category_id,
-        name: data.name,
-        description: data.description,
-        phone: data.phone,
-        email: data.email || null,
-        website: data.website || null,
-        facebook: data.facebook || null,
-        instagram: data.instagram || null,
-        address: data.address || null,
-        postal_code: data.postalCode || null,
-        city: data.city || null
+    if (exists) {
+      toast.error("Já existe um negócio com este nome nesta categoria.", {
+        position: "top-center"
       });
 
-      if (insertError) throw insertError;
-
-      /**
-       * 2. LOGO UPLOAD
-       */
-      if (logoFile) {
-        uploadedLogoPath = await uploadFile(
-          logoFile,
-          "business-media",
-          `businesses/${businessId}/logo`
-        );
-
-        const { error: logoError } = await supabase
-          .from("businesses")
-          .update({ logo_url: uploadedLogoPath })
-          .eq("id", businessId);
-
-        if (logoError) throw logoError;
-      }
-
-      /**
-       * 3. IMAGES UPLOAD
-       */
-      if (images.length > 0) {
-        const imageUploads = await Promise.all(
-          images.map((img, index) =>
-            uploadFile(
-              img.file,
-              "business-media",
-              `businesses/${businessId}/images/${index}`
-            )
-          )
-        );
-
-        uploadedImages.push(...imageUploads);
-
-        const imageRows = imageUploads.map((url, index) => ({
-          business_id: businessId,
-          url,
-          position: index
-        }));
-
-        const { error: imagesError } = await supabase
-          .from("business_images")
-          .insert(imageRows);
-
-        if (imagesError) throw imagesError;
-      }
-
-      /**
-       * 4. OPENING HOURS
-       */
-      if (data.openingHours?.length) {
-        const hoursRows = data.openingHours.map((h) => ({
-          business_id: businessId,
-          day: h.day,
-          open_time: h.open || null,
-          close_time: h.close || null,
-          is_closed: h.closed
-        }));
-
-        const { error: hoursError } = await supabase
-          .from("business_hours")
-          .insert(hoursRows);
-
-        if (hoursError) throw hoursError;
-      }
-
-      console.log("✅ Business created successfully!");
-    } catch (err) {
-      console.error("❌ Error creating business:", err);
-
-      /**
-       * ROLLBACK (best effort)
-       */
-
-      // 1. delete DB record
-      await supabase.from("businesses").delete().eq("id", businessId);
-
-      // 2. Supabase Storage cleanup is optional (não tens delete helper ainda)
-      // ideally: delete uploadedLogoPath + uploadedImages
-
-      console.warn("Rollback executed (DB cleaned).");
+      return;
     }
+
+    const draft: BusinessDraft = {
+      form: data,
+      logo: logoFile,
+      images
+    };
+
+    setDraft(draft);
+
+    /**
+     * 1. Guardar draft na BD (SEM FILES)
+     */
+    const draftId = await saveBusinessDraft({
+      form: data
+    });
+
+    /**
+     * 2. Ir para página do plano com ID persistente
+     */
+    router.push(`${Routes.CRIAR_NEGOCIO_PLANO}?draft=${draftId}`);
   }
 
   const copyMondayToAll = () => {
@@ -213,6 +153,14 @@ export default function BusinessForm() {
     });
   };
 
+  /*   const resetFormState = () => {
+    form.reset();
+    setLogoPreview(null);
+    setImages([]);
+    setCategorySearch("");
+    setShowHours(false);
+  }; */
+
   useEffect(() => {
     async function load() {
       const data = await getCategorias();
@@ -232,7 +180,12 @@ export default function BusinessForm() {
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+        <form
+          onSubmit={handleSubmit(onSubmit, (errors) => {
+            console.log("FORM ERRORS:", errors);
+          })}
+          className="space-y-10"
+        >
           {/* INFORMACOES */}
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Informações</h2>
@@ -248,29 +201,41 @@ export default function BusinessForm() {
               <Controller
                 control={control}
                 name="category_id"
-                render={({ field }) => (
-                  <Combobox
-                    items={categorias}
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <ComboboxInput placeholder="Seleciona uma categoria" />
+                render={({ field }) => {
+                  return (
+                    <Combobox
+                      items={categorias}
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
 
-                    <ComboboxContent>
-                      <ComboboxEmpty>
-                        Nenhuma categoria encontrada
-                      </ComboboxEmpty>
+                        const selected = categorias.find((c) => c.id === value);
 
-                      <ComboboxList>
-                        {(item) => (
-                          <ComboboxItem key={item.id} value={item.id}>
-                            {item.name}
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                )}
+                        setCategorySearch(selected?.name ?? "");
+                      }}
+                    >
+                      <ComboboxInput
+                        value={categorySearch}
+                        onChange={(e) => setCategorySearch(e.target.value)}
+                        placeholder="Seleciona uma categoria"
+                      />
+
+                      <ComboboxContent>
+                        <ComboboxEmpty>
+                          Nenhuma categoria encontrada
+                        </ComboboxEmpty>
+
+                        <ComboboxList>
+                          {(item) => (
+                            <ComboboxItem key={item.id} value={item.id}>
+                              {item.name}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  );
+                }}
               />
             </div>
 
@@ -313,7 +278,11 @@ export default function BusinessForm() {
 
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Logo</h2>
-            <LogoUpload onChange={setLogoFile} />
+            <LogoUpload
+              onChange={setLogoFile}
+              preview={logoPreview}
+              setPreview={setLogoPreview}
+            />
           </section>
 
           <section className="space-y-4">
@@ -330,7 +299,20 @@ export default function BusinessForm() {
             <div className="flex items-center gap-2">
               <Checkbox
                 checked={showHours}
-                onCheckedChange={(v) => setShowHours(v === true)}
+                onCheckedChange={(v) => {
+                  const checked = v === true;
+                  setShowHours(checked);
+
+                  if (checked) {
+                    setValue("openingHours", defaultOpeningHours, {
+                      shouldDirty: true
+                    });
+                  } else {
+                    setValue("openingHours", [], {
+                      shouldDirty: true
+                    });
+                  }
+                }}
               />
               <span className="text-sm">
                 Quero adicionar horário de funcionamento
@@ -363,7 +345,13 @@ export default function BusinessForm() {
             disabled={isSubmitting}
             size="lg"
           >
-            Publicar negócio
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <Spinner /> A criar negócio...
+              </span>
+            ) : (
+              "Publicar negócio"
+            )}
           </Button>
         </form>
       </CardContent>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 import { loginSchema } from "@/lib/schemas/loginSchema";
 import { signupSchema } from "@/lib/schemas/signupSchema";
+import { Routes } from "@/types";
 
 type FormData = {
   email: string;
@@ -43,7 +44,7 @@ export default function AuthPage() {
         return;
       }
 
-      router.push("/add-business");
+      router.push(Routes.CRIAR_NEGOCIO);
       return;
     }
 

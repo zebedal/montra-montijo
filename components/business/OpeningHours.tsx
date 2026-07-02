@@ -28,13 +28,13 @@ export function OpeningHours({ control }: Props) {
         return (
           <div
             key={hour.day}
-            className="grid grid-cols-[120px_1fr_auto] items-center gap-4 rounded-lg border p-4"
+            className="grid gap-4 rounded-lg border p-4 md:grid-cols-[120px_1fr_auto] md:items-center"
           >
             {/* DIA */}
             <Label className="font-medium">{hour.day}</Label>
 
             {/* HORAS */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Controller
                 control={control}
                 name={`openingHours.${index}.open`}
@@ -43,12 +43,14 @@ export function OpeningHours({ control }: Props) {
                     {...field}
                     type="time"
                     disabled={closed}
-                    className="w-36"
+                    className="w-full sm:w-36"
                   />
                 )}
               />
 
-              <span>às</span>
+              <span className="hidden md:block text-sm text-muted-foreground">
+                às
+              </span>
 
               <Controller
                 control={control}
@@ -58,7 +60,7 @@ export function OpeningHours({ control }: Props) {
                     {...field}
                     type="time"
                     disabled={closed}
-                    className="w-36"
+                    className="w-full sm:w-36"
                   />
                 )}
               />

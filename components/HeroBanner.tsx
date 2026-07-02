@@ -21,6 +21,7 @@ export function Hero() {
       <Image
         className="absolute inset-0 bg-cover bg-center"
         src="/images/background.jpg"
+        loading="eager"
         alt="Background"
         fill
       />

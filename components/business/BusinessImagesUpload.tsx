@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 const MAX_IMAGES = 6;
 
-type UploadImage = {
+export type UploadImage = {
   id: string;
   file: File;
   preview: string;
