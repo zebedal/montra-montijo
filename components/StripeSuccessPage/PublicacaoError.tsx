@@ -4,14 +4,28 @@ interface ErrorProps {
   message?: string;
 }
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Mail } from "lucide-react";
+import { Button } from "../ui/button";
 
 type Props = {
   message?: string;
+  sessionId?: string;
   onRetry?: () => void;
 };
 
-function PublicacaoError({ message, onRetry }: Props) {
+function PublicacaoError({ message, sessionId, onRetry }: Props) {
+  const subject = encodeURIComponent("Problema na publicação do negócio");
+
+  const body = encodeURIComponent(`
+Olá,
+
+Ocorreu um problema durante a publicação do meu negócio.
+
+Session ID:
+${sessionId}
+
+Obrigado.
+`);
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
       <AlertTriangle className="h-14 w-14 text-red-600" />
@@ -37,9 +51,15 @@ function PublicacaoError({ message, onRetry }: Props) {
           </button>
         )}
 
-        <a href="/suporte" className="px-4 py-2 rounded-md border text-sm">
-          Contactar suporte
-        </a>
+        <Button>
+          <a
+            href={`mailto:suporte@montramontijo.pt?subject=${subject}&body=${body}`}
+            className="flex items-center gap-2"
+          >
+            <Mail className="h-4 w-4" />
+            Contactar assistência
+          </a>
+        </Button>
       </div>
     </div>
   );

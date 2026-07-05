@@ -5,6 +5,7 @@ import { uploadFile } from "./supabase/upload";
 import { UploadImage } from "@/components/business/BusinessImagesUpload";
 import { BusinessFormData } from "./schemas/businessFormSchema";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "./supabase/server";
 
 export const MAX_LOGO_SIZE_MB = 2;
 export const MAX_IMAGE_SIZE_MB = 3;
@@ -39,6 +40,12 @@ type MoveDraftAssetsOptions = {
 type MoveDraftAssetsResult = {
   logoUrl: string | null;
   imageUrls: string[];
+};
+
+type GetBusinessByIdOptions = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
+  businessId: string;
 };
 
 export function validateImage(file: File, maxMB: number) {
@@ -324,5 +331,81 @@ export async function moveDraftAssets({
   return {
     logoUrl,
     imageUrls
+  };
+}
+
+export async function getBusinessById({
+  supabase,
+  businessId
+}: GetBusinessByIdOptions) {
+  const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .select(
+      `
+      id,
+      name,
+      description,
+      logo_url,
+      phone,
+      email,
+      website,
+      facebook,
+      instagram,
+      address,
+      postal_code,
+      city,
+      plan,
+      categories (
+        id,
+        name
+      )
+    `
+    )
+    .eq("id", businessId)
+    .single();
+
+  if (businessError || !business) {
+    throw new Error("Negócio não encontrado.");
+  }
+
+  let logoUrl: string | null = null;
+
+  if (business.logo_url) {
+    const { data } = supabase.storage
+      .from("business-media")
+      .getPublicUrl(business.logo_url);
+
+    logoUrl = data.publicUrl;
+  }
+
+  const [{ data: images }, { data: hours }] = await Promise.all([
+    supabase
+      .from("business_images")
+      .select("id, url, position")
+      .eq("business_id", businessId)
+      .order("position"),
+
+    supabase
+      .from("business_hours")
+      .select("day, open_time, close_time, is_closed")
+      .eq("business_id", businessId)
+      .order("id")
+  ]);
+
+  // @ts-expect-error image any
+  const imageUrls = images.map((image) => ({
+    ...image,
+    url: supabase.storage.from("business-media").getPublicUrl(image.url).data
+      .publicUrl
+  }));
+
+  return {
+    business: {
+      ...business,
+      logo_url: logoUrl,
+      category: business.categories?.name ?? null
+    },
+    images: imageUrls ?? [],
+    hours: hours ?? []
   };
 }

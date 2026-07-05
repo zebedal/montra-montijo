@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
+import { Button } from "../ui/button";
 interface SuccessProps {
   businessId?: string;
 }
@@ -20,16 +21,13 @@ export default function Success({ businessId }: SuccessProps) {
       </div>
 
       <div className="flex gap-3">
-        <a
-          href={`/negocio/${businessId}`}
-          className="px-4 py-2 rounded-md bg-black text-white text-sm"
-        >
-          Ver negócio
-        </a>
+        <Button variant="default">
+          <Link href={`/negocio/${businessId}`}>Ver negócio</Link>
+        </Button>
 
-        <a href="/dashboard" className="px-4 py-2 rounded-md border text-sm">
-          Ir para dashboard
-        </a>
+        <Button variant="outline">
+          <Link href="/dashboard">Ir para área de cliente</Link>
+        </Button>
       </div>
     </div>
   );
