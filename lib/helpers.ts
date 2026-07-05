@@ -30,11 +30,10 @@ export type BusinessDraftData = {
 };
 
 type MoveDraftAssetsOptions = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabaseAdmin: any;
-  draft: BusinessDraftData;
+  supabaseAdmin: SupabaseClient;
   draftId: string;
   businessId: string;
+  draft: BusinessDraftData;
 };
 
 type MoveDraftAssetsResult = {
@@ -236,7 +235,7 @@ export async function prepareBusinessMedia(
         return uploadFile(
           optimized,
           "business-media",
-          `drafts/${draftId}/images/${index}`
+          `drafts/${draftId}/images/`
         );
       })
     );
@@ -275,54 +274,51 @@ export async function getBusinessDraft(
 
 export async function moveDraftAssets({
   supabaseAdmin,
-  draft,
   draftId,
-  businessId
+  businessId,
+  draft
 }: MoveDraftAssetsOptions): Promise<MoveDraftAssetsResult> {
   let logoUrl: string | null = null;
-
   const imageUrls: string[] = [];
 
   /**
-   * LOGO
+   * Logo
    */
-
   if (draft.logoUrl) {
     const logoFile = draft.logoUrl.split("/").pop()!;
 
-    const from = `drafts/${draftId}/${logoFile}`;
-    const to = `businesses/${businessId}/${logoFile}`;
+    const from = `drafts/${draftId}/logo/${logoFile}`;
+    const to = `businesses/${businessId}/logo/${logoFile}`;
 
     const { error } = await supabaseAdmin.storage
       .from("business-media")
       .copy(from, to);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
-    logoUrl = supabaseAdmin.storage.from("business-media").getPublicUrl(to)
-      .data.publicUrl;
+    logoUrl = to;
   }
 
   /**
-   * IMAGES
+   * Images
    */
+  for (const image of draft.imageUrls) {
+    const imageFile = image.split("/").pop()!;
 
-  for (const imageUrl of draft.imageUrls) {
-    const imageFile = imageUrl.split("/").pop()!;
-
-    const from = `drafts/${draftId}/${imageFile}`;
-    const to = `businesses/${businessId}/${imageFile}`;
+    const from = `drafts/${draftId}/images/${imageFile}`;
+    const to = `businesses/${businessId}/images/${imageFile}`;
 
     const { error } = await supabaseAdmin.storage
       .from("business-media")
       .copy(from, to);
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
-    imageUrls.push(
-      supabaseAdmin.storage.from("business-media").getPublicUrl(to).data
-        .publicUrl
-    );
+    imageUrls.push(to);
   }
 
   return {

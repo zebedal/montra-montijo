@@ -77,7 +77,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({
-      url: session.url
+      url: session.url,
+      sessionId: session.id
     });
   } catch (error) {
     console.error(error);

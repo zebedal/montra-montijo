@@ -1,25 +1,22 @@
 import { Loader2 } from "lucide-react";
 
-export default function Processing() {
+function Processing() {
   return (
-    <main className="flex min-h-[70vh] items-center justify-center px-6">
-      <div className="max-w-md text-center">
-        <div className="mb-8 flex justify-center">
-          <Loader2 className="h-14 w-14 animate-spin text-primary" />
-        </div>
+    <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
+      <div className="h-12 w-12 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
 
-        <h1 className="text-3xl font-bold">Pagamento recebido!</h1>
+      <div className="space-y-2">
+        <h1 className="text-xl font-medium text-gray-900">
+          A publicar o teu negócio
+        </h1>
 
-        <p className="mt-4 text-muted-foreground">
-          Estamos a publicar o teu negócio.
+        <p className="text-gray-500 max-w-md">
+          Estamos a concluir o processo. Isto pode demorar alguns segundos.
         </p>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          Isto demora apenas alguns segundos.
-        </p>
-
-        <p className="mt-8 text-sm font-medium">Não feches esta página.</p>
       </div>
-    </main>
+
+      <p className="text-sm text-gray-400">Não feches esta página</p>
+    </div>
   );
 }
+export default Processing;

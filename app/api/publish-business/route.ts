@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+
 import { publishBusiness } from "@/lib/helpers";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-
   try {
     const { draftId, isFeatured } = await req.json();
 
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
     /**
      * GET DRAFT
      */
-    const { data: draft, error: draftError } = await supabase
+    const { data: draft, error: draftError } = await supabaseAdmin
       .from("business_drafts")
       .select("data")
       .eq("id", draftId)
@@ -42,8 +43,10 @@ export async function POST(req: Request) {
     /**
      * CALL HELPER
      */
-    const businessId = await publishBusiness({
-      supabase,
+    const businessId = crypto.randomUUID();
+    await publishBusiness({
+      businessId,
+      supabaseAdmin,
       userId: user.id,
       draft: draft.data,
       isFeatured

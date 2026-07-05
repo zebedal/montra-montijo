@@ -4,30 +4,45 @@ interface ErrorProps {
   message?: string;
 }
 
-export default function Error({ message }: ErrorProps) {
+import { AlertTriangle } from "lucide-react";
+
+type Props = {
+  message?: string;
+  onRetry?: () => void;
+};
+
+function PublicacaoError({ message, onRetry }: Props) {
   return (
-    <main className="flex min-h-[70vh] items-center justify-center px-6">
-      <div className="max-w-md text-center">
-        <div className="mb-8 text-6xl">😕</div>
+    <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
+      <AlertTriangle className="h-14 w-14 text-red-600" />
 
-        <h1 className="text-3xl font-bold">Ocorreu um problema</h1>
+      <div className="space-y-2">
+        <h1 className="text-xl font-medium text-gray-900">
+          Não foi possível publicar o negócio
+        </h1>
 
-        <p className="mt-4 text-muted-foreground">
-          O pagamento foi recebido, mas não conseguimos publicar o teu negócio
-          automaticamente.
+        <p className="text-gray-500 max-w-md">
+          {message ||
+            "O pagamento foi recebido, mas ocorreu um erro ao concluir a publicação."}
         </p>
-
-        <p className="mt-4 text-sm text-muted-foreground">
-          A nossa equipa irá tentar concluir a publicação ou poderás voltar mais
-          tarde.
-        </p>
-
-        <div className="mt-10">
-          <Link href="/meus-negocios" className="btn btn-primary">
-            Ir para Meus Negócios
-          </Link>
-        </div>
       </div>
-    </main>
+
+      <div className="flex gap-3">
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="px-4 py-2 rounded-md bg-black text-white text-sm"
+          >
+            Tentar novamente
+          </button>
+        )}
+
+        <a href="/suporte" className="px-4 py-2 rounded-md border text-sm">
+          Contactar suporte
+        </a>
+      </div>
+    </div>
   );
 }
+
+export default PublicacaoError;

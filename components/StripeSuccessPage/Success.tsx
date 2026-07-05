@@ -1,27 +1,36 @@
 import Link from "next/link";
-
+import { CheckCircle } from "lucide-react";
 interface SuccessProps {
   businessId?: string;
 }
 
 export default function Success({ businessId }: SuccessProps) {
   return (
-    <main className="flex min-h-[70vh] items-center justify-center px-6">
-      <div className="max-w-md text-center">
-        <div className="mb-8 text-6xl">🎉</div>
+    <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
+      <CheckCircle className="h-14 w-14 text-green-600" />
 
-        <h1 className="text-3xl font-bold">Negócio publicado!</h1>
+      <div className="space-y-2">
+        <h1 className="text-xl font-medium text-gray-900">
+          Negócio publicado com sucesso
+        </h1>
 
-        <p className="mt-4 text-muted-foreground">
-          O teu negócio já está disponível na plataforma.
+        <p className="text-gray-500 max-w-md">
+          O teu negócio já está disponível e visível na plataforma.
         </p>
-
-        <div className="mt-10 flex flex-col gap-3">
-          <Link href="/meus-negocios" className="btn btn-primary">
-            Ir para Meus Negócios
-          </Link>
-        </div>
       </div>
-    </main>
+
+      <div className="flex gap-3">
+        <a
+          href={`/negocio/${businessId}`}
+          className="px-4 py-2 rounded-md bg-black text-white text-sm"
+        >
+          Ver negócio
+        </a>
+
+        <a href="/dashboard" className="px-4 py-2 rounded-md border text-sm">
+          Ir para dashboard
+        </a>
+      </div>
+    </div>
   );
 }

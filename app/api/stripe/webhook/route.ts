@@ -27,8 +27,6 @@ export async function POST(req: Request) {
     return new NextResponse("Webhook error", { status: 400 });
   }
 
-  console.log("✅ EVENT:", event.type);
-
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object;
@@ -45,7 +43,6 @@ export async function POST(req: Request) {
       }
 
       if (checkout.business_id) {
-        console.log("Already processed → skipping");
         return NextResponse.json({ ok: true });
       }
 
@@ -58,9 +55,9 @@ export async function POST(req: Request) {
 
       const assets = await moveDraftAssets({
         supabaseAdmin,
-        draft,
         draftId: checkout.draft_id,
-        businessId
+        businessId,
+        draft
       });
 
       await publishBusiness({
@@ -83,8 +80,6 @@ export async function POST(req: Request) {
           processed_at: new Date().toISOString()
         })
         .eq("session_id", session.id);
-
-      console.log("Business published:", businessId);
 
       return NextResponse.json({ ok: true });
     }

@@ -22,7 +22,10 @@ type CheckoutStatus =
 export default function PublicacaoPage() {
   const searchParams = useSearchParams();
 
-  const sessionId = searchParams.get("session_id");
+  const querySessionId = searchParams.get("session_id");
+
+  const sessionId =
+    querySessionId || localStorage.getItem("pendingCheckoutSession");
 
   const [checkout, setCheckout] = useState<CheckoutStatus>({
     status: "processing"
@@ -53,6 +56,12 @@ export default function PublicacaoPage() {
 
     loadStatus();
   }, [sessionId]);
+
+  useEffect(() => {
+    if (checkout.status === "completed" || checkout.status === "failed") {
+      localStorage.removeItem("pendingCheckoutSession");
+    }
+  }, [checkout.status]);
 
   if (!sessionId) {
     return <PublicacaoError message="Sessão inválida." />;
