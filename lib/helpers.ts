@@ -103,10 +103,32 @@ export async function publishBusiness({
   try {
     const { form, logoUrl, imageUrls } = draft;
 
+    const fullAddress = [
+      `${form.street} ${form.number}`,
+      form.postalCode,
+      form.city,
+      "Portugal"
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    let coordinates = null;
+
+    if (form.street && form.postalCode) {
+      coordinates = await geocodeAddress(fullAddress);
+    }
+
     /**
      * BUSINESS
      */
-
+    console.log("Publishing business:", {
+      businessId,
+      street: form.street,
+      number: form.number,
+      postalCode: form.postalCode,
+      city: form.city,
+      coordinates
+    });
     const { error: insertError } = await supabaseAdmin
       .from("businesses")
       .insert({
@@ -120,17 +142,16 @@ export async function publishBusiness({
         website: form.website || null,
         facebook: form.facebook || null,
         instagram: form.instagram || null,
-        address: form.address || null,
+        street: form.street || null,
+        number: form.number || null,
         postal_code: form.postalCode || null,
         city: form.city || null,
-
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
         logo_url: logoUrl,
-
-        // Plano
-
         plan: isFeatured ? "premium" : "free"
       });
-
+    console.log("Insert error:", insertError);
     if (insertError) throw insertError;
 
     /**
@@ -351,9 +372,12 @@ export async function getBusinessById({
       website,
       facebook,
       instagram,
-      address,
+      street,
+      number,
       postal_code,
       city,
+      latitude,
+      longitude,
       plan,
       categories (
         id,
@@ -407,5 +431,39 @@ export async function getBusinessById({
     },
     images: imageUrls ?? [],
     hours: hours ?? []
+  };
+}
+
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
+export async function geocodeAddress(
+  address: string
+): Promise<Coordinates | null> {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(address)}`,
+    {
+      headers: {
+        "User-Agent": "MontraMontijo/1.0"
+      },
+      cache: "no-store"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Erro ao obter coordenadas.");
+  }
+
+  const results = await response.json();
+
+  if (!results.length) {
+    return null;
+  }
+
+  return {
+    latitude: Number(results[0].lat),
+    longitude: Number(results[0].lon)
   };
 }

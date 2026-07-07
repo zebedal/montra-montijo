@@ -83,7 +83,7 @@ export default function BusinessPlanPage() {
         position: "top-center"
       });
 
-      router.replace(Routes.MEUS_NEGOCIOS);
+      router.replace(Routes.NEGOCIO(data?.businessId));
     } catch (error) {
       console.error(error);
 

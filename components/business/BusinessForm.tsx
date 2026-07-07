@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,10 +30,7 @@ import { LogoUpload } from "./UploadLogo";
 import { BusinessImagesUpload } from "./BusinessImagesUpload";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
-import {
-  BusinessDraft,
-  useCreateBusiness
-} from "@/contexts/CreateBusinessContext";
+
 import { useRouter } from "next/navigation";
 import { Routes } from "@/types";
 import {
@@ -71,10 +68,9 @@ export default function BusinessForm() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [categorySearch, setCategorySearch] = useState<string>("");
+  const [showSocials, setShowSocials] = useState(false);
+  const [_isPublishing, setIsPublishing] = useState(false);
 
-  const [isPublishing, setIsPublishing] = useState(false);
-
-  const { draft, setDraft } = useCreateBusiness();
   const router = useRouter();
 
   const form = useForm<BusinessFormData>({
@@ -86,7 +82,10 @@ export default function BusinessForm() {
       phone: "",
       email: "",
       website: "",
-      address: "",
+      facebook: "",
+      instagram: "",
+      street: "",
+      number: "",
       postalCode: "",
       city: "Montijo",
       images: [],
@@ -290,15 +289,80 @@ export default function BusinessForm() {
             <Input placeholder="Website" {...register("website")} />
           </section>
 
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">Redes sociais (opcional)</h2>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={showSocials}
+                onCheckedChange={(v) => setShowSocials(v === true)}
+              />
+
+              <span className="text-sm">
+                Quero adicionar as redes sociais do meu negócio
+              </span>
+            </div>
+
+            {showSocials && (
+              <div className="space-y-4">
+                <Input placeholder="Instagram" {...register("instagram")} />
+
+                <Input placeholder="Facebook" {...register("facebook")} />
+              </div>
+            )}
+          </section>
+
           {/* LOCALIZACAO */}
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Localização</h2>
 
-            <Input placeholder="Morada" {...register("address")} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <Input {...form.register("street")} placeholder="Rua" />
+                {errors.street && (
+                  <p className="text-sm text-red-500">
+                    {errors.street.message}
+                  </p>
+                )}
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input placeholder="Código Postal" {...register("postalCode")} />
-              <Input placeholder="Localidade" {...register("city")} />
+              <div>
+                <Input {...form.register("number")} placeholder="Número" />
+                {errors.number && (
+                  <p className="text-sm text-red-500">
+                    {errors.number.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Input
+                  {...form.register("postalCode")}
+                  inputMode="numeric"
+                  maxLength={8}
+                  placeholder="Código Postal"
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, "");
+
+                    if (value.length > 4) {
+                      value = `${value.slice(0, 4)}-${value.slice(4, 7)}`;
+                    }
+
+                    form.setValue("postalCode", value);
+                  }}
+                />
+                {errors.postalCode && (
+                  <p className="text-sm text-red-500">
+                    {errors.postalCode.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Input value="Montijo" disabled />
+              </div>
             </div>
           </section>
 

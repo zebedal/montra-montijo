@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Processing from "@/components/StripeSuccessPage/Processing";
 import Success from "@/components/StripeSuccessPage/Success";
 import PublicacaoError from "@/components/StripeSuccessPage/PublicacaoError";
+import { redirect } from "next/navigation";
 
 type CheckoutStatus =
   | {
@@ -64,7 +65,7 @@ export default function PublicacaoPage() {
   }, [checkout.status]);
 
   if (!sessionId) {
-    return <PublicacaoError message="Sessão inválida." />;
+    redirect("/");
   }
 
   switch (checkout.status) {

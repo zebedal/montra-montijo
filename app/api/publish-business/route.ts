@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { publishBusiness } from "@/lib/helpers";
+import { moveDraftAssets, publishBusiness } from "@/lib/helpers";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,11 +44,22 @@ export async function POST(req: Request) {
      * CALL HELPER
      */
     const businessId = crypto.randomUUID();
+
+    const movedAssets = await moveDraftAssets({
+      supabaseAdmin,
+      draftId,
+      businessId,
+      draft: draft.data
+    });
+
     await publishBusiness({
       businessId,
       supabaseAdmin,
       userId: user.id,
-      draft: draft.data,
+      draft: {
+        ...draft.data,
+        ...movedAssets
+      },
       isFeatured
     });
 

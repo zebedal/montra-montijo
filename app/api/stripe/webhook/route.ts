@@ -9,6 +9,7 @@ import {
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function POST(req: Request) {
+  console.log("WEBHOOK RECEIVED");
   const supabase = await createClient();
 
   const body = await req.text();
@@ -45,12 +46,12 @@ export async function POST(req: Request) {
       if (checkout.business_id) {
         return NextResponse.json({ ok: true });
       }
-
+      console.log("1 - Checkout encontrado");
       const { userId, draft } = await getBusinessDraft(
         supabase,
         checkout.draft_id
       );
-
+      console.log("2 - Draft obtido");
       const businessId = crypto.randomUUID();
 
       const assets = await moveDraftAssets({
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
         businessId,
         draft
       });
-
+      console.log("3 - Assets movidos");
       await publishBusiness({
         supabaseAdmin,
         businessId,
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
         },
         isFeatured: true
       });
-
+      console.log("4 - Business publicado");
       await supabase
         .from("stripe_checkouts")
         .update({
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
           processed_at: new Date().toISOString()
         })
         .eq("session_id", session.id);
+      console.log("5 - Checkout atualizado");
 
       return NextResponse.json({ ok: true });
     }

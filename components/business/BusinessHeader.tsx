@@ -13,7 +13,6 @@ type BusinessHeaderProps = {
 };
 
 export function BusinessHeader({ business }: BusinessHeaderProps) {
-  console.log("BusinessHeader business:", business); // Log the business prop to check its structure
   return (
     <Card>
       <CardContent className="p-8">
