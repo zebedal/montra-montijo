@@ -1,3 +1,4 @@
+import BusinessBreadcrumb from "@/components/business/BusinessBreadcrumb";
 import { BusinessContact } from "@/components/business/BusinessContact";
 import { BusinessHeader } from "@/components/business/BusinessHeader";
 import { BusinessHours } from "@/components/business/BusinessHours";
@@ -25,6 +26,10 @@ export default async function BusinessPage({ params }: Props) {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
+          <BusinessBreadcrumb
+            category={business.category}
+            businessName={business.name}
+          />
           <BusinessHeader business={business} />
 
           <BusinessGallery images={images} />

@@ -118,7 +118,7 @@ export function BusinessContact({ business }: BusinessContactProps) {
   if (rows.length === 0) return null;
 
   return (
-    <Card>
+    <Card className="mt-10">
       <CardHeader>
         <CardTitle>Contactos</CardTitle>
       </CardHeader>

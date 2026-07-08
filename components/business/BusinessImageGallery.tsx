@@ -76,6 +76,7 @@ export function BusinessGallery({ images }: Props) {
               "overflow-hidden rounded-xl",
               "transition hover:opacity-90",
               "focus:outline-none",
+              "cursor-pointer",
               index === 0
                 ? "col-span-2 aspect-16/10 md:col-span-3 md:row-span-3 md:aspect-auto"
                 : "aspect-square"

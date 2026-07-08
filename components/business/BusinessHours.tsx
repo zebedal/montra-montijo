@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getBusinessStatus } from "@/lib/helpers";
 
 interface BusinessHour {
   day: string;
@@ -15,15 +16,49 @@ function formatTime(time: string | null) {
   return time ? time.slice(0, 5) : "";
 }
 
+const orderedDays = [
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
+  "Domingo"
+];
+
 export function BusinessHours({ hours }: Props) {
   const hasOpeningHours = hours.some(
     (hour) => !hour.is_closed && hour.open_time && hour.close_time
+  );
+
+  const status = getBusinessStatus(hours);
+
+  const sortedHours = [...hours].sort(
+    (a, b) => orderedDays.indexOf(a.day) - orderedDays.indexOf(b.day)
   );
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Horário</CardTitle>
+        <div className="mt-3 flex items-center gap-2 rounded-lg border px-3 py-2">
+          <div
+            className={`h-3 w-3 rounded-full ${
+              status.open ? "bg-green-500" : "bg-red-500"
+            }`}
+          />
+
+          <div className="text-sm">
+            <span className="font-medium">
+              {status.open ? "Aberto agora" : "Encerrado"}
+            </span>
+
+            <span className="text-muted-foreground">
+              {" • "}
+              {status.message}
+            </span>
+          </div>
+        </div>
       </CardHeader>
 
       <CardContent>
@@ -35,7 +70,7 @@ export function BusinessHours({ hours }: Props) {
           </div>
         ) : (
           <div className="space-y-3">
-            {hours.map((hour) => (
+            {sortedHours.map((hour) => (
               <div
                 key={hour.day}
                 className="flex items-center justify-between border-b pb-2 last:border-0"

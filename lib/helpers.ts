@@ -467,3 +467,70 @@ export async function geocodeAddress(
     longitude: Number(results[0].lon)
   };
 }
+
+export interface BusinessHour {
+  day: string;
+  open_time: string | null;
+  close_time: string | null;
+  is_closed: boolean;
+}
+
+const weekDays = [
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado"
+];
+
+export function getBusinessStatus(hours: BusinessHour[]) {
+  const now = new Date();
+
+  const today = weekDays[now.getDay()];
+
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const todayHours = hours.find((h) => h.day === today);
+
+  if (!todayHours || todayHours.is_closed) {
+    return {
+      open: false,
+      message: "Encerrado hoje"
+    };
+  }
+
+  if (!todayHours.open_time || !todayHours.close_time) {
+    return {
+      open: false,
+      message: "Horário indisponível"
+    };
+  }
+
+  const [openHour, openMinute] = todayHours.open_time.split(":").map(Number);
+
+  const [closeHour, closeMinute] = todayHours.close_time.split(":").map(Number);
+
+  const openMinutes = openHour * 60 + openMinute;
+  const closeMinutes = closeHour * 60 + closeMinute;
+
+  if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+    return {
+      open: true,
+      message: `Fecha às ${todayHours.close_time.slice(0, 5)}`
+    };
+  }
+
+  if (currentMinutes < openMinutes) {
+    return {
+      open: false,
+      message: `Abre às ${todayHours.open_time.slice(0, 5)}`
+    };
+  }
+
+  return {
+    open: false,
+    message: "Encerrado"
+  };
+}

@@ -48,7 +48,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
             )}
 
             {business.description && (
-              <p className="max-w-3xl leading-7 text-muted-foreground">
+              <p className="max-w-3xl whitespace-pre-wrap break-words leading-7 text-muted-foreground">
                 {business.description}
               </p>
             )}
