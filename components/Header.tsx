@@ -11,7 +11,7 @@ export function Header() {
 
   return (
     <header className="w-full border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href="/" className="font-bold text-xl tracking-tight">
           Montra Montijo
