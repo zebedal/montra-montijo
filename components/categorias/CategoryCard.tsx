@@ -16,7 +16,7 @@ export default function CategoryCard({ name, slug, businessCount }: Props) {
   const Icon = categoryIcons[slug] ?? Shapes;
 
   return (
-    <Link href={`/categoria/${slug}`}>
+    <Link href={`/categorias/${slug}`}>
       <Card className="group h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
         <CardContent className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
           <div className="rounded-full bg-primary-green/10 p-4 transition-colors group-hover:bg-primary-green/20">

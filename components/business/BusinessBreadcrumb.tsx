@@ -30,7 +30,7 @@ export default function BusinessBreadcrumb({ category, businessName }: Props) {
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/categoria/${category.toLowerCase()}`}>
+                <Link href={`/categorias/${category.toLowerCase()}`}>
                   {category}
                 </Link>
               </BreadcrumbLink>

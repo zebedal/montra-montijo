@@ -16,7 +16,7 @@ export default function CategoryListItem({ name, slug, businessCount }: Props) {
 
   return (
     <Link
-      href={`/categoria/${slug}`}
+      href={`/categorias/${slug}`}
       className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
     >
       <div className="flex items-center gap-4">

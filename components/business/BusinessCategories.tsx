@@ -46,7 +46,7 @@ export default function PopularCategories({
           const Icon = categoryIcons[category.slug] ?? Shapes;
 
           return (
-            <Link key={category.id} href={`/categoria/${category.slug}`}>
+            <Link key={category.id} href={`/categorias/${category.slug}`}>
               <Card className="h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
                 <CardContent className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
                   <div className="rounded-full bg-primary/10 p-4">
