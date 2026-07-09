@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import CategorySearch from "@/components/categorias/CategorySearch";
 import CategoriesGrid from "@/components/categorias/CategoriesGrid";
 import CategoriesList from "@/components/categorias/CategoriesList";
+import { normalizeText } from "@/lib/utils";
 
 type Category = {
   id: string;
@@ -21,8 +22,10 @@ export default function CategoriesView({ categories }: Props) {
 
   // Filtra as categorias com base na pesquisa
   const filtered = useMemo(() => {
+    const search = normalizeText(query);
+
     return categories.filter((category) =>
-      category.name.toLowerCase().includes(query.toLowerCase())
+      normalizeText(category.name).includes(search)
     );
   }, [categories, query]);
 

@@ -5,23 +5,35 @@ import { useMemo, useState } from "react";
 import CategorySearch from "@/components/categorias/CategorySearch";
 import BusinessCard from "../business/BusinessCard";
 import type { BusinessSummary } from "@/types/business";
+import CategoryEmptyState from "./CategoryEmptyState";
+import { normalizeText } from "@/lib/utils";
 
 type Props = {
+  categoryName: string;
   businesses: BusinessSummary[];
 };
 
-export default function CategoryBusinessesView({ businesses }: Props) {
+export default function CategoryBusinessesView({
+  businesses,
+  categoryName
+}: Props) {
   const [query, setQuery] = useState("");
 
-  const categoryName = businesses[0]?.category.name ?? "";
   const hasSearch = query.trim().length > 0;
 
   const { filtered, premiumBusinesses, regularBusinesses } = useMemo(() => {
-    const search = query.toLowerCase();
+    const search = normalizeText(query);
+
     const filtered = businesses.filter((business) =>
-      [business.name, business.description, business.street, business.city]
+      [
+        business.name,
+        business.description,
+        business.street,
+        business.city,
+        business.postal_code
+      ]
         .filter(Boolean)
-        .some((value) => value?.toLowerCase().includes(search))
+        .some((value) => normalizeText(value ?? "").includes(search))
     );
 
     return {
@@ -34,6 +46,10 @@ export default function CategoryBusinessesView({ businesses }: Props) {
       )
     };
   }, [businesses, query]);
+
+  if (businesses.length === 0) {
+    return <CategoryEmptyState categoryName={categoryName} />;
+  }
 
   return (
     <>
@@ -56,7 +72,7 @@ export default function CategoryBusinessesView({ businesses }: Props) {
           </p>
 
           {filtered.length > 0 ? (
-            <div className="mt-6 grid gap-6 md:grid-cols-3">
+            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {filtered.map((business) => (
                 <BusinessCard key={business.id} business={business} />
               ))}
@@ -82,7 +98,7 @@ export default function CategoryBusinessesView({ businesses }: Props) {
                 Conheça os negócios Premium desta categoria.
               </p>
 
-              <div className="mt-4 grid gap-6 md:grid-cols-3">
+              <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {premiumBusinesses.map((business) => (
                   <BusinessCard key={business.id} business={business} />
                 ))}
@@ -90,14 +106,14 @@ export default function CategoryBusinessesView({ businesses }: Props) {
             </section>
           )}
 
-          <section className="mt-10">
+          <section className="mt-16 border-t pt-12">
             <h2 className="text-2xl font-bold">Outros {categoryName}</h2>
 
             <p className="text-muted-foreground">
               Conheça outros negócios nesta categoria.
             </p>
 
-            <div className="mt-4 grid gap-6 md:grid-cols-3">
+            <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {regularBusinesses.map((business) => (
                 <BusinessCard key={business.id} business={business} />
               ))}

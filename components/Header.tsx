@@ -32,7 +32,7 @@ export function Header() {
           {/* AUTH ICON */}
           {!loading && (
             <Button variant="ghost" asChild>
-              <Link href={user ? Routes.DASHBOARD : Routes.LOGIN}>
+              <Link href={user ? Routes.AREA_CLIENTE : Routes.LOGIN}>
                 {user ? (
                   <>
                     <LayoutDashboard className="w-5 h-5" />

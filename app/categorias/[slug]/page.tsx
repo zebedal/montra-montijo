@@ -39,7 +39,10 @@ export default async function CategoryPage({ params }: Props) {
       />
 
       <div className="container mx-auto py-10">
-        <CategoryBusinessesView businesses={businesses} />
+        <CategoryBusinessesView
+          businesses={businesses}
+          categoryName={category.name}
+        />
       </div>
     </>
   );

@@ -58,7 +58,7 @@ export default function AuthPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(Routes.AREA_CLIENTE);
   }
 
   return (

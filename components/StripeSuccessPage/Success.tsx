@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { Button } from "../ui/button";
+import { Routes } from "@/types";
 interface SuccessProps {
   businessId?: string;
 }
@@ -26,7 +27,7 @@ export default function Success({ businessId }: SuccessProps) {
         </Button>
 
         <Button variant="outline">
-          <Link href="/dashboard">Ir para área de cliente</Link>
+          <Link href={Routes.AREA_CLIENTE}>Ir para área de cliente</Link>
         </Button>
       </div>
     </div>

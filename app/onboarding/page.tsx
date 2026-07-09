@@ -10,8 +10,6 @@ import AuthGuard from "@/components/AuthGuard";
 import { Routes } from "@/types";
 
 export default function OnboardingPage() {
-  const router = useRouter();
-
   return (
     <AuthGuard>
       <div className="mx-auto w-full max-w-4xl space-y-6 flex flex-col items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
