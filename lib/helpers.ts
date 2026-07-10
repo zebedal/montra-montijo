@@ -2,10 +2,11 @@ import { supabase } from "./supabase/client";
 
 import imageCompression from "browser-image-compression";
 import { uploadFile } from "./supabase/upload";
-import { UploadImage } from "@/components/business/BusinessImagesUpload";
+
 import { BusinessFormData } from "./schemas/businessFormSchema";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "./supabase/server";
+
+import { UploadImage } from "@/types/upload-image";
 
 export const MAX_LOGO_SIZE_MB = 2;
 export const MAX_IMAGE_SIZE_MB = 3;
@@ -258,6 +259,7 @@ export async function prepareBusinessMedia(
   if (images.length > 0) {
     const uploaded = await Promise.all(
       images.map(async (img, index) => {
+        if (!img.file) return "";
         const optimized = await optimizeImage(img.file);
 
         return uploadFile(

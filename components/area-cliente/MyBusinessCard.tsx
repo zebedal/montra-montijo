@@ -35,6 +35,7 @@ export default function MyBusinessCard({ business }: Props) {
 
               <Badge
                 variant={business.plan === "premium" ? "default" : "secondary"}
+                className={`${business.plan === "premium" ? "bg-yellow-600" : ""}`}
               >
                 {business.plan === "premium" ? "Premium" : "Gratuito"}
               </Badge>

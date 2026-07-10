@@ -38,6 +38,9 @@ import {
   saveBusinessDraft,
   validateExistingBusiness
 } from "@/lib/helpers";
+import { updateMyBusiness } from "@/lib/queries/updateMyBusiness";
+import { UploadImage } from "@/types/upload-image";
+import { uploadBusinessLogo } from "@/lib/queries/updateBusinessLogo";
 
 type Categoria = {
   id: string;
@@ -45,10 +48,11 @@ type Categoria = {
   slug: string;
 };
 
-export type UploadImage = {
-  id: string;
-  file: File;
-  preview: string;
+type Props = {
+  mode?: "create" | "edit";
+  initialData?: Partial<BusinessFormData>;
+  businessId?: string;
+  initialImages: UploadImage[];
 };
 
 export const defaultOpeningHours = [
@@ -61,7 +65,12 @@ export const defaultOpeningHours = [
   { day: "Domingo", open: "", close: "", closed: true }
 ];
 
-export default function BusinessForm() {
+export default function BusinessForm({
+  mode = "create",
+  initialData,
+  businessId,
+  initialImages
+}: Props) {
   const [showHours, setShowHours] = useState(false);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [images, setImages] = useState<UploadImage[]>([]);
@@ -76,21 +85,21 @@ export default function BusinessForm() {
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessSchema),
     defaultValues: {
-      name: "",
-      category_id: "",
-      description: "",
-      phone: "",
-      email: "",
-      website: "",
-      facebook: "",
-      instagram: "",
-      street: "",
-      number: "",
-      postalCode: "",
-      city: "Montijo",
+      name: initialData?.name ?? "",
+      category_id: initialData?.category_id ?? "",
+      description: initialData?.description ?? "",
+      phone: initialData?.phone ?? "",
+      email: initialData?.email ?? "",
+      website: initialData?.website ?? "",
+      facebook: initialData?.facebook ?? "",
+      instagram: initialData?.instagram ?? "",
+      street: initialData?.street ?? "",
+      number: initialData?.number ?? "",
+      postalCode: initialData?.postalCode ?? "",
+      city: initialData?.city ?? "Montijo",
       images: [],
-      logo: "",
-      openingHours: defaultOpeningHours
+      logo: initialData?.logo,
+      openingHours: initialData?.openingHours ?? defaultOpeningHours
     }
   });
 
@@ -100,10 +109,54 @@ export default function BusinessForm() {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors, isSubmitting }
   } = form;
 
+  const selectedCategoryId = useWatch({
+    control,
+    name: "category_id"
+  });
+
   async function onSubmit(data: BusinessFormData) {
+    if (mode === "edit") {
+      if (!businessId) {
+        toast.error("Negócio inválido.", {
+          position: "top-center"
+        });
+
+        return;
+      }
+
+      try {
+        setIsPublishing(true);
+
+        let logoUrl: string | undefined;
+
+        if (logoFile) {
+          logoUrl = await uploadBusinessLogo(businessId, logoFile);
+        }
+
+        await updateMyBusiness(businessId, data, logoUrl ?? "");
+
+        toast.success("Negócio atualizado com sucesso.", {
+          position: "top-center"
+        });
+
+        router.push(Routes.AREA_CLIENTE);
+      } catch (error) {
+        console.error(error);
+
+        toast.error("Não foi possível atualizar o negócio.", {
+          position: "top-center"
+        });
+      } finally {
+        setIsPublishing(false);
+      }
+
+      return;
+    }
+
     const exists = await validateExistingBusiness(data.name, data.category_id);
 
     if (exists) {
@@ -178,14 +231,6 @@ export default function BusinessForm() {
     });
   };
 
-  /*   const resetFormState = () => {
-    form.reset();
-    setLogoPreview(null);
-    setImages([]);
-    setCategorySearch("");
-    setShowHours(false);
-  }; */
-
   useEffect(() => {
     async function load() {
       const data = await getCategorias();
@@ -195,12 +240,63 @@ export default function BusinessForm() {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!initialData) return;
+
+    reset({
+      name: initialData.name ?? "",
+      category_id: initialData.category_id ?? "",
+      description: initialData.description ?? "",
+      phone: initialData.phone ?? "",
+      email: initialData.email ?? "",
+      website: initialData.website ?? "",
+      facebook: initialData.facebook ?? "",
+      instagram: initialData.instagram ?? "",
+      street: initialData.street ?? "",
+      number: initialData.number ?? "",
+      postalCode: initialData.postalCode ?? "",
+      city: initialData.city ?? "Montijo",
+      images: [],
+      logo: initialData.logo ?? "",
+      openingHours: initialData.openingHours ?? defaultOpeningHours
+    });
+  }, [initialData, reset]);
+
+  useEffect(() => {
+    if (!selectedCategoryId || categorias.length === 0) {
+      return;
+    }
+
+    const selected = categorias.find((c) => c.id === selectedCategoryId);
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCategorySearch(selected?.name ?? "");
+  }, [selectedCategoryId, categorias]);
+
+  useEffect(() => {
+    if (mode === "edit" && initialData?.logo) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLogoPreview(initialData?.logo);
+    }
+  }, [mode, initialData?.logo]);
+
+  useEffect(() => {
+    if (mode === "edit" && initialImages) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setImages(initialImages);
+    }
+  }, [mode, initialImages]);
+
   return (
     <Card className="mx-auto max-w-4xl">
       <CardHeader>
-        <CardTitle>Criar Negócio ou Serviço</CardTitle>
+        <CardTitle>
+          {mode === "create" ? "Criar Negócio ou Serviço" : "Editar Negócio"}
+        </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Preenche os dados para publicares o teu negócio na Montra Montijo.
+          {mode === "create"
+            ? "Preenche os dados para publicares o teu negócio na Montra Montijo."
+            : "Atualiza as informações do teu negócio."}
         </p>
       </CardHeader>
 
@@ -377,7 +473,7 @@ export default function BusinessForm() {
 
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Imagens do negócio</h2>
-            <BusinessImagesUpload images={images} onChange={setImages} />
+            <BusinessImagesUpload images={images ?? []} onChange={setImages} />
           </section>
 
           {/* HORARIO */}
@@ -428,21 +524,38 @@ export default function BusinessForm() {
               </>
             )}
           </section>
-
-          <Button
-            type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            disabled={isSubmitting}
-            size="lg"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <Spinner /> A criar negócio...
-              </span>
-            ) : (
-              "Publicar negócio"
+          <div className="flex  justify-end gap-3 border-t pt-6">
+            {mode === "edit" && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(Routes.AREA_CLIENTE)}
+                className="flex-1 bg-white"
+              >
+                Cancelar
+              </Button>
             )}
-          </Button>
+
+            <Button
+              type="submit"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              disabled={isSubmitting}
+              size="lg"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <Spinner />
+                  {mode === "create"
+                    ? "A criar negócio..."
+                    : "A guardar alterações..."}
+                </span>
+              ) : mode === "create" ? (
+                "Publicar negócio"
+              ) : (
+                "Guardar alterações"
+              )}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

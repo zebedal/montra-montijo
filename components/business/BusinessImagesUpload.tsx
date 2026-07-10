@@ -5,14 +5,9 @@ import { ImagePlus } from "lucide-react";
 import { ImageCard } from "./ImageCard";
 import { validateImage, MAX_IMAGE_SIZE_MB } from "@/lib/helpers";
 import { toast } from "sonner";
+import { UploadImage } from "@/types/upload-image";
 
 const MAX_IMAGES = 6;
-
-export type UploadImage = {
-  id: string;
-  file: File;
-  preview: string;
-};
 
 type Props = {
   images: UploadImage[];
@@ -87,7 +82,7 @@ export function BusinessImagesUpload({ images, onChange }: Props) {
         {images.map((image, index) => (
           <ImageCard
             key={image.id}
-            src={image.preview}
+            src={image.preview ?? ""}
             isPrimary={index === 0}
             onRemove={() => removeImage(image.id)}
           />
