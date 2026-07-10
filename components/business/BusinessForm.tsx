@@ -131,13 +131,13 @@ export default function BusinessForm({
       try {
         setIsPublishing(true);
 
-        let logoUrl: string | undefined;
+        let logoPath: string | undefined;
 
         if (logoFile) {
-          logoUrl = await uploadBusinessLogo(businessId, logoFile);
+          logoPath = await uploadBusinessLogo(businessId, logoFile);
         }
 
-        await updateMyBusiness(businessId, data, logoUrl ?? "");
+        await updateMyBusiness(businessId, data, logoPath);
 
         toast.success("Negócio atualizado com sucesso.", {
           position: "top-center"

@@ -12,5 +12,8 @@ export async function uploadFile(file: File, bucket: string, path: string) {
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
-  return data.publicUrl;
+  return {
+    path: fileName,
+    publicUrl: data.publicUrl
+  };
 }

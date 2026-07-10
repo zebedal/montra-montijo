@@ -7,9 +7,11 @@ export async function uploadBusinessLogo(
 ): Promise<string> {
   const optimizedLogo = await optimizeImage(logo);
 
-  return uploadFile(
+  const uploaded = await uploadFile(
     optimizedLogo,
     "business-media",
     `businesses/${businessId}/logo`
   );
+
+  return uploaded.path;
 }

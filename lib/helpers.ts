@@ -246,11 +246,12 @@ export async function prepareBusinessMedia(
   if (logo) {
     const optimizedLogo = await optimizeImage(logo);
 
-    logoUrl = await uploadFile(
+    const uploadedLogo = await uploadFile(
       optimizedLogo,
       "business-media",
       `drafts/${draftId}/logo`
     );
+    logoUrl = uploadedLogo.path;
   }
 
   /**
@@ -258,19 +259,22 @@ export async function prepareBusinessMedia(
    */
   if (images.length > 0) {
     const uploaded = await Promise.all(
-      images.map(async (img, index) => {
-        if (!img.file) return "";
+      images.map(async (img) => {
+        if (!img.file) return null;
+
         const optimized = await optimizeImage(img.file);
 
         return uploadFile(
           optimized,
           "business-media",
-          `drafts/${draftId}/images/`
+          `drafts/${draftId}/images`
         );
       })
     );
 
-    imageUrls.push(...uploaded);
+    imageUrls.push(
+      ...uploaded.filter((item) => item !== null).map((item) => item.path)
+    );
   }
 
   return {
