@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   BadgeCheck,
+  BarChart3,
   Building2,
   EllipsisVertical,
   ExternalLink,
@@ -28,16 +29,35 @@ import SubscriptionDialog from "@/components/area-cliente/SubscriptionDialog";
 import DeleteBusinessDialog from "@/components/area-cliente/DeleteBusinessDialog";
 
 import type { BusinessSummary } from "@/types/business";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useRouter } from "next/navigation";
 
 type Props = {
   business: BusinessSummary;
 };
 
 export default function MyBusinessCard({ business }: Props) {
-  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
+  const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState<{
+    open: boolean;
+    variant?: "subscription" | "statistics";
+  }>({
+    open: false,
+    variant: "subscription"
+  });
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
 
+  function handleStatisticsClick() {
+    setDropdownOpen(false);
+
+    if (business.plan === "premium") {
+      router.push(`/area-cliente/negocio/${business.id}/estatisticas`);
+      return;
+    }
+
+    setSubscriptionDialogOpen({ open: true, variant: "statistics" });
+  }
   return (
     <>
       <div className="rounded-2xl border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
@@ -133,7 +153,10 @@ export default function MyBusinessCard({ business }: Props) {
                 <DropdownMenuItem
                   onSelect={(event) => {
                     event.preventDefault();
-                    setSubscriptionOpen(true);
+                    setSubscriptionDialogOpen({
+                      open: true,
+                      variant: "subscription"
+                    });
                     setDropdownOpen(false);
                   }}
                   className="cursor-pointer"
@@ -142,6 +165,19 @@ export default function MyBusinessCard({ business }: Props) {
                   {business.plan === "premium"
                     ? "Gerir subscrição"
                     : "Ativar Premium"}
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    handleStatisticsClick();
+                  }}
+                  className="cursor-pointer"
+                >
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Estatísticas
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
@@ -163,10 +199,16 @@ export default function MyBusinessCard({ business }: Props) {
         </div>
       </div>
 
-      {subscriptionOpen && (
+      {subscriptionDialogOpen.open && (
         <SubscriptionDialog
-          open={subscriptionOpen}
-          onOpenChange={setSubscriptionOpen}
+          open={subscriptionDialogOpen.open}
+          onOpenChange={(open) =>
+            setSubscriptionDialogOpen((current) => ({
+              ...current,
+              open
+            }))
+          }
+          variant={subscriptionDialogOpen.variant}
           business={business}
         />
       )}

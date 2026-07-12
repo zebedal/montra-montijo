@@ -3,6 +3,7 @@ import { BusinessContact } from "@/components/business/BusinessContact";
 import { BusinessHeader } from "@/components/business/BusinessHeader";
 import { BusinessHours } from "@/components/business/BusinessHours";
 import { BusinessGallery } from "@/components/business/BusinessImageGallery";
+import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 import { getBusinessById } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,6 +25,7 @@ export default async function BusinessPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <BusinessPageTracker businessId={business?.id} />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <BusinessBreadcrumb

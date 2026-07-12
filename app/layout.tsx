@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import Head from "next/head";
 import { Header } from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

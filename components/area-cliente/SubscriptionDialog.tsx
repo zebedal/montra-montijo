@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BadgeCheck,
+  BarChart3,
   CalendarDays,
   CreditCard,
   RefreshCw,
@@ -43,6 +44,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   business: BusinessSummary;
+  variant?: "subscription" | "statistics";
 };
 
 function formatDate(date: string | null | undefined) {
@@ -60,9 +62,12 @@ function formatDate(date: string | null | undefined) {
 export default function SubscriptionDialog({
   open,
   onOpenChange,
-  business
+  business,
+  variant = "subscription"
 }: Props) {
   const router = useRouter();
+
+  console.log("variant: ", variant);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
@@ -237,18 +242,45 @@ export default function SubscriptionDialog({
               </>
             )}
 
-            {!isPremium && (
-              <div className="rounded-lg border bg-muted/30 p-4">
-                <p className="font-medium">
-                  Este negócio ainda não tem uma subscrição Premium.
-                </p>
+            {!isPremium &&
+              (variant === "statistics" ? (
+                <div className="rounded-lg border border-green-200 bg-green-50 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
+                      <BarChart3 className="h-5 w-5 text-green-700" />
+                    </div>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Ative o Premium para obter maior destaque e acesso a
-                  funcionalidades adicionais.
-                </p>
-              </div>
-            )}
+                    <div>
+                      <h3 className="font-semibold text-green-900">
+                        Estatísticas Premium
+                      </h3>
+
+                      <p className="mt-1 text-sm text-green-800">
+                        Descubra como os clientes interagem com o seu negócio
+                        através de estatísticas detalhadas.
+                      </p>
+
+                      <ul className="mt-4 space-y-2 text-sm text-green-900">
+                        <li>• Visualizações da página do negócio</li>
+                        <li>• Cliques no telefone e website</li>
+                        <li>• Cliques nas redes sociais</li>
+                        <li>• Evolução do desempenho ao longo do tempo</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg border bg-muted/30 p-4">
+                  <p className="font-medium">
+                    Este negócio ainda não tem uma subscrição Premium.
+                  </p>
+
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ative o Premium para destacar este negócio e aceder a
+                    funcionalidades adicionais.
+                  </p>
+                </div>
+              ))}
           </div>
 
           <DialogFooter>
@@ -289,6 +321,7 @@ export default function SubscriptionDialog({
                 type="button"
                 onClick={handleActivatePremium}
                 disabled={isUpdating}
+                className="bg-primary-green"
               >
                 <BadgeCheck className="mr-2 h-4 w-4" />
 
