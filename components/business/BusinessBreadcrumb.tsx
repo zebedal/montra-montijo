@@ -12,9 +12,14 @@ import {
 interface Props {
   category?: string | null;
   businessName: string;
+  slug: string;
 }
 
-export default function BusinessBreadcrumb({ category, businessName }: Props) {
+export default function BusinessBreadcrumb({
+  category,
+  businessName,
+  slug
+}: Props) {
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -26,11 +31,11 @@ export default function BusinessBreadcrumb({ category, businessName }: Props) {
 
         <BreadcrumbSeparator />
 
-        {category ? (
+        {slug ? (
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/categorias/${category.toLowerCase()}`}>
+                <Link href={`/categorias/${slug.toLowerCase()}`}>
                   {category}
                 </Link>
               </BreadcrumbLink>

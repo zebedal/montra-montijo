@@ -9,7 +9,9 @@ export const Routes = {
   NEGOCIO: (businessId: string) => `/negocio/${businessId}`,
   CATEGORIAS: "/categorias",
   PERFIL: "/area-cliente/perfil",
-  PLANO: "/area-cliente/plano"
+  PLANO: "/area-cliente/plano",
+  DEFINICOES: "/area-cliente/definicoes",
+  RECUPERAR_PASSWORD: "/recuperar-password"
 } as const;
 
 export type Route = (typeof Routes)[keyof typeof Routes];

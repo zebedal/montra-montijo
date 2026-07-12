@@ -1,19 +1,41 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { User, LayoutDashboard, Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { LayoutDashboard, LogOut, Plus, User } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+
+import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/lib/supabase/useUser";
 import { Routes } from "@/types";
 
 export function Header() {
   const { user, loading } = useUser();
 
+  const router = useRouter();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+
+    router.replace(Routes.LOGIN);
+    router.refresh();
+  }
+
   return (
-    <header className="w-full border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <Link href="/" className="font-bold text-xl tracking-tight">
+        <Link href="/" className="text-xl font-bold tracking-tight">
           Montra Montijo
         </Link>
 
@@ -21,32 +43,62 @@ export function Header() {
           {/* CTA */}
           <Button
             asChild
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 text-white hover:bg-green-700"
           >
             <Link href={Routes.CRIAR_NEGOCIO}>
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Criar Negócio
             </Link>
           </Button>
 
-          {/* AUTH ICON */}
-          {!loading && (
-            <Button variant="ghost" asChild>
-              <Link href={user ? Routes.AREA_CLIENTE : Routes.LOGIN}>
-                {user ? (
-                  <>
-                    <LayoutDashboard className="w-5 h-5" />
-                    <span className="hidden sm:inline">Área de Cliente</span>
-                  </>
-                ) : (
-                  <>
-                    <User className="w-5 h-5" />
+          {!loading &&
+            (!user ? (
+              <Button variant="ghost" asChild>
+                <Link href={Routes.LOGIN}>
+                  <User className="mr-2 h-5 w-5" />
+                  <span className="hidden sm:inline">Conta</span>
+                </Link>
+              </Button>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost">
+                    <User className="mr-2 h-5 w-5" />
+
                     <span className="hidden sm:inline">Conta</span>
-                  </>
-                )}
-              </Link>
-            </Button>
-          )}
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel className="flex flex-col">
+                    <span className="font-semibold">Conta</span>
+
+                    <span className="truncate text-xs font-normal text-muted-foreground">
+                      {user.email}
+                    </span>
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem asChild>
+                    <Link href={Routes.AREA_CLIENTE} className="cursor-pointer">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Área de Cliente
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Terminar sessão
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ))}
         </div>
       </div>
     </header>

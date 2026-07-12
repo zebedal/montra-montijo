@@ -387,7 +387,8 @@ export async function getBusinessById({
       plan,
       categories (
         id,
-        name
+        name,
+        slug
       )
     `
     )

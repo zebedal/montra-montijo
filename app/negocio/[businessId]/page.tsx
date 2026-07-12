@@ -23,6 +23,8 @@ export default async function BusinessPage({ params }: Props) {
     businessId
   });
 
+  console.log("business:", business);
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <BusinessPageTracker businessId={business?.id} />
@@ -31,6 +33,7 @@ export default async function BusinessPage({ params }: Props) {
           <BusinessBreadcrumb
             category={business.category}
             businessName={business.name}
+            slug={business.categories.slug}
           />
           <BusinessHeader business={business} />
 

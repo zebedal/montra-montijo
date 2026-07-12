@@ -22,7 +22,7 @@ export default function CategoryHero({ title, slug, businessCount }: Props) {
 
       <div className="absolute inset-0 bg-black/60" />
 
-      <div className="container relative z-10 mx-auto flex h-full flex-col justify-center text-white">
+      <div className="container relative z-10 mx-auto flex h-full flex-col justify-center text-white p-5">
         <CategoryBreadcrumb title={title} slug={slug} />
 
         <h1 className="mt-4 text-4xl font-bold">{title}</h1>
