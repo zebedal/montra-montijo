@@ -2,6 +2,7 @@ import { Building2 } from "lucide-react";
 
 import MyBusinessCard from "@/components/area-cliente/MyBusinessCard";
 import { getMyBusinesses } from "@/lib/queries/getMyBusinesses";
+import PremiumCheckoutToast from "@/components/area-cliente/PremiumCheckoutToast";
 
 export default async function ClientAreaPage() {
   const businesses = await getMyBusinesses();
@@ -9,6 +10,7 @@ export default async function ClientAreaPage() {
   if (!businesses || businesses.length === 0) {
     return (
       <div className="space-y-8">
+        <PremiumCheckoutToast />
         <div>
           <h1 className="text-3xl font-bold">Os meus negócios</h1>
 

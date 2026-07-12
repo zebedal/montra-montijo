@@ -690,3 +690,87 @@ export async function updateBusinessImages(
     throw new Error("Não foi possível atualizar a ordem das imagens.");
   }
 }
+
+type ReactivateSubscriptionResponse = {
+  success?: boolean;
+  error?: string;
+  cancelAtPeriodEnd?: boolean;
+  currentPeriodEnd?: string | null;
+};
+
+export async function reactivateBusinessSubscription(
+  businessId: string
+): Promise<ReactivateSubscriptionResponse> {
+  const response = await fetch("/api/stripe/reactivate-subscription", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      businessId
+    })
+  });
+
+  const result = (await response.json()) as ReactivateSubscriptionResponse;
+
+  if (!response.ok) {
+    throw new Error(result.error ?? "Não foi possível reativar a subscrição.");
+  }
+
+  return result;
+}
+
+type DeleteBusinessResponse = {
+  success?: boolean;
+  error?: string;
+  code?: string;
+};
+
+export async function deleteMyBusiness(
+  businessId: string
+): Promise<DeleteBusinessResponse> {
+  const response = await fetch("/api/delete-business", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      businessId
+    })
+  });
+
+  const result = (await response.json()) as DeleteBusinessResponse;
+
+  if (!response.ok) {
+    throw new Error(result.error ?? "Não foi possível apagar o negócio.");
+  }
+
+  return result;
+}
+
+type ActivatePremiumResponse = {
+  url?: string;
+  error?: string;
+};
+
+export async function activateBusinessPremium(
+  businessId: string
+): Promise<void> {
+  const response = await fetch("/api/stripe/activate-premium", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      businessId
+    })
+  });
+
+  const result = (await response.json()) as ActivatePremiumResponse;
+
+  if (!response.ok || !result.url) {
+    throw new Error(result.error ?? "Não foi possível ativar o Premium.");
+  }
+
+  window.location.assign(result.url);
+}

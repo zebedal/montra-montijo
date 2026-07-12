@@ -8,7 +8,6 @@ export async function getBusinessesByCategory(
 ): Promise<BusinessSummary[]> {
   const supabase = await createClient();
 
-  // Procurar a categoria
   const { data: category, error: categoryError } = await supabase
     .from("categories")
     .select("id, name, slug")
@@ -20,7 +19,6 @@ export async function getBusinessesByCategory(
     return [];
   }
 
-  // Buscar os negócios dessa categoria
   const { data: businesses, error: businessError } = await supabase
     .from("businesses")
     .select(
@@ -36,7 +34,11 @@ export async function getBusinessesByCategory(
       street,
       number,
       postal_code,
-      plan
+      plan,
+      stripe_subscription_id,
+      subscription_status,
+      cancel_at_period_end,
+      current_period_end
     `
     )
     .eq("category_id", category.id);
@@ -50,13 +52,15 @@ export async function getBusinessesByCategory(
     return [];
   }
 
-  const result = await Promise.all(
-    businesses.map(async (business) => ({
-      ...business,
-      logo_url: getPublicStorageUrl(business.logo_url),
-      category
-    }))
-  );
+  const result: BusinessSummary[] = businesses.map((business) => ({
+    ...business,
+    logo_url: getPublicStorageUrl(business.logo_url),
+    category,
+    stripe_subscription_id: business.stripe_subscription_id ?? null,
+    subscription_status: business.subscription_status ?? null,
+    cancel_at_period_end: business.cancel_at_period_end ?? false,
+    current_period_end: business.current_period_end ?? null
+  }));
 
   return result.sort((a, b) => {
     if (a.plan === b.plan) {

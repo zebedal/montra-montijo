@@ -17,20 +17,24 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
     .from("businesses")
     .select(
       `
-      id,
-      name,
-      description,
-      logo_url,
-      phone,
-      email,
-      website,
-      city,
-      street,
-      number,
-      postal_code,
-      plan,
-      category_id
-    `
+  id,
+  name,
+  description,
+  logo_url,
+  phone,
+  email,
+  website,
+  city,
+  street,
+  number,
+  postal_code,
+  plan,
+  category_id,
+  stripe_subscription_id,
+  subscription_status,
+  cancel_at_period_end,
+  current_period_end
+`
     )
     .eq("user_id", user.id);
 

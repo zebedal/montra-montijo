@@ -13,7 +13,6 @@ type Props = {
 };
 
 export default function BusinessCard({ business }: Props) {
-  console.log("BusinessCard business:", business);
   return (
     <Link href={`/negocio/${business.id}`}>
       <Card className="group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
