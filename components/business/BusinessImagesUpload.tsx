@@ -2,10 +2,13 @@
 
 import { useRef } from "react";
 import { ImagePlus } from "lucide-react";
-import { ImageCard } from "./ImageCard";
+import { DragDropProvider } from "@dnd-kit/react";
+import { move } from "@dnd-kit/helpers";
+import { isSortable } from "@dnd-kit/react/sortable";
 import { validateImage, MAX_IMAGE_SIZE_MB } from "@/lib/helpers";
 import { toast } from "sonner";
 import { UploadImage } from "@/types/upload-image";
+import { SortableImageCard } from "./SortableImageCard";
 
 const MAX_IMAGES = 6;
 
@@ -50,54 +53,67 @@ export function BusinessImagesUpload({ images, onChange }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      <input
-        ref={inputRef}
-        hidden
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={(e) => {
-          if (e.target.files) handleFiles(e.target.files);
-        }}
-      />
+    <DragDropProvider
+      onDragEnd={(event) => {
+        if (event.canceled) return;
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {images.length < MAX_IMAGES && (
-          <button
-            type="button"
-            onClick={pickImages}
-            className="cursor-pointer flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-dashed transition hover:border-primary hover:bg-muted/40"
-          >
-            <ImagePlus className="mb-2 h-8 w-8 text-muted-foreground" />
+        const { source } = event.operation;
 
-            <span className="text-sm font-medium">Adicionar fotografias</span>
+        if (!isSortable(source)) return;
 
-            <span className="mt-1 text-xs text-muted-foreground">
-              Máximo {MAX_IMAGES}
-            </span>
-          </button>
-        )}
+        onChange(move(images, event));
+      }}
+    >
+      <div className="space-y-4">
+        <input
+          ref={inputRef}
+          hidden
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files) handleFiles(e.target.files);
+          }}
+        />
 
-        {images.map((image, index) => (
-          <ImageCard
-            key={image.id}
-            src={image.preview ?? ""}
-            isPrimary={index === 0}
-            onRemove={() => removeImage(image.id)}
-          />
-        ))}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          {images.length < MAX_IMAGES && (
+            <button
+              type="button"
+              onClick={pickImages}
+              className="cursor-pointer flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-dashed transition hover:border-primary hover:bg-muted/40"
+            >
+              <ImagePlus className="mb-2 h-8 w-8 text-muted-foreground" />
+
+              <span className="text-sm font-medium">Adicionar fotografias</span>
+
+              <span className="mt-1 text-xs text-muted-foreground">
+                Máximo {MAX_IMAGES}
+              </span>
+            </button>
+          )}
+
+          {images.map((image, index) => (
+            <SortableImageCard
+              key={image.id}
+              image={image}
+              index={index}
+              isPrimary={index === 0}
+              onRemove={() => removeImage(image.id)}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            {images.length} de {MAX_IMAGES} fotografias
+          </span>
+
+          {images.length > 0 && (
+            <span>A primeira fotografia será a principal.</span>
+          )}
+        </div>
       </div>
-
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>
-          {images.length} de {MAX_IMAGES} fotografias
-        </span>
-
-        {images.length > 0 && (
-          <span>A primeira fotografia será a principal.</span>
-        )}
-      </div>
-    </div>
+    </DragDropProvider>
   );
 }

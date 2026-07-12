@@ -7,7 +7,9 @@ export const Routes = {
   CRIAR_NEGOCIO_PLANO: "/criar-negocio/plano",
   MEUS_NEGOCIOS: "/meus-negocios",
   NEGOCIO: (businessId: string) => `/negocio/${businessId}`,
-  CATEGORIAS: "/categorias"
+  CATEGORIAS: "/categorias",
+  PERFIL: "/area-cliente/perfil",
+  PLANO: "/area-cliente/plano"
 } as const;
 
 export type Route = (typeof Routes)[keyof typeof Routes];

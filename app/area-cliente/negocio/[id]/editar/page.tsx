@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPublicStorageUrl } from "@/lib/helpers";
 import { getBusinessImages } from "@/lib/queries/getBusinessImages";
 import { UploadImage } from "@/types/upload-image";
+import { getBusinessHours } from "@/lib/queries/getBusinessHours";
 
 type Props = {
   params: Promise<{
@@ -51,10 +52,20 @@ export default async function EditBusinessPage({ params }: Props) {
 
   const businessImages = await getBusinessImages(id);
 
-  const initialImages: UploadImage[] = businessImages?.map((image) => ({
+  const initialImages: UploadImage[] = businessImages.map((image) => ({
     id: image.id,
     file: null,
-    preview: getPublicStorageUrl(image.url)
+    preview: getPublicStorageUrl(image.url) ?? "",
+    storagePath: image.url
+  }));
+
+  const businessHours = await getBusinessHours(id);
+
+  const initialOpeningHours = businessHours.map((hour) => ({
+    day: hour.day,
+    open: hour.open_time ?? "",
+    close: hour.close_time ?? "",
+    closed: hour.is_closed
   }));
 
   return (
@@ -73,7 +84,8 @@ export default async function EditBusinessPage({ params }: Props) {
         number: business.number,
         postalCode: business.postal_code,
         city: business.city,
-        logo: getPublicStorageUrl(business?.logo_url) ?? ""
+        logo: getPublicStorageUrl(business?.logo_url) ?? "",
+        openingHours: initialOpeningHours
       }}
       businessId={business?.id}
       initialImages={initialImages}

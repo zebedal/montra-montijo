@@ -18,6 +18,8 @@ export function OpeningHours({ control }: Props) {
     name: "openingHours"
   });
 
+  console.log("hours", hours);
+
   if (!hours) return null;
 
   return (

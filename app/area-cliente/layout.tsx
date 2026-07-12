@@ -17,7 +17,7 @@ export default async function ClientAreaLayout({ children }: Props) {
   }
   return (
     <div className="container mx-auto py-10">
-      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[260px_1fr] ">
         <ClientAreaSidebar />
 
         <main>{children}</main>

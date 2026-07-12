@@ -554,27 +554,29 @@ export function getCategoryCoverUrl(slug: string) {
 export async function updateBusinessImages(
   businessId: string,
   images: UploadImage[]
-): Promise<
-  {
-    path: string;
-    position: number;
-  }[]
-> {
+): Promise<void> {
+  /**
+   * Imagens atualmente na BD
+   */
   const { data: existingImages, error } = await supabase
     .from("business_images")
     .select("id, url")
     .eq("business_id", businessId);
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
+
+  /**
+   * Descobrir imagens removidas
+   */
   const currentIds = new Set(images.map((image) => image.id));
 
   const removedImages = existingImages.filter(
     (image) => !currentIds.has(image.id)
   );
 
-  //apagar a imagem removida do UI da BD
+  /**
+   * Remover da BD
+   */
   if (removedImages.length > 0) {
     const { error } = await supabase
       .from("business_images")
@@ -585,20 +587,24 @@ export async function updateBusinessImages(
       );
 
     if (error) {
-      console.error(error);
       throw new Error("Não foi possível remover as imagens.");
     }
 
-    // 2. Apagar do Storage
+    /**
+     * Remover do Storage
+     */
     const { error: storageError } = await supabase.storage
       .from("business-media")
       .remove(removedImages.map((image) => image.url));
 
     if (storageError) {
-      console.error(storageError);
       throw new Error("Não foi possível remover as imagens do Storage.");
     }
   }
+
+  /**
+   * Upload das novas imagens
+   */
   const uploadedImages = await Promise.all(
     images.map(async (image, position) => {
       if (!image.file) {
@@ -614,6 +620,7 @@ export async function updateBusinessImages(
       );
 
       return {
+        uploadImage: image,
         path: uploaded.path,
         position
       };
@@ -621,23 +628,65 @@ export async function updateBusinessImages(
   );
 
   const newImages = uploadedImages.filter(
-    (image): image is { path: string; position: number } => image !== null
+    (
+      image
+    ): image is {
+      uploadImage: UploadImage;
+      path: string;
+      position: number;
+    } => image !== null
   );
 
+  /**
+   * Inserir novas imagens
+   */
   if (newImages.length > 0) {
-    const { error } = await supabase.from("business_images").insert(
-      newImages.map((image) => ({
-        business_id: businessId,
-        url: image.path,
-        position: image.position
-      }))
-    );
+    const { data: insertedImages, error } = await supabase
+      .from("business_images")
+      .insert(
+        newImages.map((image) => ({
+          business_id: businessId,
+          url: image.path,
+          position: image.position
+        }))
+      )
+      .select("id, url");
 
     if (error) {
-      console.error(error);
       throw new Error("Não foi possível guardar as imagens.");
     }
+
+    /**
+     * Atualizar os objetos do frontend
+     */
+    insertedImages.forEach((inserted) => {
+      const uploaded = newImages.find((image) => image.path === inserted.url);
+
+      if (!uploaded) return;
+
+      uploaded.uploadImage.id = inserted.id;
+      uploaded.uploadImage.storagePath = inserted.url;
+      uploaded.uploadImage.file = null;
+    });
   }
 
-  return newImages;
+  /**
+   * Atualizar a posição de TODAS as imagens
+   */
+  const updates = images.map((image, position) =>
+    supabase
+      .from("business_images")
+      .update({
+        position
+      })
+      .eq("id", image.id)
+  );
+
+  const results = await Promise.all(updates);
+
+  const failed = results.find((result) => result.error);
+
+  if (failed?.error) {
+    throw new Error("Não foi possível atualizar a ordem das imagens.");
+  }
 }

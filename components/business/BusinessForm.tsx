@@ -72,7 +72,9 @@ export default function BusinessForm({
   businessId,
   initialImages
 }: Props) {
-  const [showHours, setShowHours] = useState(false);
+  const [showHours, setShowHours] = useState(
+    mode === "edit" && (initialData?.openingHours?.length ?? 0) > 0
+  );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [images, setImages] = useState<UploadImage[]>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);

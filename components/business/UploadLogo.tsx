@@ -49,11 +49,11 @@ export function LogoUpload({ onChange, preview, setPreview }: Props) {
           />
 
           {/* overlay hover */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-200 group-hover:bg-black/50">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/0">
             <button
               type="button"
               onClick={removeLogo}
-              className="cursor-pointer rounded-full bg-white p-2 opacity-0 shadow transition-all duration-200 hover:bg-red-600 hover:text-white group-hover:opacity-100"
+              className="absolute top-2 right-2 rounded-full bg-background/90 p-2 shadow backdrop-blur-sm transition-colors hover:bg-red-600 hover:text-white cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
             </button>

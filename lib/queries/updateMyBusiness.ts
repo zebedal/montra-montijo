@@ -1,3 +1,4 @@
+import { OpeningHours } from "@/components/business/OpeningHours";
 import { BusinessFormData } from "../schemas/businessFormSchema";
 import { supabase } from "../supabase/client";
 
@@ -40,6 +41,41 @@ export async function updateMyBusiness(
   if (error) {
     console.error(error);
     return false;
+  }
+
+  /**
+   * Atualizar horários
+   */
+
+  // Remover horários existentes
+  const { error: deleteHoursError } = await supabase
+    .from("business_hours")
+    .delete()
+    .eq("business_id", businessId);
+
+  if (deleteHoursError) {
+    console.error(deleteHoursError);
+    return false;
+  }
+
+  // Inserir novos horários
+  if (data.openingHours && data.openingHours.length > 0) {
+    const { error: insertHoursError } = await supabase
+      .from("business_hours")
+      .insert(
+        data.openingHours.map((hour) => ({
+          business_id: businessId,
+          day: hour.day,
+          open_time: hour.closed ? null : hour.open,
+          close_time: hour.closed ? null : hour.close,
+          is_closed: hour.closed
+        }))
+      );
+
+    if (insertHoursError) {
+      console.error(insertHoursError);
+      return false;
+    }
   }
 
   return true;

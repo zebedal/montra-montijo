@@ -1,15 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { Trash2, Star, GripVertical } from "lucide-react";
+import { Trash2, Star } from "lucide-react";
 
 type Props = {
   src: string;
   isPrimary?: boolean;
   onRemove: () => void;
+  dragHandle?: React.ReactNode;
 };
 
-export function ImageCard({ src, isPrimary, onRemove }: Props) {
+export function ImageCard({ src, isPrimary, onRemove, dragHandle }: Props) {
   return (
     <div className="relative aspect-square overflow-hidden rounded-xl border">
       <Image src={src} alt="" fill className="object-cover" />
@@ -23,17 +24,12 @@ export function ImageCard({ src, isPrimary, onRemove }: Props) {
         </div>
       )}
 
-      <button
-        type="button"
-        className="absolute bottom-2 left-2 rounded-full bg-background/90 p-2 shadow backdrop-blur-sm"
-      >
-        <GripVertical className="h-5 w-5 text-muted-foreground" />
-      </button>
+      {dragHandle}
 
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-2 right-2 rounded-full bg-background/90 p-2 shadow backdrop-blur-sm transition-colors hover:bg-red-600 hover:text-white"
+        className="absolute top-2 right-2 rounded-full bg-background/90 p-2 shadow backdrop-blur-sm transition-colors hover:bg-red-600 hover:text-white cursor-pointer"
       >
         <Trash2 className="h-5 w-5" />
       </button>
