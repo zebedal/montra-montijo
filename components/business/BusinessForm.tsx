@@ -36,6 +36,7 @@ import { Routes } from "@/types";
 import {
   prepareBusinessMedia,
   saveBusinessDraft,
+  updateBusinessImages,
   validateExistingBusiness
 } from "@/lib/helpers";
 import { updateMyBusiness } from "@/lib/queries/updateMyBusiness";
@@ -138,6 +139,7 @@ export default function BusinessForm({
         }
 
         await updateMyBusiness(businessId, data, logoPath);
+        await updateBusinessImages(businessId, images);
 
         toast.success("Negócio atualizado com sucesso.", {
           position: "top-center"

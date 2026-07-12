@@ -550,3 +550,94 @@ export function getPublicStorageUrl(path: string | null) {
 export function getCategoryCoverUrl(slug: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/category-hero/${slug}.webp`;
 }
+
+export async function updateBusinessImages(
+  businessId: string,
+  images: UploadImage[]
+): Promise<
+  {
+    path: string;
+    position: number;
+  }[]
+> {
+  const { data: existingImages, error } = await supabase
+    .from("business_images")
+    .select("id, url")
+    .eq("business_id", businessId);
+
+  if (error) {
+    throw error;
+  }
+  const currentIds = new Set(images.map((image) => image.id));
+
+  const removedImages = existingImages.filter(
+    (image) => !currentIds.has(image.id)
+  );
+
+  //apagar a imagem removida do UI da BD
+  if (removedImages.length > 0) {
+    const { error } = await supabase
+      .from("business_images")
+      .delete()
+      .in(
+        "id",
+        removedImages.map((image) => image.id)
+      );
+
+    if (error) {
+      console.error(error);
+      throw new Error("Não foi possível remover as imagens.");
+    }
+
+    // 2. Apagar do Storage
+    const { error: storageError } = await supabase.storage
+      .from("business-media")
+      .remove(removedImages.map((image) => image.url));
+
+    if (storageError) {
+      console.error(storageError);
+      throw new Error("Não foi possível remover as imagens do Storage.");
+    }
+  }
+  const uploadedImages = await Promise.all(
+    images.map(async (image, position) => {
+      if (!image.file) {
+        return null;
+      }
+
+      const optimized = await optimizeImage(image.file);
+
+      const uploaded = await uploadFile(
+        optimized,
+        "business-media",
+        `businesses/${businessId}/images`
+      );
+
+      return {
+        path: uploaded.path,
+        position
+      };
+    })
+  );
+
+  const newImages = uploadedImages.filter(
+    (image): image is { path: string; position: number } => image !== null
+  );
+
+  if (newImages.length > 0) {
+    const { error } = await supabase.from("business_images").insert(
+      newImages.map((image) => ({
+        business_id: businessId,
+        url: image.path,
+        position: image.position
+      }))
+    );
+
+    if (error) {
+      console.error(error);
+      throw new Error("Não foi possível guardar as imagens.");
+    }
+  }
+
+  return newImages;
+}

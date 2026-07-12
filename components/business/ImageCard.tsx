@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Trash2, Star } from "lucide-react";
+import { Trash2, Star, GripVertical } from "lucide-react";
 
 type Props = {
   src: string;
@@ -11,7 +11,7 @@ type Props = {
 
 export function ImageCard({ src, isPrimary, onRemove }: Props) {
   return (
-    <div className="group relative aspect-square overflow-hidden rounded-xl border cursor-pointer">
+    <div className="relative aspect-square overflow-hidden rounded-xl border">
       <Image src={src} alt="" fill className="object-cover" />
 
       {isPrimary && (
@@ -23,15 +23,20 @@ export function ImageCard({ src, isPrimary, onRemove }: Props) {
         </div>
       )}
 
-      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-200 group-hover:bg-black/50">
-        <button
-          type="button"
-          onClick={onRemove}
-          className="cursor-pointer rounded-full bg-white p-2 opacity-0 transition-all duration-200 hover:bg-red-600 hover:text-white group-hover:opacity-100"
-        >
-          <Trash2 className="h-5 w-5" />
-        </button>
-      </div>
+      <button
+        type="button"
+        className="absolute bottom-2 left-2 rounded-full bg-background/90 p-2 shadow backdrop-blur-sm"
+      >
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
+      </button>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-2 right-2 rounded-full bg-background/90 p-2 shadow backdrop-blur-sm transition-colors hover:bg-red-600 hover:text-white"
+      >
+        <Trash2 className="h-5 w-5" />
+      </button>
     </div>
   );
 }
