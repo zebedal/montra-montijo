@@ -10,7 +10,7 @@ export async function getBusinessesByCategory(
 
   const { data: category, error: categoryError } = await supabase
     .from("categories")
-    .select("id, name, slug")
+    .select("id, name, slug, schema_org_type")
     .eq("slug", slug)
     .single();
 
@@ -25,6 +25,7 @@ export async function getBusinessesByCategory(
       `
       id,
       name,
+      slug,
       description,
       logo_url,
       phone,

@@ -32,10 +32,10 @@ export default async function ClientAreaPage() {
         <div className="rounded-2xl border border-dashed bg-muted/30 px-8 py-20">
           <div className="mx-auto flex max-w-xl flex-col items-center text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Building2 className="h-8 w-8 text-primary" />
+              <Building2 className="h-8 w-8 text-primary-green" />
             </div>
 
-            <h2 className="mt-6 text-2xl font-bold">
+            <h2 className="mt-6 text-xl font-bold">
               Ainda não tem nenhum negócio
             </h2>
 

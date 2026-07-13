@@ -4,9 +4,10 @@ import { Button } from "../ui/button";
 import { Routes } from "@/types";
 interface SuccessProps {
   businessId?: string;
+  slug: string;
 }
 
-export default function Success({ businessId }: SuccessProps) {
+export default function Success({ slug }: SuccessProps) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
       <CheckCircle className="h-14 w-14 text-green-600" />
@@ -23,7 +24,7 @@ export default function Success({ businessId }: SuccessProps) {
 
       <div className="flex gap-3">
         <Button variant="default">
-          <Link href={`/negocio/${businessId}`}>Ver negócio</Link>
+          <Link href={`/negocio/${slug}`}>Ver negócio</Link>
         </Button>
 
         <Button variant="outline">

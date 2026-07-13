@@ -14,6 +14,8 @@ import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
 import LocalBusinessJsonLd from "@/components/seo/LocalBusinessJsonLd";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import { getRelatedBusinesses } from "@/lib/queries/getRelatedBusinesses";
+import RelatedBusinesses from "@/components/business/RelatedBusinesses";
 
 interface Props {
   params: Promise<{
@@ -146,6 +148,17 @@ export default async function BusinessPage({ params }: Props) {
 
   const { business, images, hours } = result;
 
+  const supabase = await createClient();
+
+  const relatedBusinesses = business.category
+    ? await getRelatedBusinesses({
+        supabase,
+        businessId: business.id,
+        categoryId: business.category.id,
+        limit: 3
+      })
+    : [];
+
   const siteUrl = (
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ).replace(/\/$/, "");
@@ -200,6 +213,14 @@ export default async function BusinessPage({ params }: Props) {
           <BusinessHours hours={hours} />
         </div>
       </div>
+
+      {business.category && (
+        <RelatedBusinesses
+          businesses={relatedBusinesses}
+          categoryName={business.category.name}
+          categorySlug={business.category.slug}
+        />
+      )}
     </main>
   );
 }

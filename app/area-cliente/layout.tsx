@@ -24,7 +24,7 @@ export default async function ClientAreaLayout({ children }: Props) {
     redirect("/");
   }
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-10 px-4">
       <div className="grid gap-8 lg:grid-cols-[260px_1fr] ">
         <ClientAreaSidebar />
 

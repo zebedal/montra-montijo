@@ -94,13 +94,15 @@ export async function optimizeImage(file: File): Promise<File> {
   });
 }
 
+type PublishBusinessReturn = { id: string; slug: string };
+
 export async function publishBusiness({
   supabaseAdmin,
   businessId,
   userId,
   draft,
   isFeatured = false
-}: PublishBusinessOptions): Promise<string> {
+}: PublishBusinessOptions): Promise<PublishBusinessReturn> {
   try {
     const { form, logoUrl, imageUrls } = draft;
 
@@ -122,13 +124,10 @@ export async function publishBusiness({
     /**
      * BUSINESS
      */
-    console.log("Publishing business:", {
-      businessId,
-      street: form.street,
-      number: form.number,
-      postalCode: form.postalCode,
-      city: form.city,
-      coordinates
+    const slug = await createUniqueBusinessSlug({
+      supabase: supabaseAdmin,
+      businessName: draft.form.name,
+      city: draft.form.city
     });
     const { error: insertError } = await supabaseAdmin
       .from("businesses")
@@ -137,6 +136,7 @@ export async function publishBusiness({
         user_id: userId,
         category_id: form.category_id,
         name: form.name,
+        slug,
         description: form.description,
         phone: form.phone,
         email: form.email || null,
@@ -191,7 +191,10 @@ export async function publishBusiness({
       if (error) throw error;
     }
 
-    return businessId;
+    return {
+      id: businessId,
+      slug
+    };
   } catch (error) {
     await supabaseAdmin.from("businesses").delete().eq("id", businessId);
 
@@ -774,4 +777,57 @@ export async function activateBusinessPremium(
   }
 
   window.location.assign(result.url);
+}
+
+function normalizeSlug(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " e ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+type Options = {
+  supabase: SupabaseClient;
+  businessName: string;
+  city?: string | null;
+};
+
+export async function createUniqueBusinessSlug({
+  supabase,
+  businessName,
+  city
+}: Options): Promise<string> {
+  const location = city?.trim() || "Montijo";
+
+  const baseSlug =
+    normalizeSlug(`${businessName}-${location}`) ||
+    `negocio-${crypto.randomUUID().slice(0, 8)}`;
+
+  let slug = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("businesses")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(
+        `Não foi possível verificar a slug do negócio: ${error.message}`
+      );
+    }
+
+    if (!data) {
+      return slug;
+    }
+
+    slug = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
 }

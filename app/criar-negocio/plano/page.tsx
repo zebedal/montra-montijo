@@ -48,12 +48,6 @@ export default function BusinessPlanPage() {
     load();
   }, [draftId]);
 
-  // Se não existir draft, significa que alguém entrou diretamente nesta página.
-  if (!draft) {
-    router.replace(Routes.CRIAR_NEGOCIO);
-    return null;
-  }
-
   const publishFree = async () => {
     if (!draftId) return;
 
@@ -83,7 +77,9 @@ export default function BusinessPlanPage() {
         position: "top-center"
       });
 
-      router.replace(Routes.NEGOCIO(data?.businessId));
+      router.replace(
+        `/criar-negocio/sucesso?slug=${encodeURIComponent(data.businessSlug)}`
+      );
     } catch (error) {
       console.error(error);
 

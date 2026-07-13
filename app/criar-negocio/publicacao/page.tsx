@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import Processing from "@/components/StripeSuccessPage/Processing";
-import Success from "@/components/StripeSuccessPage/Success";
 import PublicacaoError from "@/components/StripeSuccessPage/PublicacaoError";
-import { redirect } from "next/navigation";
+import Success from "@/components/StripeSuccessPage/Success";
 
 type CheckoutStatus =
   | {
@@ -14,6 +14,7 @@ type CheckoutStatus =
   | {
       status: "completed";
       businessId: string;
+      businessSlug: string;
     }
   | {
       status: "failed";
@@ -21,41 +22,79 @@ type CheckoutStatus =
     };
 
 export default function PublicacaoPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const querySessionId = searchParams.get("session_id");
 
-  const sessionId =
-    querySessionId || localStorage.getItem("pendingCheckoutSession");
+  const [sessionId, setSessionId] = useState<string | null>(querySessionId);
 
   const [checkout, setCheckout] = useState<CheckoutStatus>({
     status: "processing"
   });
 
   useEffect(() => {
-    if (!sessionId) return;
-    async function loadStatus() {
+    if (querySessionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSessionId(querySessionId);
+      return;
+    }
+
+    const storedSessionId = localStorage.getItem("pendingCheckoutSession");
+
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+      return;
+    }
+
+    router.replace("/");
+  }, [querySessionId, router]);
+
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadStatus(currentSessionId: string) {
       try {
         const response = await fetch(
-          `/api/stripe/checkout-status?session_id=${sessionId}`
+          `/api/stripe/checkout-status?session_id=${encodeURIComponent(
+            currentSessionId
+          )}`,
+          {
+            cache: "no-store"
+          }
         );
-
-        if (!response.ok) {
-          throw new Error("Erro ao carregar estado do checkout");
-        }
 
         const data = await response.json();
 
-        setCheckout(data);
-      } catch {
-        setCheckout({
-          status: "failed",
-          error: "Não foi possível verificar o estado da publicação."
-        });
+        if (!response.ok) {
+          throw new Error(data.error ?? "Erro ao carregar estado do checkout.");
+        }
+
+        if (!cancelled) {
+          setCheckout(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setCheckout({
+            status: "failed",
+            error:
+              error instanceof Error
+                ? error.message
+                : "Não foi possível verificar o estado da publicação."
+          });
+        }
       }
     }
 
-    loadStatus();
+    loadStatus(sessionId);
+
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId]);
 
   useEffect(() => {
@@ -65,7 +104,7 @@ export default function PublicacaoPage() {
   }, [checkout.status]);
 
   if (!sessionId) {
-    redirect("/");
+    return <Processing />;
   }
 
   switch (checkout.status) {
@@ -73,7 +112,12 @@ export default function PublicacaoPage() {
       return <Processing />;
 
     case "completed":
-      return <Success businessId={checkout.businessId} />;
+      return (
+        <Success
+          businessId={checkout.businessId}
+          slug={checkout.businessSlug}
+        />
+      );
 
     case "failed":
       return <PublicacaoError message={checkout.error} />;

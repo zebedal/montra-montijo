@@ -21,6 +21,7 @@ type SearchSuggestion =
       value: string;
       businessId: string;
       categoryName: string | null;
+      slug: string;
     };
 
 type SuggestionsResponse = {
@@ -132,7 +133,7 @@ export function Hero() {
     setActiveSuggestionIndex(-1);
 
     if (suggestion.type === "business") {
-      router.push(`/negocio/${suggestion.businessId}`);
+      router.push(`/negocio/${suggestion.slug}`);
       return;
     }
 

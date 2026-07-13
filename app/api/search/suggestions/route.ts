@@ -15,6 +15,7 @@ type Suggestion =
       value: string;
       businessId: string;
       categoryName: string | null;
+      slug: string;
     };
 
 export async function GET(request: Request) {
@@ -65,6 +66,7 @@ export async function GET(request: Request) {
         label: business.name,
         value: business.name,
         businessId: business.id,
+        slug: business.slug,
         categoryName: business.category?.name ?? null
       });
     }

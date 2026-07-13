@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       draft: draft.data
     });
 
-    await publishBusiness({
+    const publishedBusiness = await publishBusiness({
       businessId,
       supabaseAdmin,
       userId: user.id,
@@ -63,7 +63,10 @@ export async function POST(req: Request) {
       isFeatured
     });
 
-    return NextResponse.json({ businessId });
+    return NextResponse.json({
+      businessId: publishedBusiness.id,
+      businessSlug: publishedBusiness.slug
+    });
   } catch (error) {
     console.error("PUBLISH ERROR:", error);
 

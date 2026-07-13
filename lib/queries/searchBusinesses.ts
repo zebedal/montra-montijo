@@ -79,7 +79,7 @@ export async function searchBusinesses(
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
-    slug: row.name,
+    slug: row.slug,
     description: row.description,
     logoUrl: getPublicStorageUrl(row.logo_url),
     city: row.city,
