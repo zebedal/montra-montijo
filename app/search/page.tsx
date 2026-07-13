@@ -1,10 +1,14 @@
+import type { Metadata } from "next";
+
 import Image from "next/image";
 import Link from "next/link";
+
 import { Building2, Crown, MapPin, Search, Tags } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
   searchBusinesses,
   type SearchBusinessResult
@@ -12,7 +16,7 @@ import {
 
 type Props = {
   searchParams: Promise<{
-    q?: string;
+    q?: string | string[];
   }>;
 };
 
@@ -24,6 +28,45 @@ const suggestedSearches = [
   "Ginásios",
   "Oficinas"
 ];
+
+function getSearchQuery(value: string | string[] | undefined) {
+  const query = Array.isArray(value) ? value[0] : value;
+
+  return query?.trim() ?? "";
+}
+
+export async function generateMetadata({
+  searchParams
+}: Props): Promise<Metadata> {
+  const { q } = await searchParams;
+  const query = getSearchQuery(q);
+
+  const title = query
+    ? `Pesquisa por “${query}”`
+    : "Pesquisar negócios no Montijo";
+
+  const description = query
+    ? `Consulte os resultados da pesquisa por ${query} na Montra Montijo.`
+    : "Pesquise restaurantes, lojas, empresas e serviços locais no Montijo.";
+
+  return {
+    title,
+    description,
+
+    alternates: {
+      canonical: "/search"
+    },
+
+    robots: {
+      index: false,
+      follow: true,
+      googleBot: {
+        index: false,
+        follow: true
+      }
+    }
+  };
+}
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -43,7 +86,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   return (
     <>
       {parts.map((part, index) =>
-        expression.test(part) ? (
+        index % 2 === 1 ? (
           <mark
             key={`${part}-${index}`}
             className="rounded bg-yellow-100 px-0.5 text-inherit"
@@ -72,7 +115,7 @@ function getMatchedCategory(results: SearchBusinessResult[]) {
 export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams;
 
-  const query = q?.trim() ?? "";
+  const query = getSearchQuery(q);
 
   const results = query
     ? await searchBusinesses(query, {
@@ -215,11 +258,11 @@ export default async function SearchPage({ searchParams }: Props) {
                 href={`/negocio/${business.id}`}
                 className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
-                <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+                <div className="relative aspect-16/10 overflow-hidden bg-muted">
                   {business.logoUrl ? (
                     <Image
                       src={business.logoUrl}
-                      alt={business.name}
+                      alt={`Logótipo de ${business.name}`}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"

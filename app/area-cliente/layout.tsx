@@ -4,9 +4,17 @@ import ClientAreaSidebar from "@/components/area-cliente/ClientAreaSidebar";
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { Metadata } from "next";
 
 type Props = {
   children: ReactNode;
+};
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 export default async function ClientAreaLayout({ children }: Props) {

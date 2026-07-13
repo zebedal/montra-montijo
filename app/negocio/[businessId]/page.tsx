@@ -1,9 +1,15 @@
+import { cache } from "react";
+
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
 import BusinessBreadcrumb from "@/components/business/BusinessBreadcrumb";
 import { BusinessContact } from "@/components/business/BusinessContact";
+import { BusinessGallery } from "@/components/business/BusinessImageGallery";
 import { BusinessHeader } from "@/components/business/BusinessHeader";
 import { BusinessHours } from "@/components/business/BusinessHours";
-import { BusinessGallery } from "@/components/business/BusinessImageGallery";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
+
 import { getBusinessById } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,28 +19,143 @@ interface Props {
   }>;
 }
 
+function createDescription({
+  businessName,
+  categoryName,
+  description
+}: {
+  businessName: string;
+  categoryName?: string | null;
+  description?: string | null;
+}) {
+  if (description) {
+    const normalizedDescription = description.replace(/\s+/g, " ").trim();
+
+    if (normalizedDescription.length <= 155) {
+      return normalizedDescription;
+    }
+
+    return `${normalizedDescription.slice(0, 152).trimEnd()}...`;
+  }
+
+  if (categoryName) {
+    return `Conheça ${businessName}, um negócio de ${categoryName.toLowerCase()} no Montijo. Consulte contactos, localização, horário e outras informações.`;
+  }
+
+  return `Conheça ${businessName}, um negócio local no Montijo. Consulte contactos, localização, horário e outras informações na Montra Montijo.`;
+}
+
+const getBusinessPageData = cache(async (businessId: string) => {
+  const supabase = await createClient();
+
+  try {
+    return await getBusinessById({
+      supabase,
+      businessId
+    });
+  } catch (error) {
+    console.error("Erro ao obter o negócio:", error);
+    return null;
+  }
+});
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { businessId } = await params;
+
+  const result = await getBusinessPageData(businessId);
+  const business = result?.business;
+
+  if (!business) {
+    return {
+      title: "Negócio não encontrado",
+      description:
+        "O negócio que procura não está disponível na Montra Montijo.",
+      robots: {
+        index: false,
+        follow: false
+      }
+    };
+  }
+
+  const title = `${business.name} no Montijo`;
+
+  const description = createDescription({
+    businessName: business.name,
+    categoryName: business.category?.name,
+    description: business.description
+  });
+
+  const canonical = `/negocio/${business.id}`;
+
+  return {
+    title,
+    description,
+
+    alternates: {
+      canonical
+    },
+
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      locale: "pt_PT",
+      siteName: "Montra Montijo",
+      images: business.logo_url
+        ? [
+            {
+              url: business.logo_url,
+              alt: `Logótipo de ${business.name}`
+            }
+          ]
+        : undefined
+    },
+
+    twitter: {
+      card: business.logo_url ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: business.logo_url ? [business.logo_url] : undefined
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1
+      }
+    }
+  };
+}
+
 export default async function BusinessPage({ params }: Props) {
   const { businessId } = await params;
 
-  const supabase = await createClient();
+  const result = await getBusinessPageData(businessId);
 
-  const { business, images, hours } = await getBusinessById({
-    supabase,
-    businessId
-  });
+  if (!result?.business) {
+    notFound();
+  }
 
-  console.log("business:", business);
+  const { business, images, hours } = result;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <BusinessPageTracker businessId={business?.id} />
+    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <BusinessPageTracker businessId={business.id} />
+
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <BusinessBreadcrumb
             category={business.category}
             businessName={business.name}
-            slug={business.categories.slug}
+            slug={business.category.slug}
           />
+
           <BusinessHeader business={business} />
 
           <BusinessGallery images={images} />
@@ -46,6 +167,6 @@ export default async function BusinessPage({ params }: Props) {
           <BusinessHours hours={hours} />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

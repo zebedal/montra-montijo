@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { BusinessStatisticsDashboard } from "@/components/estatisticas/BusinessStatisticsDashboard";
 import { getBusinessStatistics } from "@/lib/queries/getBusinessStatistics";
 import { Routes } from "@/types";
+import { Metadata } from "next";
 
 interface Props {
   params: Promise<{
@@ -13,6 +14,10 @@ interface Props {
     days?: string;
   }>;
 }
+
+export const metadata: Metadata = {
+  title: "Estatísticas"
+};
 
 export default async function BusinessStatisticsPage({
   params,

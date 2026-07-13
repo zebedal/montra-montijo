@@ -3,17 +3,19 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
-import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { loginSchema } from "@/lib/schemas/loginSchema";
 import { signupSchema } from "@/lib/schemas/signupSchema";
-import { Routes } from "@/types";
+import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/lib/supabase/useUser";
+
+import { Routes } from "@/types";
 
 type FormData = {
   email: string;
@@ -95,8 +97,8 @@ export default function AuthPage() {
 
         <p className="text-sm text-muted-foreground">
           {mode === "login"
-            ? "Bem-vindo de volta à Montra Montijo"
-            : "Cria a tua conta e adiciona o teu negócio"}
+            ? "Bem-vindo de volta à Montra Montijo."
+            : "Crie a sua conta e adicione o seu negócio."}
         </p>
       </div>
 
@@ -158,7 +160,7 @@ export default function AuthPage() {
       <p className="text-center text-sm text-muted-foreground">
         {mode === "login" ? (
           <>
-            Ainda não tens conta?{" "}
+            Ainda não tem conta?{" "}
             <button
               type="button"
               onClick={() => changeMode("signup")}
@@ -169,7 +171,7 @@ export default function AuthPage() {
           </>
         ) : (
           <>
-            Já tens conta?{" "}
+            Já tem conta?{" "}
             <button
               type="button"
               onClick={() => changeMode("login")}

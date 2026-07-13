@@ -22,12 +22,6 @@ export default function BusinessPlanPage() {
 
   const [draftId, setDraftId] = useState<string | null>(urlDraftId);
 
-  // Se não existir draft, significa que alguém entrou diretamente nesta página.
-  /* if (!draft) {
-    router.replace(Routes.CRIAR_NEGOCIO);
-    return null;
-  } */
-
   useEffect(() => {
     if (draftId) return;
 
@@ -53,6 +47,12 @@ export default function BusinessPlanPage() {
 
     load();
   }, [draftId]);
+
+  // Se não existir draft, significa que alguém entrou diretamente nesta página.
+  if (!draft) {
+    router.replace(Routes.CRIAR_NEGOCIO);
+    return null;
+  }
 
   const publishFree = async () => {
     if (!draftId) return;

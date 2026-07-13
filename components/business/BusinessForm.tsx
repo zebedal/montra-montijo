@@ -53,7 +53,7 @@ type Props = {
   mode?: "create" | "edit";
   initialData?: Partial<BusinessFormData>;
   businessId?: string;
-  initialImages: UploadImage[];
+  initialImages?: UploadImage[];
 };
 
 export const defaultOpeningHours = [

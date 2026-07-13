@@ -3,6 +3,11 @@ import { Building2 } from "lucide-react";
 import MyBusinessCard from "@/components/area-cliente/MyBusinessCard";
 import { getMyBusinesses } from "@/lib/queries/getMyBusinesses";
 import PremiumCheckoutToast from "@/components/area-cliente/PremiumCheckoutToast";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Os meus negócios"
+};
 
 export default async function ClientAreaPage() {
   const businesses = await getMyBusinesses();

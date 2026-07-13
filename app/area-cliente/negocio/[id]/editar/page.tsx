@@ -6,11 +6,16 @@ import { getPublicStorageUrl } from "@/lib/helpers";
 import { getBusinessImages } from "@/lib/queries/getBusinessImages";
 import { UploadImage } from "@/types/upload-image";
 import { getBusinessHours } from "@/lib/queries/getBusinessHours";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
     id: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Editar negócio"
 };
 
 export default async function EditBusinessPage({ params }: Props) {
