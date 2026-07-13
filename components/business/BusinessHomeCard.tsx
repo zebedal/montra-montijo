@@ -37,7 +37,7 @@ export default function BusinessHomeCard({
         )}
 
         {showPremiumBadge && business.plan === "premium" && (
-          <Badge className="absolute left-3 top-3 border-0 bg-yellow-600 text-white hover:bg-yellow-600">
+          <Badge className="py-3 absolute left-3 top-3 border-0 bg-yellow-600 text-white hover:bg-yellow-600">
             <Crown className="mr-1 h-3.5 w-3.5" />
             Premium
           </Badge>

@@ -231,7 +231,7 @@ export function Hero() {
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="Ex.: cabeleireiro, restaurante..."
-                className="border-0 pl-10 text-foreground shadow-none focus-visible:ring-0"
+                className="border-0 pl-10 text-foreground shadow-none focus-visible:ring-0 h-full"
                 role="combobox"
                 aria-expanded={showDropdown}
                 aria-controls="hero-search-suggestions"
