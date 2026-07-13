@@ -18,6 +18,7 @@ export type BusinessStatistics = {
   business: {
     id: string;
     name: string;
+    slug: string;
     plan: string;
     subscriptionStatus: string | null;
   };
@@ -141,6 +142,7 @@ export async function getBusinessStatistics(
       `
       id,
       name,
+      slug,
       user_id,
       plan,
       subscription_status
@@ -276,6 +278,7 @@ export async function getBusinessStatistics(
       business: {
         id: business.id,
         name: business.name,
+        slug: business.slug,
         plan: business.plan,
         subscriptionStatus: business.subscription_status
       },

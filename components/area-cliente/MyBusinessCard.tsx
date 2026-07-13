@@ -52,7 +52,7 @@ export default function MyBusinessCard({ business }: Props) {
     setDropdownOpen(false);
 
     if (business.plan === "premium") {
-      router.push(`/area-cliente/negocio/${business.id}/estatisticas`);
+      router.push(`/area-cliente/negocio/${business.slug}/estatisticas`);
       return;
     }
 
@@ -121,7 +121,7 @@ export default function MyBusinessCard({ business }: Props) {
 
           <div className="flex flex-wrap items-center gap-2 md:ml-auto">
             <Button asChild variant="outline">
-              <Link href={`/negocio/${business.id}`}>
+              <Link href={`/negocio/${business.slug}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Ver página
               </Link>

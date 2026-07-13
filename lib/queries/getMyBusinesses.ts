@@ -19,6 +19,7 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
       `
   id,
   name,
+  slug,
   description,
   logo_url,
   phone,

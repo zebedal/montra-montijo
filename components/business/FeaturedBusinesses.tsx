@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Crown } from "lucide-react";
 
 import BusinessHomeCard from "@/components/business/BusinessHomeCard";
 import { Button } from "@/components/ui/button";
-import { Routes } from "@/types";
+
 import { PublicBusiness } from "@/types/business";
+import PageContainer from "../PageContainer";
 
 type Props = {
   businesses: PublicBusiness[];
@@ -16,29 +17,26 @@ export default function FeaturedBusinesses({ businesses }: Props) {
   }
 
   return (
-    <section className="container bg-muted/30 py-14 sm:py-16 mx-auto">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section>
+      <PageContainer>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-primary">
-              <Sparkles className="h-5 w-5" />
-
-              <p className="text-sm font-semibold uppercase tracking-wide">
-                Em destaque
-              </p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+              <Crown className="h-3.5 w-3.5" />
+              Seleção Premium
             </div>
 
-            <h2 className="mt-2 text-3xl font-bold tracking-tight">
-              Negócios que merecem a sua atenção
+            <h2 className="mt-4 text-3xl font-bold tracking-tight">
+              Negócios em destaque
             </h2>
 
-            <p className="mt-3 max-w-2xl text-muted-foreground">
-              Descubra alguns dos negócios em destaque na Montra Montijo.
+            <p className="mt-2 max-w-2xl text-muted-foreground">
+              Conheça alguns dos negócios Premium em destaque na Montra Montijo.
             </p>
           </div>
 
           <Button asChild variant="outline">
-            <Link href={Routes.NEGOCIOS}>
+            <Link href="/negocios">
               Ver mais negócios
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
@@ -50,7 +48,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
             <BusinessHomeCard key={business.id} business={business} />
           ))}
         </div>
-      </div>
+      </PageContainer>
     </section>
   );
 }

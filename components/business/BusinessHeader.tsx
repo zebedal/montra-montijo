@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { BusinessCategorySummary } from "@/types/business";
 
 type BusinessHeaderProps = {
   business: {
@@ -8,7 +9,7 @@ type BusinessHeaderProps = {
     description: string | null;
     logo_url: string | null;
     plan: string;
-    category: string | null;
+    category: BusinessCategorySummary | null;
   };
 };
 
@@ -36,7 +37,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
 
               {business.category && (
                 <p className="text-muted-foreground text-lg">
-                  {business.category}
+                  {business.category.name}
                 </p>
               )}
             </div>

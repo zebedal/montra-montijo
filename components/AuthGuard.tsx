@@ -23,8 +23,6 @@ export default function AuthGuard({
     }
   }, [loading, user, router, redirectTo]);
 
-  console.log("user", user);
-
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">

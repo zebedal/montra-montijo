@@ -14,7 +14,7 @@ type Props = {
 
 export default function BusinessCard({ business }: Props) {
   return (
-    <Link href={`/negocio/${business.id}`}>
+    <Link href={`/negocio/${business.slug}`}>
       <Card className="group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">

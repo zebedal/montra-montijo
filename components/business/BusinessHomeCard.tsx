@@ -18,10 +18,10 @@ export default function BusinessHomeCard({
 }: Props) {
   return (
     <Link
-      href={`/negocio/${business.id}`}
+      href={`/negocio/${business.slug}`}
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+      <div className="relative aspect-16/10 overflow-hidden bg-muted">
         {business.logoUrl ? (
           <Image
             src={business.logoUrl}

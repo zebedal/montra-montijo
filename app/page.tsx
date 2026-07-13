@@ -1,16 +1,61 @@
+import type { Metadata } from "next";
+
 import BusinessCategories from "@/components/business/BusinessCategories";
 import FeaturedBusinesses from "@/components/business/FeaturedBusinesses";
 import NewBusinesses from "@/components/business/NewBusinesses";
-
 import { Hero } from "@/components/HeroBanner";
 
 import { getPublicStorageUrl } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/server";
-import { PublicBusiness } from "@/types/business";
+
+import type { PublicBusiness } from "@/types/business";
+import WhyMontra from "@/components/WhyMontra";
+import BusinessCta from "@/components/BusinessCta";
+
+export const metadata: Metadata = {
+  title: "Comércio local no Montijo",
+
+  description:
+    "Descubra o comércio local do Montijo. Encontre restaurantes, lojas, empresas e serviços locais na Montra Montijo.",
+
+  alternates: {
+    canonical: "/"
+  },
+
+  openGraph: {
+    title: "Comércio local no Montijo",
+    description:
+      "Descubra restaurantes, lojas, empresas e serviços do comércio local no Montijo.",
+    url: "/",
+    type: "website",
+    locale: "pt_PT",
+    siteName: "Montra Montijo"
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Comércio local no Montijo",
+    description:
+      "Descubra restaurantes, lojas, empresas e serviços locais na Montra Montijo."
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1
+    }
+  }
+};
 
 type BusinessRow = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   logo_url: string | null;
   city: string | null;
@@ -26,6 +71,7 @@ function mapBusiness(business: BusinessRow): PublicBusiness {
   return {
     id: business.id,
     name: business.name,
+    slug: business.slug,
     description: business.description,
     logoUrl: getPublicStorageUrl(business.logo_url),
     city: business.city,
@@ -42,34 +88,39 @@ export default async function Home() {
     { data: featuredData, error: featuredError },
     { data: newestData, error: newestError }
   ] = await Promise.all([
-    supabase.from("categories").select(
-      `
-        id,
-        name,
-        slug,
-        businesses (
-          id
-        )
-      `
-    ),
+    supabase
+      .from("categories")
+      .select(
+        `
+          id,
+          name,
+          slug,
+          businesses (
+            id
+          )
+        `
+      )
+      .eq("businesses.is_visible", true),
 
     supabase
       .from("businesses")
       .select(
         `
-        id,
-        name,
-        description,
-        logo_url,
-        city,
-        plan,
-        created_at,
-        category:categories (
+          id,
           name,
-          slug
-        )
-      `
+          slug,
+          description,
+          logo_url,
+          city,
+          plan,
+          created_at,
+          category:categories (
+            name,
+            slug
+          )
+        `
       )
+      .eq("is_visible", true)
       .eq("plan", "premium")
       .order("created_at", {
         ascending: false
@@ -80,19 +131,21 @@ export default async function Home() {
       .from("businesses")
       .select(
         `
-        id,
-        name,
-        description,
-        logo_url,
-        city,
-        plan,
-        created_at,
-        category:categories (
+          id,
           name,
-          slug
-        )
-      `
+          slug,
+          description,
+          logo_url,
+          city,
+          plan,
+          created_at,
+          category:categories (
+            name,
+            slug
+          )
+        `
       )
+      .eq("is_visible", true)
       .order("created_at", {
         ascending: false
       })
@@ -127,7 +180,8 @@ export default async function Home() {
   ).map(mapBusiness);
 
   /*
-   * Evitar mostrar os mesmos negócios Premium nas duas secções.
+   * Evita apresentar os mesmos negócios Premium
+   * nas secções de destaque e de novos negócios.
    */
   const featuredIds = new Set(
     featuredBusinesses.map((business) => business.id)
@@ -139,14 +193,17 @@ export default async function Home() {
     .map(mapBusiness);
 
   return (
-    <>
+    <main>
       <Hero />
 
       <BusinessCategories categories={popularCategories} />
 
       <FeaturedBusinesses businesses={featuredBusinesses} />
-
+      <div className="h-2 bg-background" />
       <NewBusinesses businesses={newBusinesses} />
-    </>
+
+      <WhyMontra />
+      <BusinessCta />
+    </main>
   );
 }

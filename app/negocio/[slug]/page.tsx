@@ -10,12 +10,12 @@ import { BusinessHeader } from "@/components/business/BusinessHeader";
 import { BusinessHours } from "@/components/business/BusinessHours";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
-import { getBusinessById } from "@/lib/helpers";
+import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
 
 interface Props {
   params: Promise<{
-    businessId: string;
+    slug: string;
   }>;
 }
 
@@ -45,13 +45,13 @@ function createDescription({
   return `Conheça ${businessName}, um negócio local no Montijo. Consulte contactos, localização, horário e outras informações na Montra Montijo.`;
 }
 
-const getBusinessPageData = cache(async (businessId: string) => {
+const getBusinessPageData = cache(async (slug: string) => {
   const supabase = await createClient();
 
   try {
-    return await getBusinessById({
+    return await getBusinessBySlug({
       supabase,
-      businessId
+      slug
     });
   } catch (error) {
     console.error("Erro ao obter o negócio:", error);
@@ -60,9 +60,9 @@ const getBusinessPageData = cache(async (businessId: string) => {
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { businessId } = await params;
+  const { slug } = await params;
 
-  const result = await getBusinessPageData(businessId);
+  const result = await getBusinessPageData(slug);
   const business = result?.business;
 
   if (!business) {
@@ -85,7 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: business.description
   });
 
-  const canonical = `/negocio/${business.id}`;
+  const canonical = `/negocio/${business.slug}`;
 
   return {
     title,
@@ -134,11 +134,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BusinessPage({ params }: Props) {
-  const { businessId } = await params;
+  const { slug } = await params;
 
-  const result = await getBusinessPageData(businessId);
+  const result = await getBusinessPageData(slug);
 
-  if (!result?.business) {
+  if (!result) {
     notFound();
   }
 
@@ -150,11 +150,12 @@ export default async function BusinessPage({ params }: Props) {
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
-          <BusinessBreadcrumb
-            category={business.category}
-            businessName={business.name}
-            slug={business.category.slug}
-          />
+          {business.category && (
+            <BusinessBreadcrumb
+              category={business.category}
+              businessName={business.name}
+            />
+          )}
 
           <BusinessHeader business={business} />
 

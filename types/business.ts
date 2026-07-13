@@ -9,6 +9,7 @@ export type BusinessCategorySummary = {
 export type PublicBusinessSummary = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   logo_url: string | null;
   phone: string | null;
@@ -31,6 +32,7 @@ export type BusinessSummary = PublicBusinessSummary & {
 
 export type PublicBusiness = {
   id: string;
+  slug: string;
   name: string;
   description: string | null;
   logoUrl: string | null;
@@ -40,4 +42,25 @@ export type PublicBusiness = {
     name: string;
     slug: string;
   } | null;
+};
+
+export type PublicBusinessDetails = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+  phone: string;
+  email: string | null;
+  website: string | null;
+  facebook: string | null;
+  instagram: string | null;
+  street: string | null;
+  number: string | null;
+  postal_code: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  plan: "free" | "premium";
+  category: BusinessCategorySummary | null;
 };

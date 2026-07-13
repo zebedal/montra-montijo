@@ -8,18 +8,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
+import { BusinessCategorySummary } from "@/types/business";
 
 interface Props {
-  category?: string | null;
+  category: BusinessCategorySummary;
   businessName: string;
-  slug: string;
 }
 
-export default function BusinessBreadcrumb({
-  category,
-  businessName,
-  slug
-}: Props) {
+export default function BusinessBreadcrumb({ category, businessName }: Props) {
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -31,12 +27,12 @@ export default function BusinessBreadcrumb({
 
         <BreadcrumbSeparator />
 
-        {slug ? (
+        {category.name ? (
           <>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/categorias/${slug.toLowerCase()}`}>
-                  {category}
+                <Link href={`/categorias/${category.slug.toLowerCase()}`}>
+                  {category.name}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>

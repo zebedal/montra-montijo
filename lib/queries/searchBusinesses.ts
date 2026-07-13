@@ -12,6 +12,7 @@ export type SearchMatchType =
 type SearchBusinessRow = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   logo_url: string | null;
   city: string | null;
@@ -26,6 +27,7 @@ type SearchBusinessRow = {
 export type SearchBusinessResult = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   logoUrl: string | null;
   city: string | null;
@@ -77,6 +79,7 @@ export async function searchBusinesses(
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
+    slug: row.name,
     description: row.description,
     logoUrl: getPublicStorageUrl(row.logo_url),
     city: row.city,

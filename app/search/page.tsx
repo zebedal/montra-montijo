@@ -255,7 +255,7 @@ export default async function SearchPage({ searchParams }: Props) {
             {results.map((business) => (
               <Link
                 key={business.id}
-                href={`/negocio/${business.id}`}
+                href={`/negocio/${business.slug}`}
                 className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
                 <div className="relative aspect-16/10 overflow-hidden bg-muted">

@@ -180,7 +180,7 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
                   )}
                 >
                   <Link
-                    href={`/area-cliente/negocio/${business.id}/estatisticas?days=${value}`}
+                    href={`/area-cliente/negocio/${business.slug}/estatisticas?days=${value}`}
                     scroll={false}
                     aria-current={active ? "page" : undefined}
                   >
@@ -194,7 +194,7 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
 
         <Button asChild variant="fat" className="w-full md:w-auto">
           <Link
-            href={`/negocio/${business.id}`}
+            href={`/negocio/${business.slug}`}
             target="_blank"
             rel="noopener noreferrer"
           >
