@@ -10,6 +10,7 @@ type BusinessCategory = {
   id: string;
   name: string;
   slug: string;
+  schema_org_type: string | null;
 };
 
 export type BusinessImage = {
@@ -94,7 +95,9 @@ export async function getBusinessBySlug({
         categories (
           id,
           name,
-          slug
+          slug,
+          schema_org_type
+
         )
       `
     )

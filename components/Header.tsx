@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { LayoutDashboard, LogOut, Plus, User } from "lucide-react";
-
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,7 +36,12 @@ export function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href="/" className="text-xl font-bold tracking-tight">
-          Montra Montijo
+          <Image
+            src="/images/logo.svg"
+            alt="logo montra montijo"
+            width={128}
+            height={64}
+          />
         </Link>
 
         <div className="flex items-center gap-2">

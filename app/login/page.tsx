@@ -16,10 +16,18 @@ import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/lib/supabase/useUser";
 
 import { Routes } from "@/types";
+import { toast } from "sonner";
 
 type FormData = {
   email: string;
   password: string;
+};
+
+export const metadata = {
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 export default function AuthPage() {
@@ -67,7 +75,11 @@ export default function AuthPage() {
       });
 
       if (error) {
-        alert(error.message);
+        toast.error("Não foi possível criar a conta.", {
+          position: "top-center",
+          description: error.message
+        });
+
         return;
       }
 
@@ -81,7 +93,11 @@ export default function AuthPage() {
     });
 
     if (error) {
-      alert(error.message);
+      toast.error("Não foi possível criar a conta.", {
+        position: "top-center",
+        description: error.message
+      });
+
       return;
     }
 
@@ -89,7 +105,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="mx-auto mt-20 max-w-md space-y-6">
+    <div className="py-12 mx-auto mt-20 max-w-md space-y-6">
       <div className="space-y-1 text-center">
         <h1 className="text-2xl font-bold">
           {mode === "login" ? "Entrar" : "Criar conta"}

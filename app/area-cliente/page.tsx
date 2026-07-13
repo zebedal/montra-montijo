@@ -6,7 +6,11 @@ import PremiumCheckoutToast from "@/components/area-cliente/PremiumCheckoutToast
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Os meus negócios"
+  title: "Os meus negócios",
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 export default async function ClientAreaPage() {

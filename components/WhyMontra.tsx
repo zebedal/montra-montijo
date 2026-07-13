@@ -31,7 +31,7 @@ const benefits = [
 
 export default function WhyMontra() {
   return (
-    <section className="border-y bg-[#f4f7f5]">
+    <section className=" bg-[#f4f7f5]">
       <PageContainer className="py-16 sm:py-20 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <div className="lg:sticky lg:top-24 lg:self-start">

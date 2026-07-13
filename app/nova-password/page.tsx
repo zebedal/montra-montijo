@@ -166,10 +166,10 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="mx-auto mt-20 max-w-md space-y-6 px-4">
+    <div className="py-12 mx-auto mt-20 max-w-md space-y-6 px-4">
       <div className="space-y-2 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <KeyRound className="h-7 w-7 text-primary" />
+          <KeyRound className="h-7 w-7 text-primary-green" />
         </div>
 
         <h1 className="pt-3 text-2xl font-bold">Definir nova palavra-passe</h1>

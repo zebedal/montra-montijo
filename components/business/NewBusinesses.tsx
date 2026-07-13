@@ -70,7 +70,7 @@ export default function NewBusinesses({ businesses }: Props) {
 
                 <div className="min-w-0 flex-1">
                   {business.category && (
-                    <p className="truncate text-xs font-semibold uppercase tracking-wide text-primary-green">
+                    <p className="inline-flex rounded-full bg-[#EAF3EE] px-2.5 py-1 text-xs font-semibold text-primary-light">
                       {business.category.name}
                     </p>
                   )}

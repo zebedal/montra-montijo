@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BusinessCategorySummary } from "@/types/business";
+import BusinessShareButton from "./BusinessShareButtons";
 
 type BusinessHeaderProps = {
   business: {
@@ -11,9 +12,10 @@ type BusinessHeaderProps = {
     plan: string;
     category: BusinessCategorySummary | null;
   };
+  businessUrl: string;
 };
 
-export function BusinessHeader({ business }: BusinessHeaderProps) {
+export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
   return (
     <Card>
       <CardContent className="p-8">
@@ -54,6 +56,10 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
               </p>
             )}
           </div>
+          <BusinessShareButton
+            businessName={business.name}
+            businessUrl={businessUrl}
+          />
         </div>
       </CardContent>
     </Card>

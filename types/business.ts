@@ -4,6 +4,7 @@ export type BusinessCategorySummary = {
   id: string;
   name: string;
   slug: string;
+  schema_org_type: string | null;
 };
 
 export type PublicBusinessSummary = {

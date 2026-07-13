@@ -9,6 +9,9 @@ import CategoryHero from "@/components/categorias/CategoryHero";
 import { getBusinessesByCategory } from "@/lib/queries/business";
 import { createClient } from "@/lib/supabase/server";
 
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
+
 type Props = {
   params: Promise<{
     slug: string;
@@ -93,23 +96,57 @@ export default async function CategoryPage({ params }: Props) {
 
   const businesses = await getBusinessesByCategory(category.slug);
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+
+  const categoryUrl = `${siteUrl}/categorias/${category.slug}`;
+
   return (
-    <main>
-      <CategoryHero
-        title={category.name}
-        slug={category.slug}
-        businessCount={businesses.length}
+    <>
+      <CollectionPageJsonLd
+        name={`${category.name} no Montijo`}
+        description={`Negócios de ${category.name.toLowerCase()} disponíveis no concelho do Montijo.`}
+        url={categoryUrl}
+        items={businesses.map((business) => ({
+          name: business.name,
+          url: `${siteUrl}/negocio/${business.slug}`
+        }))}
       />
 
-      <section
-        aria-labelledby="category-businesses-heading"
-        className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
-      >
-        <CategoryBusinessesView
-          businesses={businesses}
-          categoryName={category.name}
+      <BreadcrumbJsonLd
+        items={[
+          {
+            name: "Início",
+            url: siteUrl
+          },
+          {
+            name: "Categorias",
+            url: `${siteUrl}/categorias`
+          },
+          {
+            name: category.name,
+            url: categoryUrl
+          }
+        ]}
+      />
+      <main>
+        <CategoryHero
+          title={category.name}
+          slug={category.slug}
+          businessCount={businesses.length}
         />
-      </section>
-    </main>
+
+        <section
+          aria-labelledby="category-businesses-heading"
+          className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8"
+        >
+          <CategoryBusinessesView
+            businesses={businesses}
+            categoryName={category.name}
+          />
+        </section>
+      </main>
+    </>
   );
 }

@@ -129,7 +129,7 @@ export default function RecoverPasswordPage() {
     <div className="mx-auto mt-20 max-w-md space-y-6 px-4">
       <div className="space-y-2 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <Mail className="h-7 w-7 text-primary" />
+          <Mail className="h-7 w-7 text-primary-green" />
         </div>
 
         <h1 className="pt-3 text-2xl font-bold">Recuperar palavra-passe</h1>

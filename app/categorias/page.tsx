@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import CategoriesView from "@/components/categorias/CategoriesPage";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
+import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -69,8 +71,36 @@ export default async function CategoriesPage() {
       businessCount: category.businesses?.length ?? 0
     })) ?? [];
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+
+  const categoriesUrl = `${siteUrl}/categorias`;
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <CollectionPageJsonLd
+        name="Categorias de negócios no Montijo"
+        description="Categorias de empresas, lojas, serviços e comércio local disponíveis na Montra Montijo."
+        url={categoriesUrl}
+        items={categories.map((category) => ({
+          name: category.name,
+          url: `${categoriesUrl}/${category.slug}`
+        }))}
+      />
+
+      <BreadcrumbJsonLd
+        items={[
+          {
+            name: "Início",
+            url: siteUrl
+          },
+          {
+            name: "Categorias",
+            url: categoriesUrl
+          }
+        ]}
+      />
       <CategoriesView categories={categories} />
     </main>
   );

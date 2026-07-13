@@ -11,6 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { PublicBusiness } from "@/types/business";
 import WhyMontra from "@/components/WhyMontra";
 import BusinessCta from "@/components/BusinessCta";
+import WebsiteJsonLd from "@/components/seo/WebsiteJsonLd";
+import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
 
 export const metadata: Metadata = {
   title: "Comércio local no Montijo",
@@ -192,8 +194,15 @@ export default async function Home() {
     .slice(0, 6)
     .map(mapBusiness);
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+
   return (
     <main>
+      <OrganizationJsonLd url={siteUrl} />
+
+      <WebsiteJsonLd url={siteUrl} />
       <Hero />
 
       <BusinessCategories categories={popularCategories} />

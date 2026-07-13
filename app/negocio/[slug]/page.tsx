@@ -12,6 +12,8 @@ import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
+import LocalBusinessJsonLd from "@/components/seo/LocalBusinessJsonLd";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 
 interface Props {
   params: Promise<{
@@ -144,9 +146,39 @@ export default async function BusinessPage({ params }: Props) {
 
   const { business, images, hours } = result;
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+
+  const businessUrl = `${siteUrl}/negocio/${business.slug}`;
+
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <LocalBusinessJsonLd business={business} hours={hours} />
       <BusinessPageTracker businessId={business.id} />
+
+      {business.category && (
+        <BreadcrumbJsonLd
+          items={[
+            {
+              name: "Início",
+              url: siteUrl
+            },
+            {
+              name: "Categorias",
+              url: `${siteUrl}/categorias`
+            },
+            {
+              name: business.category.name,
+              url: `${siteUrl}/categorias/${business.category.slug}`
+            },
+            {
+              name: business.name,
+              url: businessUrl
+            }
+          ]}
+        />
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
@@ -157,7 +189,7 @@ export default async function BusinessPage({ params }: Props) {
             />
           )}
 
-          <BusinessHeader business={business} />
+          <BusinessHeader business={business} businessUrl={businessUrl} />
 
           <BusinessGallery images={images} />
         </div>

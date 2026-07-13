@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Building2, Mail, MapPin } from "lucide-react";
 import { SiFacebook, SiInstagram } from "react-icons/si";
-
+import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
 
 const exploreLinks = [
@@ -61,15 +61,12 @@ export default function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-md">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Building2 className="h-5 w-5" />
-              </div>
-
-              <div>
-                <h2 className="text-lg font-bold">Montra Montijo</h2>
-
-                <p className="text-sm text-muted-foreground">Comércio Local</p>
-              </div>
+              <Image
+                src="/images/logo.svg"
+                alt="logo montra montijo"
+                width={200}
+                height={100}
+              />
             </div>
 
             <p className="mt-6 leading-7 text-muted-foreground">
