@@ -291,6 +291,25 @@ export default function BusinessForm({
     }
   }, [mode, initialImages]);
 
+  useEffect(() => {
+    const firstError = Object.keys(errors)[0];
+
+    if (!firstError) return;
+
+    const element = document.querySelector(
+      `[name="${firstError}"]`
+    ) as HTMLElement | null;
+
+    if (!element) return;
+
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    element.focus();
+  }, [errors]);
+
   return (
     <Card className="mx-auto max-w-4xl">
       <CardHeader>
@@ -326,23 +345,47 @@ export default function BusinessForm({
               <Controller
                 control={control}
                 name="category_id"
-                render={({ field }) => {
-                  return (
+                render={({ field, fieldState }) => (
+                  <>
                     <Combobox
                       items={categorias}
                       value={field.value}
                       onValueChange={(value) => {
                         field.onChange(value);
 
-                        const selected = categorias.find((c) => c.id === value);
+                        const selectedCategory = categorias.find(
+                          (category) => category.id === value
+                        );
 
-                        setCategorySearch(selected?.name ?? "");
+                        setCategorySearch(selectedCategory?.name ?? "");
                       }}
                     >
                       <ComboboxInput
+                        name="category_id"
                         value={categorySearch}
-                        onChange={(e) => setCategorySearch(e.target.value)}
-                        placeholder="Seleciona uma categoria"
+                        onChange={(event) => {
+                          const searchValue = event.target.value;
+
+                          setCategorySearch(searchValue);
+
+                          const selectedCategory = categorias.find(
+                            (category) => category.id === field.value
+                          );
+
+                          /*
+                           * Se o utilizador alterar manualmente o texto depois de ter
+                           * selecionado uma categoria, a seleção deixa de ser válida.
+                           */
+                          if (
+                            field.value &&
+                            searchValue !== (selectedCategory?.name ?? "")
+                          ) {
+                            field.onChange("");
+                          }
+                        }}
+                        onBlur={field.onBlur}
+                        placeholder="Seleciona uma categoria *"
+                        aria-invalid={fieldState.invalid}
                       />
 
                       <ComboboxContent>
@@ -359,8 +402,14 @@ export default function BusinessForm({
                         </ComboboxList>
                       </ComboboxContent>
                     </Combobox>
-                  );
-                }}
+
+                    {fieldState.error && (
+                      <p className="text-sm text-red-500">
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </>
+                )}
               />
             </div>
 
@@ -418,7 +467,7 @@ export default function BusinessForm({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
-                <Input {...form.register("street")} placeholder="Rua" />
+                <Input {...form.register("street")} placeholder="Rua *" />
                 {errors.street && (
                   <p className="text-sm text-red-500">
                     {errors.street.message}

@@ -16,7 +16,7 @@ export const openingHourSchema = z.object({
 export const businessSchema = z.object({
   name: z.string().min(2, "Indica o nome do negócio."),
 
-  category_id: z.string().uuid("Seleciona uma categoria válida"),
+  category_id: z.string().min(1, "Selecione uma categoria válida."),
 
   description: z
     .string()

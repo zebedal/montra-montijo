@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { LayoutDashboard, LogOut, Plus, User } from "lucide-react";
+import { Heart, LayoutDashboard, LogOut, Plus, User } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -89,6 +89,15 @@ export function Header() {
                     <Link href={Routes.AREA_CLIENTE} className="cursor-pointer">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       Área de Cliente
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/area-cliente/favoritos">
+                      <Heart className="mr-2 h-4 w-4" />
+                      Favoritos
                     </Link>
                   </DropdownMenuItem>
 

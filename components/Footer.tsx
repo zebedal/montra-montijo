@@ -41,16 +41,20 @@ const informationLinks = [
     href: "/sobre"
   },
   {
-    label: "Contacto",
-    href: "/contacto"
+    label: "Contactos",
+    href: "/contactos"
   },
   {
     label: "Política de Privacidade",
-    href: "/politica-privacidade"
+    href: "/politica-de-privacidade"
   },
   {
     label: "Termos e Condições",
-    href: "/termos"
+    href: "/termos-e-condicoes"
+  },
+  {
+    label: "Política de Cookies",
+    href: "/politica-de-cookies"
   }
 ];
 

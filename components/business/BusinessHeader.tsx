@@ -3,10 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BusinessCategorySummary } from "@/types/business";
 import BusinessShareButton from "./BusinessShareButtons";
+import FavoriteButton from "./FavoriteButton";
 
 type BusinessHeaderProps = {
   business: {
+    id: string;
     name: string;
+    slug: string;
     description: string | null;
     logo_url: string | null;
     plan: string;
@@ -32,16 +35,33 @@ export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
           </Avatar>
 
           <div className="flex flex-1 flex-col justify-center gap-3">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">
-                {business.name}
-              </h1>
+            <div className="relative">
+              <div className="min-w-0 pr-24 sm:pr-28">
+                <h1 className="text-3xl font-bold tracking-tight">
+                  {business.name}
+                </h1>
 
-              {business.category && (
-                <p className="text-muted-foreground text-lg">
-                  {business.category.name}
-                </p>
-              )}
+                {business.category && (
+                  <p className="mt-2 text-lg text-muted-foreground">
+                    {business.category.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="absolute right-0 top-0 flex items-center gap-2">
+                <FavoriteButton
+                  businessId={business.id}
+                  businessName={business.name}
+                  businessSlug={business.slug}
+                  iconOnly
+                />
+
+                <BusinessShareButton
+                  businessName={business.name}
+                  businessUrl={businessUrl}
+                  iconOnly
+                />
+              </div>
             </div>
 
             {business.plan === "premium" && (
@@ -56,10 +76,6 @@ export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
               </p>
             )}
           </div>
-          <BusinessShareButton
-            businessName={business.name}
-            businessUrl={businessUrl}
-          />
         </div>
       </CardContent>
     </Card>

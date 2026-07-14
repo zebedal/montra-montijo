@@ -14,11 +14,13 @@ import {
 type Props = {
   businessName: string;
   businessUrl: string;
+  iconOnly?: boolean;
 };
 
 export default function BusinessShareButton({
   businessName,
-  businessUrl
+  businessUrl,
+  iconOnly = false
 }: Props) {
   async function shareNative() {
     if (!navigator.share) {
@@ -64,10 +66,21 @@ export default function BusinessShareButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline">
-          <Share2 className="mr-2 h-4 w-4" />
-          Partilhar
-          <ChevronDown className="ml-2 h-4 w-4" />
+        <Button
+          type="button"
+          variant="outline"
+          size={iconOnly ? "icon" : "default"}
+          aria-label="Partilhar negócio"
+          title="Partilhar"
+        >
+          <Share2 className="h-4 w-4" />
+
+          {!iconOnly && (
+            <>
+              <span className="ml-2">Partilhar</span>
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </>
+          )}
         </Button>
       </DropdownMenuTrigger>
 

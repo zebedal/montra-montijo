@@ -13,7 +13,8 @@ export const Routes = {
   PLANO: "/area-cliente/plano",
   DEFINICOES: "/area-cliente/definicoes",
   RECUPERAR_PASSWORD: "/recuperar-password",
-  SEARCH: "/search"
+  SEARCH: "/search",
+  FAVORITOS: "/area-cliente/favoritos"
 } as const;
 
 export type Route = (typeof Routes)[keyof typeof Routes];

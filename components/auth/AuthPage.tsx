@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,6 +25,7 @@ type FormData = {
 
 export default function AuthPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [mode, setMode] = useState<"login" | "signup">("login");
 
@@ -32,11 +33,18 @@ export default function AuthPage() {
 
   const { user, loading } = useUser();
 
+  const nextPath = searchParams.get("next");
+
+  const redirectPath =
+    nextPath?.startsWith("/") && !nextPath.startsWith("//")
+      ? nextPath
+      : Routes.AREA_CLIENTE;
+
   useEffect(() => {
     if (!loading && user) {
-      router.replace(Routes.AREA_CLIENTE);
+      router.replace(redirectPath);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, nextPath, redirectPath]);
 
   const {
     register,
@@ -62,21 +70,32 @@ export default function AuthPage() {
 
   async function onSubmit(data: FormData) {
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
+      const { data: signupData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password
       });
 
       if (error) {
         toast.error("Não foi possível criar a conta.", {
-          position: "top-center",
           description: error.message
         });
 
         return;
       }
 
-      toast.success("Conta criada com sucesso.", { position: "top-center" });
+      toast.success("Conta criada com sucesso.");
+
+      /*
+       * Se o Supabase devolver sessão imediatamente,
+       * regressamos à página de origem.
+       *
+       * Se exigir confirmação por email, mantemos o fluxo
+       * normal para criação do primeiro negócio.
+       */
+      if (signupData.session && redirectPath) {
+        router.replace(redirectPath);
+        return;
+      }
 
       router.push(Routes.CRIAR_NEGOCIO);
       return;
@@ -89,7 +108,6 @@ export default function AuthPage() {
 
     if (error) {
       toast.error("Não foi possível iniciar sessão.", {
-        position: "top-center",
         description:
           error.message === "Invalid login credentials"
             ? "Email ou palavra-passe incorretos."
@@ -99,13 +117,13 @@ export default function AuthPage() {
       return;
     }
 
-    toast.success("Sessão iniciada com sucesso.", { position: "top-center" });
+    toast.success("Sessão iniciada com sucesso.");
 
-    router.push(Routes.AREA_CLIENTE);
+    router.replace(redirectPath ?? Routes.AREA_CLIENTE);
   }
 
   return (
-    <div className="mx-auto mt-20 max-w-md space-y-6 py-14">
+    <div className="mx-auto mt-20 max-w-md space-y-6">
       <div className="space-y-1 text-center">
         <h1 className="text-2xl font-bold">
           {mode === "login" ? "Entrar" : "Criar conta"}
