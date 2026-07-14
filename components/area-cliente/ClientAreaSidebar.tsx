@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Building2, CreditCard, Heart, Settings, User } from "lucide-react";
+import { Building2, Heart, Settings, User, FileQuestion } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Routes } from "@/types";
@@ -30,6 +30,11 @@ const links = [
     href: Routes.DEFINICOES,
     label: "Definições",
     icon: Settings
+  },
+  {
+    label: "Reivindicações",
+    href: Routes.REIVINDICACOES,
+    icon: FileQuestion
   }
 ];
 

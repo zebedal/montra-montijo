@@ -44,6 +44,45 @@ export async function POST(request: Request) {
     }
 
     /*
+     * Limitar o número de pedidos pendentes por utilizador.
+     */
+    const { count, error: pendingClaimsError } = await supabase
+      .from("business_claims")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq("claimant_user_id", user.id)
+      .eq("status", "pending");
+
+    if (pendingClaimsError) {
+      console.error("Erro ao contar pedidos pendentes:", pendingClaimsError);
+
+      return NextResponse.json(
+        {
+          error: "Não foi possível validar os pedidos pendentes."
+        },
+        {
+          status: 500
+        }
+      );
+    }
+
+    const MAX_PENDING_CLAIMS = 3;
+
+    if ((count ?? 0) >= MAX_PENDING_CLAIMS) {
+      return NextResponse.json(
+        {
+          error:
+            "Já tem 3 pedidos de reivindicação pendentes. Aguarde pela análise antes de enviar novos pedidos."
+        },
+        {
+          status: 429
+        }
+      );
+    }
+
+    /*
      * Obter o proprietário atual no servidor.
      * Nunca confiamos num user_id enviado pelo browser.
      */

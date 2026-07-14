@@ -192,9 +192,12 @@ export default function BusinessClaimButton({
       };
 
       if (!response.ok || !result.success) {
-        toast.error("Não foi possível enviar o pedido.", {
-          description: result.error ?? "Verifique os dados e tente novamente."
-        });
+        toast.error(
+          toast.error(result.error ?? "Não foi possível enviar o pedido."),
+          {
+            description: result.error ?? "Verifique os dados e tente novamente."
+          }
+        );
 
         return;
       }
