@@ -66,12 +66,14 @@ export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
 
             {business.plan === "premium" && (
               <div>
-                <Badge>Premium</Badge>
+                <Badge className="bg-yellow-600 px-3 py-1 text-white">
+                  Premium
+                </Badge>
               </div>
             )}
 
             {business.description && (
-              <p className="max-w-3xl whitespace-pre-wrap break-words leading-7 text-muted-foreground">
+              <p className="max-w-3xl whitespace-pre-wrap wrap-break-word leading-7 text-muted-foreground">
                 {business.description}
               </p>
             )}

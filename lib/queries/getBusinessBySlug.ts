@@ -34,6 +34,7 @@ export type GetBusinessBySlugResult = {
 
 type BusinessRow = {
   id: string;
+  user_id: string;
   slug: string;
   name: string;
   description: string | null;
@@ -76,6 +77,7 @@ export async function getBusinessBySlug({
     .select(
       `
         id,
+        user_id,
         slug,
         name,
         description,
@@ -165,6 +167,7 @@ export async function getBusinessBySlug({
   return {
     business: {
       id: business.id,
+      user_id: business.user_id,
       slug: business.slug,
       name: business.name,
       description: business.description,

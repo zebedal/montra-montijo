@@ -5,6 +5,7 @@ import { ArrowRight, Building2, Check } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
+import { Routes } from "@/types";
 
 const advantages = [
   "Perfil público para o seu negócio",
@@ -49,7 +50,7 @@ export default function BusinessCta() {
               </p>
 
               <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                Tem um negócio no Montijo?
+                Dê mais visibilidade ao seu negócio
               </h2>
 
               <p className="mt-4 max-w-2xl text-base leading-7 text-white/85 sm:text-lg">
@@ -81,19 +82,17 @@ export default function BusinessCta() {
                 variant="secondary"
                 className="min-w-48"
               >
-                <Link href="/criar-negocio">
-                  Adicionar negócio
+                <Link href={Routes.CRIAR_NEGOCIO}>
+                  Adicionar gratuitamente
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
 
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="min-w-48 border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white"
-              >
-                <Link href="/login">Entrar na conta</Link>
+              <Button asChild size="lg" variant="primary" className="min-w-48">
+                <Link href={Routes.PLANO_DESTAQUE}>
+                  Descobrir o plano destaque
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>

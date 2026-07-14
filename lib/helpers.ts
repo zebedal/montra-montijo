@@ -9,7 +9,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { UploadImage } from "@/types/upload-image";
 
 export const MAX_LOGO_SIZE_MB = 2;
-export const MAX_IMAGE_SIZE_MB = 3;
+export const MAX_IMAGE_SIZE_MB = 5;
 
 interface PrepareBusinessMediaProps {
   logoUrl: string | null;

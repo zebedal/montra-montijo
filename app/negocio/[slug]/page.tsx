@@ -16,6 +16,7 @@ import LocalBusinessJsonLd from "@/components/seo/LocalBusinessJsonLd";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { getRelatedBusinesses } from "@/lib/queries/getRelatedBusinesses";
 import RelatedBusinesses from "@/components/business/RelatedBusinesses";
+import BusinessClaimButton from "@/components/business/BusinessClaimButton";
 
 interface Props {
   params: Promise<{
@@ -211,6 +212,13 @@ export default async function BusinessPage({ params }: Props) {
           <BusinessContact business={business} />
 
           <BusinessHours hours={hours} />
+
+          <BusinessClaimButton
+            businessId={business.id}
+            businessName={business.name}
+            businessSlug={business.slug}
+            currentOwnerUserId={business.user_id}
+          />
         </div>
       </div>
 
