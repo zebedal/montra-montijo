@@ -243,41 +243,50 @@ export async function prepareBusinessMedia(
   let logoUrl: string | null = null;
   const imageUrls: string[] = [];
 
+  const imagesToUpload = images.filter(
+    (image): image is UploadImage & { file: File } => image.file instanceof File
+  );
+
+  /*
+   * O logo também conta como upload.
+   * A validação acontece antes de qualquer ficheiro chegar ao Storage.
+   */
+  const totalUploads = (logo ? 1 : 0) + imagesToUpload.length;
+
+  await validateDailyDraftUploadLimit(totalUploads);
+
   /**
    * Logo
    */
   if (logo) {
     const optimizedLogo = await optimizeImage(logo);
 
-    const uploadedLogo = await uploadFile(
-      optimizedLogo,
-      "business-media",
-      `drafts/${draftId}/logo`
-    );
+    const uploadedLogo = await uploadDraftFile({
+      file: optimizedLogo,
+      draftId,
+      folder: "logo"
+    });
+
     logoUrl = uploadedLogo.path;
   }
 
   /**
    * Imagens
    */
-  if (images.length > 0) {
+  if (imagesToUpload.length > 0) {
     const uploaded = await Promise.all(
-      images.map(async (img) => {
-        if (!img.file) return null;
+      imagesToUpload.map(async (image) => {
+        const optimized = await optimizeImage(image.file);
 
-        const optimized = await optimizeImage(img.file);
-
-        return uploadFile(
-          optimized,
-          "business-media",
-          `drafts/${draftId}/images`
-        );
+        return uploadDraftFile({
+          file: optimized,
+          draftId,
+          folder: "images"
+        });
       })
     );
 
-    imageUrls.push(
-      ...uploaded.filter((item) => item !== null).map((item) => item.path)
-    );
+    imageUrls.push(...uploaded.map((item) => item.path));
   }
 
   return {
@@ -829,5 +838,98 @@ export async function createUniqueBusinessSlug({
 
     slug = `${baseSlug}-${suffix}`;
     suffix += 1;
+  }
+}
+
+type UploadDraftFileParams = {
+  file: File;
+  draftId: string;
+  folder: "logo" | "images";
+};
+
+export async function uploadDraftFile({
+  file,
+  draftId,
+  folder
+}: UploadDraftFileParams) {
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("Utilizador não autenticado.");
+  }
+
+  const uploaded = await uploadFile(
+    file,
+    "business-media",
+    `drafts/${draftId}/${folder}`
+  );
+
+  const { error: registerError } = await supabase
+    .from("business_draft_images")
+    .insert({
+      draft_id: draftId,
+      user_id: user.id,
+      path: uploaded.path
+    });
+
+  if (registerError) {
+    /*
+     * Se o registo de auditoria falhar, removemos o ficheiro
+     * para não deixar um upload órfão.
+     */
+    await supabase.storage.from("business-media").remove([uploaded.path]);
+
+    console.error("Erro ao registar upload temporário:", registerError);
+
+    throw new Error("Não foi possível concluir o upload da imagem.");
+  }
+
+  return uploaded;
+}
+
+const MAX_DAILY_DRAFT_UPLOADS = 30;
+
+export async function validateDailyDraftUploadLimit(
+  uploadsToAdd: number
+): Promise<void> {
+  if (uploadsToAdd <= 0) {
+    return;
+  }
+
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("Utilizador não autenticado.");
+  }
+
+  const startOfToday = new Date();
+
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const { count, error } = await supabase
+    .from("business_draft_images")
+    .select("id", {
+      count: "exact",
+      head: true
+    })
+    .eq("user_id", user.id)
+    .gte("created_at", startOfToday.toISOString());
+
+  if (error) {
+    console.error("Erro ao verificar limite diário de uploads:", error);
+
+    throw new Error("Não foi possível validar o limite diário de uploads.");
+  }
+
+  if ((count ?? 0) + uploadsToAdd > MAX_DAILY_DRAFT_UPLOADS) {
+    throw new Error(
+      `Atingiu o limite diário de ${MAX_DAILY_DRAFT_UPLOADS} uploads de imagens.`
+    );
   }
 }

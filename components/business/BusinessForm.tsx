@@ -204,9 +204,14 @@ export default function BusinessForm({
     } catch (error) {
       console.error(error);
 
-      toast.error("Não foi possível preparar o anúncio.", {
-        position: "top-center"
-      });
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível preparar o anúncio.",
+        {
+          position: "top-center"
+        }
+      );
     } finally {
       setIsPublishing(false);
     }
