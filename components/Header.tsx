@@ -53,9 +53,13 @@ function MobileNavLink({ href, icon: Icon, children }: MobileNavLinkProps) {
     <SheetClose asChild>
       <Link
         href={href}
-        className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors hover:bg-muted"
+        className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white"
       >
-        {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />}
+        {Icon && (
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/8 transition-colors group-hover:bg-white/12">
+            <Icon className="h-4 w-4 text-emerald-300" />
+          </span>
+        )}
 
         <span>{children}</span>
       </Link>
@@ -80,10 +84,10 @@ export function Header() {
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="shrink-0" aria-label="Montra Montijo">
           <Image
-            src="/images/logo.svg"
+            src="/images/new-logo.png"
             alt="Montra Montijo"
-            width={128}
-            height={64}
+            width={160}
+            height={80}
             priority
           />
         </Link>
@@ -209,122 +213,165 @@ export function Header() {
 
             <SheetContent
               side="right"
-              className="w-[88vw] overflow-y-auto sm:max-w-sm"
+              className="w-[88vw] overflow-y-auto border-l border-white/10 bg-[#10281e] p-0 text-white sm:max-w-sm"
             >
-              <nav className="mt-8 space-y-7">
-                <section>
-                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Explorar
-                  </p>
+              <div className="flex min-h-full flex-col">
+                <div className="relative border-b border-white/10 px-6 pb-6 pt-7">
+                  <div
+                    aria-hidden="true"
+                    className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl"
+                  />
 
-                  <div className="space-y-1">
-                    <MobileNavLink href={Routes.NEGOCIOS} icon={Building2}>
-                      Negócios
-                    </MobileNavLink>
+                  <div
+                    aria-hidden="true"
+                    className="absolute -left-16 bottom-0 h-36 w-36 rounded-full bg-white/5 blur-3xl"
+                  />
 
-                    <MobileNavLink href={Routes.CATEGORIAS} icon={Grid2X2}>
-                      Categorias
-                    </MobileNavLink>
-
-                    <MobileNavLink href={Routes.EVENTOS} icon={CalendarDays}>
-                      Agenda
-                    </MobileNavLink>
+                  <div className="relative">
+                    <SheetClose asChild>
+                      <Link
+                        href="/"
+                        className="block w-fit"
+                        aria-label="Montra Montijo"
+                      >
+                        <Image
+                          src="/images/logo-darker.png"
+                          alt="Montra Montijo"
+                          width={120}
+                          height={80}
+                          priority
+                        />
+                      </Link>
+                    </SheetClose>
                   </div>
-                </section>
+                </div>
 
-                <section>
-                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Para comerciantes
-                  </p>
-
-                  <div className="space-y-1">
-                    <MobileNavLink href={Routes.CRIAR_NEGOCIO} icon={Plus}>
-                      Criar negócio
-                    </MobileNavLink>
-
-                    <MobileNavLink href="/plano-destaque" icon={Crown}>
-                      Plano Destaque
-                    </MobileNavLink>
-                  </div>
-                </section>
-
-                <section>
-                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Montra Montijo
-                  </p>
-
-                  <div className="space-y-1">
-                    <MobileNavLink href={Routes.SOBRE} icon={Info}>
-                      Sobre
-                    </MobileNavLink>
-
-                    <MobileNavLink href={Routes.CONTACTOS} icon={Mail}>
-                      Contactos
-                    </MobileNavLink>
-                  </div>
-                </section>
-
-                {!loading && (
+                <nav className="flex-1 space-y-7 px-4 py-7">
                   <section>
-                    <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Conta
+                    <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300/75">
+                      Explorar
                     </p>
 
-                    {!user ? (
-                      <div className="space-y-1">
-                        <MobileNavLink href={Routes.LOGIN} icon={LogIn}>
-                          Entrar ou criar conta
-                        </MobileNavLink>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="mb-3 rounded-xl border bg-muted/20 px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <CircleUserRound className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <div className="space-y-1">
+                      <MobileNavLink href={Routes.NEGOCIOS} icon={Building2}>
+                        Negócios
+                      </MobileNavLink>
 
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium">Conta</p>
+                      <MobileNavLink href={Routes.CATEGORIAS} icon={Grid2X2}>
+                        Categorias
+                      </MobileNavLink>
 
-                              <p className="truncate text-xs text-muted-foreground">
-                                {user.email}
-                              </p>
+                      <MobileNavLink href={Routes.EVENTOS} icon={CalendarDays}>
+                        Agenda
+                      </MobileNavLink>
+                    </div>
+                  </section>
+
+                  <section>
+                    <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300/75">
+                      Para comerciantes
+                    </p>
+
+                    <div className="space-y-1">
+                      <MobileNavLink href={Routes.CRIAR_NEGOCIO} icon={Plus}>
+                        Criar negócio
+                      </MobileNavLink>
+
+                      <MobileNavLink href="/plano-destaque" icon={Crown}>
+                        Plano Destaque
+                      </MobileNavLink>
+                    </div>
+                  </section>
+
+                  <section>
+                    <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300/75">
+                      Montra Montijo
+                    </p>
+
+                    <div className="space-y-1">
+                      <MobileNavLink href={Routes.SOBRE} icon={Info}>
+                        Sobre
+                      </MobileNavLink>
+
+                      <MobileNavLink href={Routes.CONTACTOS} icon={Mail}>
+                        Contactos
+                      </MobileNavLink>
+                    </div>
+                  </section>
+
+                  {!loading && (
+                    <section>
+                      <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300/75">
+                        Conta
+                      </p>
+
+                      {!user ? (
+                        <div className="space-y-1">
+                          <MobileNavLink href={Routes.LOGIN} icon={LogIn}>
+                            Entrar ou criar conta
+                          </MobileNavLink>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="mb-4 rounded-xl border border-white/10 bg-white/5 px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/15">
+                                <CircleUserRound className="h-5 w-5 text-emerald-300" />
+                              </div>
+
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-white">
+                                  Conta
+                                </p>
+
+                                <p className="truncate text-xs text-white/45">
+                                  {user.email}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <MobileNavLink
-                          href={Routes.AREA_CLIENTE}
-                          icon={LayoutDashboard}
-                        >
-                          Área de cliente
-                        </MobileNavLink>
-
-                        <MobileNavLink href={Routes.FAVORITOS} icon={Heart}>
-                          Favoritos
-                        </MobileNavLink>
-
-                        <MobileNavLink
-                          href={Routes.REIVINDICACOES}
-                          icon={ShieldQuestion}
-                        >
-                          Reivindicações
-                        </MobileNavLink>
-
-                        <SheetClose asChild>
-                          <button
-                            type="button"
-                            onClick={handleLogout}
-                            className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                          <MobileNavLink
+                            href={Routes.AREA_CLIENTE}
+                            icon={LayoutDashboard}
                           >
-                            <LogOut className="h-4 w-4 shrink-0" />
-                            Terminar sessão
-                          </button>
-                        </SheetClose>
-                      </div>
-                    )}
-                  </section>
-                )}
-              </nav>
+                            Área de cliente
+                          </MobileNavLink>
+
+                          <MobileNavLink href={Routes.FAVORITOS} icon={Heart}>
+                            Favoritos
+                          </MobileNavLink>
+
+                          <MobileNavLink
+                            href={Routes.REIVINDICACOES}
+                            icon={ShieldQuestion}
+                          >
+                            Reivindicações
+                          </MobileNavLink>
+
+                          <SheetClose asChild>
+                            <button
+                              type="button"
+                              onClick={handleLogout}
+                              className="group mt-2 flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                            >
+                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
+                                <LogOut className="h-4 w-4" />
+                              </span>
+
+                              <span>Terminar sessão</span>
+                            </button>
+                          </SheetClose>
+                        </div>
+                      )}
+                    </section>
+                  )}
+                </nav>
+
+                <div className="border-t border-white/10 px-7 py-5">
+                  <p className="text-xs text-white/30">© 2026 Montra Montijo</p>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

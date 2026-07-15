@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -112,6 +113,7 @@ export default function RootLayout({
       )}
     >
       <body className="flex min-h-full flex-col">
+        <ScrollToTop />
         <Header />
 
         <div className="flex-1">{children}</div>

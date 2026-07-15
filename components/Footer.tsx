@@ -70,7 +70,7 @@ export default function Footer() {
           <div className="max-w-md">
             <div className="flex items-center gap-3">
               <Image
-                src="/images/logo.svg"
+                src="/images/new-logo.png"
                 alt="logo montra montijo"
                 width={200}
                 height={100}
