@@ -348,7 +348,8 @@ export default function FeaturedPlanPage() {
                 <ul className="mt-7 space-y-3 text-sm">
                   <li className="flex items-start gap-3">
                     <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Destaque na homepage
+                    Destaque na página principal, através de um sistema de
+                    rotação entre negócios com Plano Destaque
                   </li>
 
                   <li className="flex items-start gap-3">

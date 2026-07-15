@@ -13,6 +13,7 @@ import {
   searchBusinesses,
   type SearchBusinessResult
 } from "@/lib/queries/searchBusinesses";
+import SearchAutocomplete from "@/components/search/SearchAutoComplete";
 
 type Props = {
   searchParams: Promise<{
@@ -115,6 +116,8 @@ function getMatchedCategory(results: SearchBusinessResult[]) {
 export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams;
 
+  const initialQuery = typeof q === "string" ? q.trim() : "";
+
   const query = getSearchQuery(q);
 
   const results = query
@@ -137,29 +140,11 @@ export default async function SearchPage({ searchParams }: Props) {
           Montijo.
         </p>
 
-        <form
-          action="/search"
-          method="GET"
-          className="mt-7 flex gap-2 rounded-xl border bg-card p-2 shadow-sm"
-        >
-          <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-            <Input
-              type="search"
-              name="q"
-              defaultValue={query}
-              placeholder="Ex.: restaurante, cabeleireiro, dentista..."
-              className="border-0 pl-10 shadow-none focus-visible:ring-0"
-              autoFocus={!query}
-            />
-          </div>
-
-          <Button type="submit">
-            <Search className="mr-2 hidden h-4 w-4 sm:block" />
-            Pesquisar
-          </Button>
-        </form>
+        <SearchAutocomplete
+          initialQuery={initialQuery}
+          suggestionsId="search-page-suggestions"
+          className="w-full"
+        />
       </div>
 
       {!query ? (

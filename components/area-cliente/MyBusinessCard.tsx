@@ -29,7 +29,7 @@ import SubscriptionDialog from "@/components/area-cliente/SubscriptionDialog";
 import DeleteBusinessDialog from "@/components/area-cliente/DeleteBusinessDialog";
 
 import type { BusinessSummary } from "@/types/business";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+
 import { useRouter } from "next/navigation";
 
 type Props = {

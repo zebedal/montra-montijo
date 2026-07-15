@@ -25,6 +25,7 @@ type CategoryRelation = {
 type BusinessRow = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
   logo_url: string | null;
   city: string | null;
@@ -64,6 +65,7 @@ export async function getPublicBusinesses({
       `
         id,
         name,
+        slug,
         description,
         logo_url,
         city,
@@ -78,6 +80,9 @@ export async function getPublicBusinesses({
       }
     )
     .eq("is_visible", true)
+    .order("plan", {
+      ascending: false
+    })
     .order("created_at", {
       ascending: false
     })
@@ -100,6 +105,7 @@ export async function getPublicBusinesses({
 
   const businesses: PublicBusiness[] = rows.map((business) => ({
     id: business.id,
+    slug: business.slug,
     name: business.name,
     description: business.description,
     logoUrl: getPublicStorageUrl(business.logo_url),

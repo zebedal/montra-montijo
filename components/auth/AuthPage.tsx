@@ -123,7 +123,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="mx-auto mt-20 max-w-md space-y-6">
+    <div className="mx-auto mt-20 mb-20 max-w-md space-y-6">
       <div className="space-y-1 text-center">
         <h1 className="text-2xl font-bold">
           {mode === "login" ? "Entrar" : "Criar conta"}

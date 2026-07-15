@@ -29,21 +29,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8
     },
     {
+      url: `${siteUrl}/eventos`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8
+    },
+    {
       url: `${siteUrl}/criar-negocio`,
       changeFrequency: "monthly",
       priority: 0.7
     }
   ];
 
-  const [categoriesResult, businessesResult] = await Promise.all([
+  const [categoriesResult, businessesResult, eventsResult] = await Promise.all([
     supabase.from("categories").select("slug").not("slug", "is", null),
 
     supabase
       .from("businesses")
-      .select("id,slug, updated_at, created_at")
+      .select("slug, updated_at, created_at")
       .eq("is_visible", true)
       .order("updated_at", {
         ascending: false
+      }),
+
+    supabase
+      .from("events")
+      .select("slug, updated_at, created_at, event_date")
+      .gte(
+        "event_date",
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      )
+      .order("event_date", {
+        ascending: true
       })
   ]);
 
@@ -61,6 +78,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
+  if (eventsResult.error) {
+    console.error("Erro ao obter eventos para o sitemap:", eventsResult.error);
+  }
+
   const categoryPages: MetadataRoute.Sitemap =
     categoriesResult.data?.map((category) => ({
       url: `${siteUrl}/categorias/${category.slug}`,
@@ -76,5 +97,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7
     })) ?? [];
 
-  return [...staticPages, ...categoryPages, ...businessPages];
+  const eventPages: MetadataRoute.Sitemap =
+    eventsResult.data?.map((event) => ({
+      url: `${siteUrl}/eventos/${event.slug}`,
+      lastModified: event.updated_at ?? event.created_at ?? undefined,
+      changeFrequency: "daily",
+      priority: 0.7
+    })) ?? [];
+
+  return [...staticPages, ...categoryPages, ...businessPages, ...eventPages];
 }

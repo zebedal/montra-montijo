@@ -153,7 +153,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
         </section>
         <section
           aria-labelledby="businesses-heading"
-          className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
+          className="mx-auto mt-12 w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>

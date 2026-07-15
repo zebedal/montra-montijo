@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import {
+  Instrument_Sans,
+  Inter,
+  Manrope,
+  Outfit,
+  Plus_Jakarta_Sans
+} from "next/font/google";
 
 import "./globals.css";
 
@@ -9,22 +15,15 @@ import { cn } from "@/lib/utils";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
-const inter = Inter({
+const inter = Instrument_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-inter",
   display: "swap"
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  display: "swap"
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap"
+  variable: "--font-manrope"
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -106,8 +105,7 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistSans.variable,
-        geistMono.variable,
+        manrope.variable,
         inter.variable,
         "font-sans"
       )}

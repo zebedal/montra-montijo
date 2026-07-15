@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-
+import { decode } from "he";
 const MONTIJO_EVENTS_RSS_URL = "https://www.mun-montijo.pt/rss-eventos.rss";
 
 type RssEventItem = {
@@ -76,7 +76,7 @@ function extractImageUrl(html: string): string | null {
 }
 
 function htmlToPlainText(html: string): string {
-  return html
+  const textWithoutHtml = html
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
     .replace(/<[^>]+>/g, " ")
@@ -88,6 +88,7 @@ function htmlToPlainText(html: string): string {
     .replace(/&gt;/gi, ">")
     .replace(/\s+/g, " ")
     .trim();
+  return decode(textWithoutHtml).trim();
 }
 
 export async function fetchMontijoEvents(): Promise<MontijoRssEvent[]> {
@@ -136,11 +137,13 @@ export async function fetchMontijoEvents(): Promise<MontijoRssEvent[]> {
 
     return [
       {
-        title,
+        title: decode(title),
         descriptionHtml,
         descriptionText: htmlToPlainText(descriptionHtml),
         eventDate: parsedDate.toISOString(),
-        categories: normalizeCategories(item.category),
+        categories: normalizeCategories(item.category).map((category) =>
+          decode(category)
+        ),
         imageUrl: extractImageUrl(descriptionHtml),
         sourceUrl,
         sourceGuid,

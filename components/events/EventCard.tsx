@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,13 +104,9 @@ export default function EventCard({ event }: Props) {
 
         <div className="mt-auto pt-6">
           <Button asChild variant="outline" className="w-full">
-            <Link
-              href={event.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Consultar evento
-              <ArrowUpRight className="ml-2 h-4 w-4" />
+            <Link href={`/eventos/${event.slug}`}>
+              Ver detalhes
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
 

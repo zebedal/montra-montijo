@@ -194,7 +194,7 @@ export default async function BusinessPage({ params }: Props) {
         />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mt-14">
         <div className="space-y-6">
           {business.category && (
             <BusinessBreadcrumb

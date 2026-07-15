@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { getUpcomingEvents } from "@/lib/queries/getUpcomingEvents";
 
 export default async function UpcomingEventsSection() {
-  const events = await getUpcomingEvents(3);
+  const { events } = await getUpcomingEvents({
+    page: 1,
+    pageSize: 3
+  });
 
   if (events.length === 0) {
     return null;
