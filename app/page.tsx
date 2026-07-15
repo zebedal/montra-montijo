@@ -13,6 +13,7 @@ import WhyMontra from "@/components/WhyMontra";
 import BusinessCta from "@/components/BusinessCta";
 import WebsiteJsonLd from "@/components/seo/WebsiteJsonLd";
 import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
+import UpcomingEventsSection from "@/components/UpcomingEvents";
 
 export const metadata: Metadata = {
   title: "Comércio local no Montijo",
@@ -212,6 +213,7 @@ export default async function Home() {
       <NewBusinesses businesses={newBusinesses} />
 
       <WhyMontra />
+      <UpcomingEventsSection />
       <BusinessCta />
     </main>
   );

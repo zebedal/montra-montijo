@@ -115,9 +115,9 @@ export default async function BusinessesPage({ searchParams }: Props) {
             className="object-cover"
           />
 
-          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-black/65" />
 
-          <PageContainer className="relative flex min-h-[340px] items-center py-16">
+          <PageContainer className="relative flex min-h-85 items-center py-16">
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
                 Comércio Local
@@ -127,7 +127,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
                 Negócios no Montijo
               </h1>
 
-              <p className="mt-5 max-w-2xl text-lg leading-7 text-white/90">
+              <p className="mt-5 max-w-2xl text-md leading-7 text-white/90">
                 Descubra o comércio local do Montijo através de um diretório com
                 empresas, negócios e serviços da região. Encontre contactos,
                 localização e informação útil num só lugar.

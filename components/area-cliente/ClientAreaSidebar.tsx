@@ -42,7 +42,7 @@ export default function ClientAreaSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="rounded-xl border bg-card p-3 lg:self-start lg:sticky lg:top-18 lg:p-4">
+    <aside className="rounded-xl border bg-card p-3 lg:self-start lg:sticky lg:top-28 lg:p-4">
       <h2 className="mb-6 hidden text-lg font-semibold lg:block">
         Área de Cliente
       </h2>

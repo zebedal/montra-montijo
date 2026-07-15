@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Building2, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import { SiFacebook, SiInstagram } from "react-icons/si";
 import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
@@ -17,6 +17,10 @@ const exploreLinks = [
   {
     label: "Pesquisar",
     href: "/search"
+  },
+  {
+    label: "Agenda",
+    href: "/eventos"
   }
 ];
 

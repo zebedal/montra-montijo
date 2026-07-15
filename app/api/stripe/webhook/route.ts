@@ -8,6 +8,7 @@ import {
   publishBusiness
 } from "@/lib/helpers";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 
 export async function POST(req: Request) {
   console.log("WEBHOOK RECEIVED");
@@ -233,6 +234,8 @@ export async function POST(req: Request) {
       }
 
       console.log("6 - Checkout atualizado");
+
+      await finalizeBusinessDraftUploads(checkout.draft_id);
 
       return NextResponse.json({ ok: true });
     }

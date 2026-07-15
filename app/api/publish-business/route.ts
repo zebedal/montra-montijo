@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { moveDraftAssets, publishBusiness } from "@/lib/helpers";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -62,6 +63,8 @@ export async function POST(req: Request) {
       },
       isFeatured
     });
+
+    await finalizeBusinessDraftUploads(draftId);
 
     return NextResponse.json({
       businessId: publishedBusiness.id,

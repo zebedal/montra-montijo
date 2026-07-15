@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 import { PublicBusiness } from "@/types/business";
 import PageContainer from "../PageContainer";
+import { Routes } from "@/types";
 
 type Props = {
   businesses: PublicBusiness[];
@@ -31,12 +32,12 @@ export default function FeaturedBusinesses({ businesses }: Props) {
             </h2>
 
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Conheça alguns dos negócios Premium em destaque na Montra Montijo.
+              Conheça alguns dos negócios em destaque na Montra Montijo.
             </p>
           </div>
 
           <Button asChild variant="outline">
-            <Link href="/negocios">
+            <Link href={Routes.NEGOCIOS}>
               Ver mais negócios
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

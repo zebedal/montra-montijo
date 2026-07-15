@@ -1,10 +1,27 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Heart, LayoutDashboard, LogOut, Plus, User } from "lucide-react";
-import Image from "next/image";
+import {
+  Building2,
+  CalendarDays,
+  CircleUserRound,
+  Crown,
+  Grid2X2,
+  Heart,
+  Info,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Mail,
+  Menu,
+  Plus,
+  ShieldQuestion,
+  User
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,10 +31,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger
+} from "@/components/ui/sheet";
 
 import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/lib/supabase/useUser";
 import { Routes } from "@/types";
+
+type MobileNavLinkProps = {
+  href: string;
+  icon?: React.ElementType;
+  children: React.ReactNode;
+};
+
+function MobileNavLink({ href, icon: Icon, children }: MobileNavLinkProps) {
+  return (
+    <SheetClose asChild>
+      <Link
+        href={href}
+        className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors hover:bg-muted"
+      >
+        {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />}
+
+        <span>{children}</span>
+      </Link>
+    </SheetClose>
+  );
+}
 
 export function Header() {
   const { user, loading } = useUser();
@@ -32,87 +76,257 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        {/* Logo */}
-        <Link href="/" className="text-xl font-bold tracking-tight">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="shrink-0" aria-label="Montra Montijo">
           <Image
             src="/images/logo.svg"
-            alt="logo montra montijo"
+            alt="Montra Montijo"
             width={128}
             height={64}
+            priority
           />
         </Link>
 
-        <div className="flex items-center gap-2">
-          {/* CTA */}
+        <nav
+          aria-label="Navegação principal"
+          className="hidden items-center gap-1 lg:flex"
+        >
+          <Button asChild variant="ghost">
+            <Link href={Routes.NEGOCIOS}>Negócios</Link>
+          </Button>
+
+          <Button asChild variant="ghost">
+            <Link href="/categorias">Categorias</Link>
+          </Button>
+
+          <Button asChild variant="ghost">
+            <Link href="/eventos">Agenda</Link>
+          </Button>
+
+          <Button asChild variant="ghost">
+            <Link href="/plano-destaque">Plano Destaque</Link>
+          </Button>
+        </nav>
+
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             asChild
             className="bg-green-600 text-white hover:bg-green-700"
           >
             <Link href={Routes.CRIAR_NEGOCIO}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Negócio
+              <Plus className="h-4 w-4 sm:mr-2" />
+
+              <span className="hidden sm:inline">Criar negócio</span>
             </Link>
           </Button>
 
-          {!loading &&
-            (!user ? (
-              <Button variant="ghost" asChild>
-                <Link href={Routes.LOGIN}>
-                  <User className="mr-2 h-5 w-5" />
-                  <span className="hidden sm:inline">Conta</span>
-                </Link>
-              </Button>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost">
+          <div className="hidden lg:block">
+            {!loading &&
+              (!user ? (
+                <Button variant="ghost" asChild>
+                  <Link href={Routes.LOGIN}>
                     <User className="mr-2 h-5 w-5" />
+                    Conta
+                  </Link>
+                </Button>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost">
+                      <User className="mr-2 h-5 w-5" />
+                      Conta
+                    </Button>
+                  </DropdownMenuTrigger>
 
-                    <span className="hidden sm:inline">Conta</span>
-                  </Button>
-                </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64">
+                    <DropdownMenuLabel className="flex flex-col">
+                      <span className="font-semibold">Conta</span>
 
-                <DropdownMenuContent align="end" className="w-64">
-                  <DropdownMenuLabel className="flex flex-col">
-                    <span className="font-semibold">Conta</span>
+                      <span className="truncate text-xs font-normal text-muted-foreground">
+                        {user.email}
+                      </span>
+                    </DropdownMenuLabel>
 
-                    <span className="truncate text-xs font-normal text-muted-foreground">
-                      {user.email}
-                    </span>
-                  </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
 
-                  <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={Routes.AREA_CLIENTE}
+                        className="cursor-pointer"
+                      >
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Área de cliente
+                      </Link>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem asChild>
-                    <Link href={Routes.AREA_CLIENTE} className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Área de Cliente
-                    </Link>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/area-cliente/favoritos"
+                        className="cursor-pointer"
+                      >
+                        <Heart className="mr-2 h-4 w-4" />
+                        Favoritos
+                      </Link>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/area-cliente/reivindicacoes"
+                        className="cursor-pointer"
+                      >
+                        <ShieldQuestion className="mr-2 h-4 w-4" />
+                        Reivindicações
+                      </Link>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/area-cliente/favoritos">
-                      <Heart className="mr-2 h-4 w-4" />
-                      Favoritos
-                    </Link>
-                  </DropdownMenuItem>
+                    <DropdownMenuSeparator />
 
-                  <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Terminar sessão
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ))}
+          </div>
 
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="cursor-pointer text-red-600 focus:text-red-600"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Terminar sessão
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ))}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                aria-label="Abrir menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              className="w-[88vw] overflow-y-auto sm:max-w-sm"
+            >
+              <nav className="mt-8 space-y-7">
+                <section>
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Explorar
+                  </p>
+
+                  <div className="space-y-1">
+                    <MobileNavLink href={Routes.NEGOCIOS} icon={Building2}>
+                      Negócios
+                    </MobileNavLink>
+
+                    <MobileNavLink href={Routes.CATEGORIAS} icon={Grid2X2}>
+                      Categorias
+                    </MobileNavLink>
+
+                    <MobileNavLink href={Routes.EVENTOS} icon={CalendarDays}>
+                      Agenda
+                    </MobileNavLink>
+                  </div>
+                </section>
+
+                <section>
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Para comerciantes
+                  </p>
+
+                  <div className="space-y-1">
+                    <MobileNavLink href={Routes.CRIAR_NEGOCIO} icon={Plus}>
+                      Criar negócio
+                    </MobileNavLink>
+
+                    <MobileNavLink href="/plano-destaque" icon={Crown}>
+                      Plano Destaque
+                    </MobileNavLink>
+                  </div>
+                </section>
+
+                <section>
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Montra Montijo
+                  </p>
+
+                  <div className="space-y-1">
+                    <MobileNavLink href={Routes.SOBRE} icon={Info}>
+                      Sobre
+                    </MobileNavLink>
+
+                    <MobileNavLink href={Routes.CONTACTOS} icon={Mail}>
+                      Contactos
+                    </MobileNavLink>
+                  </div>
+                </section>
+
+                {!loading && (
+                  <section>
+                    <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Conta
+                    </p>
+
+                    {!user ? (
+                      <div className="space-y-1">
+                        <MobileNavLink href={Routes.LOGIN} icon={LogIn}>
+                          Entrar ou criar conta
+                        </MobileNavLink>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="mb-3 rounded-xl border bg-muted/20 px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <CircleUserRound className="h-5 w-5 shrink-0 text-muted-foreground" />
+
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium">Conta</p>
+
+                              <p className="truncate text-xs text-muted-foreground">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <MobileNavLink
+                          href={Routes.AREA_CLIENTE}
+                          icon={LayoutDashboard}
+                        >
+                          Área de cliente
+                        </MobileNavLink>
+
+                        <MobileNavLink href={Routes.FAVORITOS} icon={Heart}>
+                          Favoritos
+                        </MobileNavLink>
+
+                        <MobileNavLink
+                          href={Routes.REIVINDICACOES}
+                          icon={ShieldQuestion}
+                        >
+                          Reivindicações
+                        </MobileNavLink>
+
+                        <SheetClose asChild>
+                          <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                          >
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            Terminar sessão
+                          </button>
+                        </SheetClose>
+                      </div>
+                    )}
+                  </section>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
