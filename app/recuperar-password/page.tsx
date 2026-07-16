@@ -41,7 +41,12 @@ export default function RecoverPasswordPage() {
     try {
       setIsSubmitting(true);
 
-      const redirectTo = `${window.location.origin}/auth/callback?next=/nova-password`;
+      const callbackUrl = new URL("/auth/callback", window.location.origin);
+
+      callbackUrl.searchParams.set("next", "/nova-password");
+      callbackUrl.searchParams.set("flow", "recovery");
+
+      const redirectTo = callbackUrl.toString();
 
       const { error } = await supabase.auth.resetPasswordForEmail(
         normalizedEmail,
