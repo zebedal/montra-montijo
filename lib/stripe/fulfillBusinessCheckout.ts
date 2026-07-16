@@ -181,7 +181,7 @@ async function trySendBusinessPublishedEmail(businessId: string) {
   try {
     const { data: business, error: businessError } = await supabaseAdmin
       .from("businesses")
-      .select("id, user_id, name, slug")
+      .select("id, user_id, name, slug, plan")
       .eq("id", businessId)
       .maybeSingle();
 
@@ -211,7 +211,8 @@ async function trySendBusinessPublishedEmail(businessId: string) {
       businessId: business.id,
       email: user.email,
       businessName: business.name,
-      businessSlug: business.slug
+      businessSlug: business.slug,
+      plan: business.plan
     });
 
     console.log(

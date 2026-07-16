@@ -7,6 +7,7 @@ type SendBusinessPublishedEmailOnceParams = {
   email: string;
   businessName: string;
   businessSlug: string;
+  plan: "free" | "premium";
 };
 
 type SendBusinessPublishedEmailOnceResult = {
@@ -21,7 +22,8 @@ export async function sendBusinessPublishedEmailOnce({
   businessId,
   email,
   businessName,
-  businessSlug
+  businessSlug,
+  plan
 }: SendBusinessPublishedEmailOnceParams): Promise<SendBusinessPublishedEmailOnceResult> {
   /*
    * Verificar se este email já foi enviado para o negócio.
@@ -57,7 +59,8 @@ export async function sendBusinessPublishedEmailOnce({
   await sendBusinessPublishedEmail({
     email,
     businessName,
-    businessSlug
+    businessSlug,
+    plan
   });
 
   /*

@@ -4,15 +4,22 @@ type SendBusinessPublishedEmailParams = {
   email: string;
   businessName: string;
   businessSlug: string;
+  plan: "free" | "premium";
 };
 
 export async function sendBusinessPublishedEmail({
   email,
   businessName,
-  businessSlug
+  businessSlug,
+  plan
 }: SendBusinessPublishedEmailParams) {
   const businessUrl = `https://www.montramontijo.pt/negocio/${businessSlug}`;
   const clientAreaUrl = "https://www.montramontijo.pt/area-cliente";
+
+  const planMessage =
+    plan === "premium"
+      ? "O plano Premium está ativo e a página pública do seu negócio já pode ser consultada."
+      : "A página pública do seu negócio já pode ser consultada na Montra Montijo.";
 
   const { data, error } = await resend.emails.send({
     from: "Montra Montijo <geral@montramontijo.pt>",
@@ -122,15 +129,14 @@ export async function sendBusinessPublishedEmail({
 
                       <p
                         style="
-                          margin:0;
-                          font-size:16px;
-                          line-height:1.8;
-                          color:#374151;
+                        margin:0;
+                        font-size:16px;
+                        line-height:1.8;
+                         color:#374151;
                         "
-                      >
-                        O plano <strong>Premium</strong> está ativo e a página
-                        pública do seu negócio já pode ser consultada.
-                      </p>
+                        >
+                            ${planMessage}
+                        </p>
 
                       <table
                         role="presentation"
@@ -260,7 +266,7 @@ O seu negócio já está publicado
 
 O negócio ${businessName} foi publicado com sucesso na Montra Montijo.
 
-O plano Premium está ativo e a página pública do seu negócio já pode ser consultada.
+${planMessage}
 
 Ver negócio:
 ${businessUrl}
