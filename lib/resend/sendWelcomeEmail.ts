@@ -6,7 +6,7 @@ type SendWelcomeEmailParams = {
 
 export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
   const { data, error } = await resend.emails.send({
-    from: "Montra Montijo <conta@montramontijo.pt>",
+    from: "Montra Montijo <geral@montramontijo.pt>",
     to: email,
     subject: "Bem-vindo à Montra Montijo",
     html: `
