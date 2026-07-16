@@ -218,7 +218,7 @@ export async function sendBusinessPublishedEmail({
                       >
                         Precisa de ajuda?
                         <a
-                          href="mailto:suporte@montramontijo.pt"
+                          href="mailto:geral@montramontijo.pt"
                           style="
                             color:#15803d;
                             text-decoration:underline;
@@ -275,7 +275,7 @@ ${businessUrl}
 ${clientAreaUrl}
 
 Precisa de ajuda?
-suporte@montramontijo.pt
+geral@montramontijo.pt
     `.trim()
   });
 
