@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
-import { createClient } from "@/lib/supabase/server";
+import { BUSINESSES_PER_PAGE } from "@/lib/queries/getPublicBusinesses";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const siteUrl = (
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -9,12 +10,9 @@ const siteUrl = (
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient();
-
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: siteUrl,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1
     },
@@ -30,7 +28,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${siteUrl}/eventos`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8
     },
@@ -42,19 +39,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const [categoriesResult, businessesResult, eventsResult] = await Promise.all([
-    supabase.from("categories").select("slug").not("slug", "is", null),
+    supabaseAdmin.from("categories").select("slug").not("slug", "is", null),
 
-    supabase
+    supabaseAdmin
       .from("businesses")
-      .select("slug, updated_at, created_at")
+      .select("slug, updated_at, created_at", {
+        count: "exact"
+      })
       .eq("is_visible", true)
+      .not("slug", "is", null)
       .order("updated_at", {
         ascending: false
       }),
 
-    supabase
+    supabaseAdmin
       .from("events")
       .select("slug, updated_at, created_at, event_date")
+      .not("slug", "is", null)
       .gte(
         "event_date",
         new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -97,6 +98,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7
     })) ?? [];
 
+  const totalBusinesses = businessesResult.count ?? 0;
+
+  const totalBusinessPages = Math.ceil(totalBusinesses / BUSINESSES_PER_PAGE);
+
+  const businessPaginationPages: MetadataRoute.Sitemap = Array.from(
+    {
+      length: Math.max(totalBusinessPages - 1, 0)
+    },
+    (_, index) => {
+      const page = index + 2;
+
+      return {
+        url: `${siteUrl}/negocios?page=${page}`,
+        changeFrequency: "daily",
+        priority: 0.7
+      };
+    }
+  );
+
   const eventPages: MetadataRoute.Sitemap =
     eventsResult.data?.map((event) => ({
       url: `${siteUrl}/eventos/${event.slug}`,
@@ -105,5 +125,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7
     })) ?? [];
 
-  return [...staticPages, ...categoryPages, ...businessPages, ...eventPages];
+  return [
+    ...staticPages,
+    ...businessPaginationPages,
+    ...categoryPages,
+    ...businessPages,
+    ...eventPages
+  ];
 }

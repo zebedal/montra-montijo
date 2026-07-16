@@ -1,14 +1,31 @@
 import { resend } from "@/lib/resend/server";
 
-type SendWelcomeEmailParams = {
+type SendSubscriptionCancellationScheduledEmailParams = {
   email: string;
+  businessName: string;
+  businessSlug: string;
+  currentPeriodEnd: string;
 };
 
-export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
+export async function sendSubscriptionCancellationScheduledEmail({
+  email,
+  businessName,
+  businessSlug,
+  currentPeriodEnd
+}: SendSubscriptionCancellationScheduledEmailParams) {
+  const businessUrl = `https://www.montramontijo.pt/negocio/${businessSlug}`;
+  const clientAreaUrl = "https://www.montramontijo.pt/area-cliente";
+
+  const formattedEndDate = new Intl.DateTimeFormat("pt-PT", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(new Date(currentPeriodEnd));
+
   const { data, error } = await resend.emails.send({
     from: "Montra Montijo <geral@montramontijo.pt>",
     to: email,
-    subject: "Bem-vindo à Montra Montijo",
+    subject: `Cancelamento Premium agendado para ${businessName}`,
     html: `
       <!DOCTYPE html>
       <html lang="pt-PT">
@@ -18,7 +35,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
-          <title>Bem-vindo à Montra Montijo</title>
+          <title>Cancelamento Premium agendado</title>
         </head>
 
         <body
@@ -39,7 +56,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
               color:transparent;
             "
           >
-            A sua conta foi confirmada. Bem-vindo à Montra Montijo.
+            O cancelamento Premium de ${businessName} foi agendado.
           </div>
 
           <table
@@ -67,10 +84,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                   "
                 >
                   <tr>
-                    <td
-                      align="center"
-                      style="padding:42px 40px 20px;"
-                    >
+                    <td align="center" style="padding:42px 40px 20px;">
                       <img
                         src="https://www.montramontijo.pt/images/new-logo.png"
                         alt="Montra Montijo"
@@ -99,7 +113,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           text-align:center;
                         "
                       >
-                        Bem-vindo à Montra Montijo
+                        Cancelamento Premium agendado
                       </h1>
 
                       <p
@@ -110,7 +124,8 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           color:#374151;
                         "
                       >
-                        A sua conta foi confirmada com sucesso.
+                        O cancelamento da subscrição Premium do negócio
+                        <strong>${businessName}</strong> foi agendado.
                       </p>
 
                       <p
@@ -121,9 +136,20 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           color:#374151;
                         "
                       >
-                        Já pode criar e gerir o seu negócio, divulgar os seus
-                        serviços e fazer parte da comunidade local da
-                        <strong>Montra Montijo</strong>.
+                        O plano Premium continuará ativo até
+                        <strong>${formattedEndDate}</strong>.
+                      </p>
+
+                      <p
+                        style="
+                          margin:16px 0 0;
+                          font-size:16px;
+                          line-height:1.8;
+                          color:#374151;
+                        "
+                      >
+                        Depois dessa data, o negócio continuará publicado com
+                        o plano gratuito.
                       </p>
 
                       <table
@@ -141,7 +167,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                             style="border-radius:10px;"
                           >
                             <a
-                              href="https://www.montramontijo.pt/criar-negocio"
+                              href="${clientAreaUrl}"
                               style="
                                 display:inline-block;
                                 padding:16px 34px;
@@ -152,7 +178,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                                 border-radius:10px;
                               "
                             >
-                              Criar o meu negócio
+                              Abrir área de cliente
                             </a>
                           </td>
                         </tr>
@@ -166,8 +192,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           color:#6b7280;
                         "
                       >
-                        Pode também aceder à sua área de cliente para gerir os
-                        seus negócios, subscrições e dados da conta.
+                        A página pública do negócio continua disponível.
                       </p>
 
                       <p
@@ -178,13 +203,13 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                         "
                       >
                         <a
-                          href="https://www.montramontijo.pt/area-cliente"
+                          href="${businessUrl}"
                           style="
                             color:#15803d;
                             text-decoration:underline;
                           "
                         >
-                          Abrir área de cliente
+                          Ver página do negócio
                         </a>
                       </p>
 
@@ -206,7 +231,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                       >
                         Precisa de ajuda?
                         <a
-                          href="mailto:geral@montramontijo.pt"
+                          href="mailto:suporte@montramontijo.pt"
                           style="
                             color:#15803d;
                             text-decoration:underline;
@@ -250,27 +275,31 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
       </html>
     `,
     text: `
-Bem-vindo à Montra Montijo
+Cancelamento Premium agendado
 
-A sua conta foi confirmada com sucesso.
+O cancelamento da subscrição Premium do negócio ${businessName} foi agendado.
 
-Já pode criar e gerir o seu negócio e fazer parte da comunidade local da Montra Montijo.
+O plano Premium continuará ativo até ${formattedEndDate}.
 
-Criar negócio:
-https://www.montramontijo.pt/criar-negocio
+Depois dessa data, o negócio continuará publicado com o plano gratuito.
 
 Área de cliente:
-https://www.montramontijo.pt/area-cliente
+${clientAreaUrl}
+
+Página do negócio:
+${businessUrl}
 
 Precisa de ajuda?
-geral@montramontijo.pt
+suporte@montramontijo.pt
     `.trim()
   });
 
   if (error) {
-    console.error("Erro ao enviar email de boas-vindas:", error);
+    console.error("Erro ao enviar email de cancelamento agendado:", error);
 
-    throw new Error("Não foi possível enviar o email de boas-vindas.");
+    throw new Error(
+      "Não foi possível enviar o email de cancelamento agendado."
+    );
   }
 
   return data;

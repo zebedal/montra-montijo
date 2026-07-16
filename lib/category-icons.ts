@@ -35,14 +35,18 @@ import {
   Wrench,
   Eye,
   ShoppingBag,
-  Home
+  Home,
+  Beer,
+  School,
+  Dog,
+  Plane
 } from "lucide-react";
 
 export const categoryIcons: Record<string, LucideIcon> = {
   // Alimentação
   restaurantes: UtensilsCrossed,
   cafes: Coffee,
-  bares: Coffee,
+  bares: Beer,
   "snack-bars": UtensilsCrossed,
   takeaway: ShoppingBag,
   padarias: Cake,
@@ -88,11 +92,15 @@ export const categoryIcons: Record<string, LucideIcon> = {
   calcado: ShoppingBag,
   papelaria: BookOpen,
   oticas: Eye,
+  lavandarias: Shirt,
+  floristas: Flower2,
 
   // Educação
   "centros-estudo": GraduationCap,
   explicacoes: GraduationCap,
   formacao: GraduationCap,
+  atl: School,
+  "atl-apoio-escolar": School,
 
   // Eventos
   eventos: CalendarDays,
@@ -108,5 +116,7 @@ export const categoryIcons: Record<string, LucideIcon> = {
   // Novas categorias
   ginasios: Dumbbell,
   hoteis: Hotel,
-  "lojas-animais": PawPrint
+  "lojas-animais": PawPrint,
+  "pet-shop": Dog,
+  "agencias-viagem": Plane
 };

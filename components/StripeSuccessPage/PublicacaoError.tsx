@@ -79,7 +79,7 @@ Obrigado.
 
           <Button variant="outline" asChild>
             <a
-              href={`mailto:suporte@montramontijo.pt?subject=${subject}&body=${body}`}
+              href={`mailto:geral@montramontijo.pt?subject=${subject}&body=${body}`}
               className="flex items-center gap-2"
             >
               <Mail className="h-4 w-4" />
