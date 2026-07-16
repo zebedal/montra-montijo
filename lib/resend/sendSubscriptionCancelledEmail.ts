@@ -1,14 +1,23 @@
 import { resend } from "@/lib/resend/server";
 
-type SendWelcomeEmailParams = {
+type SendSubscriptionCancelledEmailParams = {
   email: string;
+  businessName: string;
+  businessSlug: string;
 };
 
-export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
+export async function sendSubscriptionCancelledEmail({
+  email,
+  businessName,
+  businessSlug
+}: SendSubscriptionCancelledEmailParams) {
+  const businessUrl = `https://www.montramontijo.pt/negocio/${businessSlug}`;
+  const clientAreaUrl = "https://www.montramontijo.pt/area-cliente";
+
   const { data, error } = await resend.emails.send({
     from: "Montra Montijo <geral@montramontijo.pt>",
     to: email,
-    subject: "Bem-vindo à Montra Montijo",
+    subject: `A subscrição Premium de ${businessName} terminou`,
     html: `
       <!DOCTYPE html>
       <html lang="pt-PT">
@@ -18,7 +27,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
-          <title>Bem-vindo à Montra Montijo</title>
+          <title>A sua subscrição Premium terminou</title>
         </head>
 
         <body
@@ -39,7 +48,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
               color:transparent;
             "
           >
-            A sua conta foi confirmada. Bem-vindo à Montra Montijo.
+            A subscrição Premium de ${businessName} terminou.
           </div>
 
           <table
@@ -67,10 +76,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                   "
                 >
                   <tr>
-                    <td
-                      align="center"
-                      style="padding:42px 40px 20px;"
-                    >
+                    <td align="center" style="padding:42px 40px 20px;">
                       <img
                         src="https://www.montramontijo.pt/images/new-logo.png"
                         alt="Montra Montijo"
@@ -99,7 +105,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           text-align:center;
                         "
                       >
-                        Bem-vindo à Montra Montijo
+                        A sua subscrição Premium terminou
                       </h1>
 
                       <p
@@ -110,7 +116,8 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           color:#374151;
                         "
                       >
-                        A sua conta foi confirmada com sucesso.
+                        A subscrição Premium do negócio
+                        <strong>${businessName}</strong> terminou.
                       </p>
 
                       <p
@@ -121,9 +128,9 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           color:#374151;
                         "
                       >
-                        Já pode criar e gerir o seu negócio, divulgar os seus
-                        serviços e fazer parte da comunidade local da
-                        <strong>Montra Montijo</strong>.
+                        O negócio continuará publicado na Montra Montijo com o
+                        plano gratuito, mas deixará de beneficiar das funcionalidades
+                        e do destaque associados ao plano Premium.
                       </p>
 
                       <table
@@ -141,7 +148,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                             style="border-radius:10px;"
                           >
                             <a
-                              href="https://www.montramontijo.pt/criar-negocio"
+                              href="${clientAreaUrl}"
                               style="
                                 display:inline-block;
                                 padding:16px 34px;
@@ -152,7 +159,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                                 border-radius:10px;
                               "
                             >
-                              Criar o meu negócio
+                              Abrir área de cliente
                             </a>
                           </td>
                         </tr>
@@ -166,8 +173,7 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                           color:#6b7280;
                         "
                       >
-                        Pode também aceder à sua área de cliente para gerir os
-                        seus negócios, subscrições e dados da conta.
+                        A página pública do seu negócio continua disponível.
                       </p>
 
                       <p
@@ -178,13 +184,13 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
                         "
                       >
                         <a
-                          href="https://www.montramontijo.pt/area-cliente"
+                          href="${businessUrl}"
                           style="
                             color:#15803d;
                             text-decoration:underline;
                           "
                         >
-                          Abrir área de cliente
+                          Ver página do negócio
                         </a>
                       </p>
 
@@ -250,27 +256,29 @@ export async function sendWelcomeEmail({ email }: SendWelcomeEmailParams) {
       </html>
     `,
     text: `
-Bem-vindo à Montra Montijo
+A sua subscrição Premium terminou
 
-A sua conta foi confirmada com sucesso.
+A subscrição Premium do negócio ${businessName} terminou.
 
-Já pode criar e gerir o seu negócio e fazer parte da comunidade local da Montra Montijo.
-
-Criar negócio:
-https://www.montramontijo.pt/criar-negocio
+O negócio continuará publicado na Montra Montijo com o plano gratuito, mas deixará de beneficiar das funcionalidades e do destaque associados ao plano Premium.
 
 Área de cliente:
-https://www.montramontijo.pt/area-cliente
+${clientAreaUrl}
+
+Página do negócio:
+${businessUrl}
 
 Precisa de ajuda?
-geral@montramontijo.pt
+suporte@montramontijo.pt
     `.trim()
   });
 
   if (error) {
-    console.error("Erro ao enviar email de boas-vindas:", error);
+    console.error("Erro ao enviar email de cancelamento da subscrição:", error);
 
-    throw new Error("Não foi possível enviar o email de boas-vindas.");
+    throw new Error(
+      "Não foi possível enviar o email de cancelamento da subscrição."
+    );
   }
 
   return data;

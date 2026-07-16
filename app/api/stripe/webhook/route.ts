@@ -4,6 +4,8 @@ import Stripe from "stripe";
 import { fulfillBusinessCheckout } from "@/lib/stripe/fulfillBusinessCheckout";
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { sendSubscriptionCancelledEmailOnce } from "@/lib/resend/sendSubscriptionCancelledEmailOnce";
+import { sendSubscriptionCancellationScheduledEmailOnce } from "@/lib/resend/sendSubscriptionCancellationScheduledEmailOnce";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -210,7 +212,7 @@ export async function POST(req: Request) {
         const currentPeriodEnd =
           subscription.items.data[0]?.current_period_end ?? null;
 
-        const { error } = await supabaseAdmin
+        const { data: business, error } = await supabaseAdmin
           .from("businesses")
           .update({
             subscription_status: subscription.status,
@@ -219,7 +221,9 @@ export async function POST(req: Request) {
               ? new Date(currentPeriodEnd * 1000).toISOString()
               : null
           })
-          .eq("stripe_subscription_id", subscription.id);
+          .eq("stripe_subscription_id", subscription.id)
+          .select("id, user_id, name, slug")
+          .maybeSingle();
 
         if (error) {
           console.error(
@@ -232,6 +236,59 @@ export async function POST(req: Request) {
           });
         }
 
+        /*
+         * Só enviamos este email quando o cancelamento
+         * fica agendado para o fim do período atual.
+         */
+        if (subscription.cancel_at_period_end && business && currentPeriodEnd) {
+          try {
+            const {
+              data: { user },
+              error: userError
+            } = await supabaseAdmin.auth.admin.getUserById(business.user_id);
+
+            if (userError) {
+              throw userError;
+            }
+
+            if (!user?.email) {
+              throw new Error("O utilizador não tem um email associado.");
+            }
+
+            const result = await sendSubscriptionCancellationScheduledEmailOnce(
+              {
+                userId: business.user_id,
+                businessId: business.id,
+                email: user.email,
+                businessName: business.name,
+                businessSlug: business.slug,
+                currentPeriodEnd: new Date(
+                  currentPeriodEnd * 1000
+                ).toISOString()
+              }
+            );
+
+            console.log(
+              result.alreadySent
+                ? "Email de cancelamento agendado já tinha sido enviado."
+                : "Email de cancelamento agendado enviado com sucesso.",
+              {
+                businessId: business.id,
+                subscriptionId: subscription.id
+              }
+            );
+          } catch (emailError) {
+            /*
+             * A subscrição já ficou sincronizada.
+             * Uma falha no email não deve fazer o webhook falhar.
+             */
+            console.error(
+              "Cancelamento agendado, mas falhou o envio do email:",
+              emailError
+            );
+          }
+        }
+
         return NextResponse.json({
           ok: true
         });
@@ -240,7 +297,7 @@ export async function POST(req: Request) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
 
-        const { error } = await supabaseAdmin
+        const { data: business, error } = await supabaseAdmin
           .from("businesses")
           .update({
             plan: "free",
@@ -248,7 +305,9 @@ export async function POST(req: Request) {
             cancel_at_period_end: false,
             current_period_end: null
           })
-          .eq("stripe_subscription_id", subscription.id);
+          .eq("stripe_subscription_id", subscription.id)
+          .select("id, user_id, name, slug")
+          .maybeSingle();
 
         if (error) {
           console.error("Erro ao terminar subscrição do negócio:", error);
@@ -256,6 +315,60 @@ export async function POST(req: Request) {
           return new NextResponse("Database error", {
             status: 500
           });
+        }
+
+        if (!business) {
+          console.error(
+            "Nenhum negócio encontrado para a subscrição terminada:",
+            subscription.id
+          );
+
+          return NextResponse.json({
+            ok: true
+          });
+        }
+
+        try {
+          const {
+            data: { user },
+            error: userError
+          } = await supabaseAdmin.auth.admin.getUserById(business.user_id);
+
+          if (userError) {
+            throw userError;
+          }
+
+          if (!user?.email) {
+            throw new Error("O utilizador não tem um email associado.");
+          }
+
+          const result = await sendSubscriptionCancelledEmailOnce({
+            userId: business.user_id,
+            businessId: business.id,
+            email: user.email,
+            businessName: business.name,
+            businessSlug: business.slug
+          });
+
+          console.log(
+            result.alreadySent
+              ? "Email de cancelamento já tinha sido enviado."
+              : "Email de cancelamento enviado com sucesso.",
+            {
+              businessId: business.id,
+              subscriptionId: subscription.id
+            }
+          );
+        } catch (emailError) {
+          /*
+           * A subscrição já terminou e o negócio já passou para Free.
+           * Uma falha no email não deve fazer o Stripe repetir
+           * desnecessariamente o webhook.
+           */
+          console.error(
+            "Subscrição terminada, mas falhou o email de cancelamento:",
+            emailError
+          );
         }
 
         return NextResponse.json({

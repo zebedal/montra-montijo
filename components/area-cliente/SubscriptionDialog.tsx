@@ -300,7 +300,7 @@ export default function SubscriptionDialog({
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
 
-                  {isUpdating ? "A reativar..." : "Reativar renovação"}
+                  {isUpdating ? "A reativar..." : "Reativar subscrição"}
                 </Button>
               ) : (
                 <Button
@@ -311,7 +311,7 @@ export default function SubscriptionDialog({
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
 
-                  {isUpdating ? "A cancelar..." : "Cancelar renovação"}
+                  {isUpdating ? "A cancelar..." : "Cancelar subscrição"}
                 </Button>
               )
             ) : (
