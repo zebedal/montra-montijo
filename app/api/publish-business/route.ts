@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { moveDraftAssets, publishBusiness } from "@/lib/helpers";
+import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
+import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
+
   try {
     const { draftId, isFeatured } = await req.json();
 
@@ -17,7 +19,6 @@ export async function POST(req: Request) {
     /**
      * AUTH
      */
-
     const {
       data: { user },
       error: authError
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     /**
-     * CALL HELPER
+     * PUBLISH BUSINESS
      */
     const businessId = crypto.randomUUID();
 
@@ -63,6 +64,40 @@ export async function POST(req: Request) {
       },
       isFeatured
     });
+
+    /**
+     * SEND PUBLICATION EMAIL
+     *
+     * Uma falha no email não deve impedir a publicação
+     * do negócio.
+     */
+    if (user.email) {
+      try {
+        const result = await sendBusinessPublishedEmailOnce({
+          userId: user.id,
+          businessId: publishedBusiness.id,
+          email: user.email,
+          businessName: draft.data.form.name,
+          businessSlug: publishedBusiness.slug,
+          plan: isFeatured ? "premium" : "free"
+        });
+
+        console.log(
+          result.alreadySent
+            ? "Email de publicação já tinha sido enviado."
+            : "Email de publicação enviado com sucesso.",
+          {
+            businessId: publishedBusiness.id,
+            userId: user.id
+          }
+        );
+      } catch (emailError) {
+        console.error(
+          "Negócio publicado, mas falhou o email de publicação:",
+          emailError
+        );
+      }
+    }
 
     await finalizeBusinessDraftUploads(draftId);
 

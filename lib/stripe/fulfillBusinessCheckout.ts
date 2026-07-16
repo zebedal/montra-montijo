@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 
+import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -23,11 +24,11 @@ export async function fulfillBusinessCheckout(
     .from("stripe_checkouts")
     .select(
       `
-          session_id,
-          draft_id,
-          status,
-          business_id
-        `
+        session_id,
+        draft_id,
+        status,
+        business_id
+      `
     )
     .eq("session_id", session.id)
     .maybeSingle();
@@ -45,10 +46,12 @@ export async function fulfillBusinessCheckout(
   /*
    * Esta sessão já foi processada anteriormente.
    *
-   * Isto torna a função idempotente: se o Stripe
-   * reenviar o mesmo evento, não criamos outro negócio.
+   * Não voltamos a criar o negócio, mas tentamos garantir
+   * que o email de publicação foi enviado.
    */
   if (checkout.business_id) {
+    await trySendBusinessPublishedEmail(checkout.business_id);
+
     return {
       businessId: checkout.business_id,
       alreadyProcessed: true
@@ -148,10 +151,89 @@ export async function fulfillBusinessCheckout(
 
   console.log("6 - Checkout atualizado");
 
+  /*
+   * O negócio e o checkout já estão concluídos.
+   *
+   * Uma falha no email não deve transformar um pagamento
+   * e uma publicação bem-sucedidos num erro do webhook.
+   */
+  await trySendBusinessPublishedEmail(businessId);
+
+  console.log("7 - Email de publicação verificado");
+
   await finalizeBusinessDraftUploads(checkout.draft_id);
+
+  console.log("8 - Uploads temporários finalizados");
 
   return {
     businessId,
     alreadyProcessed: false
   };
+}
+
+/*
+ * Obtém os dados finais diretamente da tabela businesses.
+ *
+ * Desta forma não dependemos dos nomes exatos dos campos
+ * existentes no draft depois da publicação.
+ */
+async function trySendBusinessPublishedEmail(businessId: string) {
+  try {
+    const { data: business, error: businessError } = await supabaseAdmin
+      .from("businesses")
+      .select("id, user_id, name, slug, plan")
+      .eq("id", businessId)
+      .maybeSingle();
+
+    if (businessError) {
+      throw businessError;
+    }
+
+    if (!business) {
+      throw new Error("Negócio não encontrado.");
+    }
+
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseAdmin.auth.admin.getUserById(business.user_id);
+
+    if (userError) {
+      throw userError;
+    }
+
+    if (!user?.email) {
+      throw new Error("O utilizador não tem um email associado.");
+    }
+
+    const result = await sendBusinessPublishedEmailOnce({
+      userId: business.user_id,
+      businessId: business.id,
+      email: user.email,
+      businessName: business.name,
+      businessSlug: business.slug,
+      plan: business.plan
+    });
+
+    console.log(
+      result.alreadySent
+        ? "Email de publicação já tinha sido enviado."
+        : "Email de publicação enviado com sucesso.",
+      {
+        businessId: business.id,
+        userId: business.user_id
+      }
+    );
+  } catch (emailError) {
+    /*
+     * O negócio já foi publicado.
+     *
+     * Uma falha no Resend, na consulta do utilizador
+     * ou no registo do envio não deve falhar o checkout.
+     */
+    console.error(
+      "Negócio publicado, mas falhou o email de publicação:",
+      emailError
+    );
+  }
 }
