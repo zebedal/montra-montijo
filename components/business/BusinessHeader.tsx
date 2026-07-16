@@ -2,8 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BusinessCategorySummary } from "@/types/business";
-import BusinessShareButton from "./BusinessShareButtons";
+import BusinessShareButton from "./ShareButton";
 import FavoriteButton from "./FavoriteButton";
+import { Crown } from "lucide-react";
+import ShareButton from "./ShareButton";
 
 type BusinessHeaderProps = {
   business: {
@@ -56,9 +58,11 @@ export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
                   iconOnly
                 />
 
-                <BusinessShareButton
-                  businessName={business.name}
-                  businessUrl={businessUrl}
+                <ShareButton
+                  title={business.name}
+                  text={`Conheça ${business.name} na Montra Montijo.`}
+                  url={businessUrl}
+                  entityLabel="negócio"
                   iconOnly
                 />
               </div>
@@ -67,6 +71,7 @@ export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
             {business.plan === "premium" && (
               <div>
                 <Badge className="bg-yellow-600 px-3 py-1 text-white">
+                  <Crown className="h-3 w-3" />
                   Premium
                 </Badge>
               </div>

@@ -3,6 +3,7 @@
 import { ChevronDown, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { SiFacebook } from "react-icons/si";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,14 +13,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type Props = {
-  businessName: string;
-  businessUrl: string;
+  title: string;
+  url: string;
+  text: string;
+  entityLabel?: string;
   iconOnly?: boolean;
 };
 
-export default function BusinessShareButton({
-  businessName,
-  businessUrl,
+export default function ShareButton({
+  title,
+  url,
+  text,
+  entityLabel = "conteúdo",
   iconOnly = false
 }: Props) {
   async function shareNative() {
@@ -30,13 +35,13 @@ export default function BusinessShareButton({
 
     try {
       await navigator.share({
-        title: businessName,
-        text: `Conheça ${businessName} na Montra Montijo.`,
-        url: businessUrl
+        title,
+        text,
+        url
       });
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        toast.error("Não foi possível partilhar o negócio.");
+        toast.error(`Não foi possível partilhar o ${entityLabel}.`);
       }
     }
   }
@@ -44,7 +49,7 @@ export default function BusinessShareButton({
   function shareOnFacebook() {
     const facebookUrl = new URL("https://www.facebook.com/sharer/sharer.php");
 
-    facebookUrl.searchParams.set("u", businessUrl);
+    facebookUrl.searchParams.set("u", url);
 
     window.open(
       facebookUrl.toString(),
@@ -55,7 +60,7 @@ export default function BusinessShareButton({
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(businessUrl);
+      await navigator.clipboard.writeText(url);
 
       toast.success("Ligação copiada.");
     } catch {
@@ -70,7 +75,7 @@ export default function BusinessShareButton({
           type="button"
           variant="outline"
           size={iconOnly ? "icon" : "default"}
-          aria-label="Partilhar negócio"
+          aria-label={`Partilhar ${entityLabel}`}
           title="Partilhar"
         >
           <Share2 className="h-4 w-4" />

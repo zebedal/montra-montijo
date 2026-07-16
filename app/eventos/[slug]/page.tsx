@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { getEventBySlug } from "@/lib/queries/getEventBySlug";
+import ShareButton from "@/components/business/ShareButton";
 
 type Props = {
   params: Promise<{
@@ -251,6 +252,13 @@ export default async function EventDetailsPage({ params }: Props) {
 
                   <span>Concelho do Montijo</span>
                 </div>
+                <ShareButton
+                  title={event.title}
+                  text={`Descubra o evento ${event.title} na Montra Montijo.`}
+                  url={eventUrl}
+                  entityLabel="evento"
+                  iconOnly
+                />
               </div>
             </div>
 

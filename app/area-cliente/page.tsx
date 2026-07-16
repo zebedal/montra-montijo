@@ -4,6 +4,7 @@ import MyBusinessCard from "@/components/area-cliente/MyBusinessCard";
 import { getMyBusinesses } from "@/lib/queries/getMyBusinesses";
 import PremiumCheckoutToast from "@/components/area-cliente/PremiumCheckoutToast";
 import { Metadata } from "next";
+import PremiumCheckoutDialog from "@/components/area-cliente/PremiumCheckoutDialog";
 
 export const metadata: Metadata = {
   title: "Os meus negócios",
@@ -19,7 +20,6 @@ export default async function ClientAreaPage() {
   if (!businesses || businesses.length === 0) {
     return (
       <div className="space-y-8">
-        <PremiumCheckoutToast />
         <div>
           <h1 className="text-3xl font-bold">Os meus negócios</h1>
 
@@ -52,6 +52,7 @@ export default async function ClientAreaPage() {
 
   return (
     <div className="space-y-8">
+      <PremiumCheckoutDialog />
       <div>
         <h1 className="text-3xl font-bold">Os meus negócios</h1>
 
