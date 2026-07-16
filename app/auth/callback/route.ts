@@ -1,3 +1,4 @@
+import { type EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 import { sendWelcomeEmailOnce } from "@/lib/resend/sendWelcomeEmailOnce";
@@ -8,6 +9,8 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
 
   const code = requestUrl.searchParams.get("code");
+  const tokenHash = requestUrl.searchParams.get("token_hash");
+  const type = requestUrl.searchParams.get("type");
   const next = requestUrl.searchParams.get("next");
   const flow = requestUrl.searchParams.get("flow");
 
@@ -20,54 +23,81 @@ export async function GET(request: Request) {
       ? next
       : Routes.AREA_CLIENTE;
 
-  if (!code) {
-    const loginUrl = new URL(Routes.LOGIN, requestUrl.origin);
-
-    loginUrl.searchParams.set("error", "invalid_auth_link");
-
-    return NextResponse.redirect(loginUrl);
-  }
-
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  let userId: string | undefined;
+  let userEmail: string | undefined;
 
-  if (error) {
-    console.error("Erro ao trocar código por sessão:", error);
+  /*
+   * Confirmação de signup através de token_hash.
+   *
+   * Este fluxo não depende do code_verifier PKCE guardado
+   * no browser onde a conta foi criada.
+   */
+  if (tokenHash && type) {
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as EmailOtpType
+    });
 
-    const loginUrl = new URL("/login", requestUrl.origin);
+    if (error) {
+      console.error("Erro ao verificar token de autenticação:", {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        type,
+        flow
+      });
 
-    loginUrl.searchParams.set("error", "expired_auth_link");
+      return redirectToAuthError(requestUrl, "invalid_or_expired_auth_link");
+    }
 
-    return NextResponse.redirect(loginUrl);
+    userId = data.user?.id;
+    userEmail = data.user?.email;
+  } else if (code) {
+    /*
+     * Fluxo PKCE atual, usado sobretudo na recuperação
+     * de palavra-passe e mantido por compatibilidade.
+     */
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error("Erro ao trocar código por sessão:", {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        flow
+      });
+
+      return redirectToAuthError(requestUrl, "invalid_or_expired_auth_link");
+    }
+
+    userId = data.user?.id;
+    userEmail = data.user?.email;
+  } else {
+    return redirectToAuthError(requestUrl, "invalid_auth_link");
   }
 
   /*
-   * Só enviar o email de boas-vindas quando o callback
-   * corresponde à confirmação de uma conta nova.
+   * Só enviar o email de boas-vindas após a confirmação
+   * de uma conta nova.
    *
-   * Não enviamos durante recuperação de palavra-passe.
+   * Uma falha no Resend nunca bloqueia a autenticação.
    */
-  if (flow === "signup" && data.user?.id && data.user.email) {
+  if (flow === "signup" && userId && userEmail) {
     try {
       const result = await sendWelcomeEmailOnce({
-        userId: data.user.id,
-        email: data.user.email
+        userId,
+        email: userEmail
       });
 
       console.log(
         result.alreadySent
           ? "Email de boas-vindas já tinha sido enviado."
           : "Email de boas-vindas enviado com sucesso.",
-        {
-          userId: data.user.id
-        }
+        { userId }
       );
     } catch (welcomeEmailError) {
-      /*
-       * Uma falha no Resend nunca deve impedir o utilizador
-       * de confirmar a conta e entrar na aplicação.
-       */
       console.error(
         "Conta confirmada, mas falhou o email de boas-vindas:",
         welcomeEmailError
@@ -76,4 +106,12 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.redirect(new URL(safeNext, requestUrl.origin));
+}
+
+function redirectToAuthError(requestUrl: URL, errorCode: string) {
+  const loginUrl = new URL(Routes.LOGIN, requestUrl.origin);
+
+  loginUrl.searchParams.set("error", errorCode);
+
+  return NextResponse.redirect(loginUrl);
 }
