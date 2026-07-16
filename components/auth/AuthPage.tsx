@@ -57,6 +57,8 @@ export default function AuthPage() {
 
     callbackUrl.searchParams.set("next", redirectPath);
     callbackUrl.searchParams.set("flow", "signup");
+
+    return callbackUrl.toString();
   }, [redirectPath]);
 
   useEffect(() => {
