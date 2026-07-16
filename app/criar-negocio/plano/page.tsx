@@ -6,7 +6,6 @@ import { BadgeCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCreateBusiness } from "@/contexts/CreateBusinessContext";
-import { Routes } from "@/types";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,6 +13,7 @@ import { supabase } from "@/lib/supabase/client";
 
 export default function BusinessPlanPage() {
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { draft, clearDraft } = useCreateBusiness();
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -117,6 +117,7 @@ export default function BusinessPlanPage() {
       localStorage.setItem("pendingCheckoutSession", result.sessionId);
 
       window.location.assign(result.url);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("Não foi possível iniciar o pagamento.", {
         position: "top-center"

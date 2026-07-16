@@ -103,13 +103,6 @@ export default function AccountSettings() {
     closePasswordDialog();
   }
 
-  function handleDeleteAccount() {
-    /*
-     * Será implementado no próximo passo através
-     * de uma Route Handler protegida.
-     */
-  }
-
   return (
     <div className="space-y-8">
       <div>

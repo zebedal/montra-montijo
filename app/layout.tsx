@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
-import {
-  Instrument_Sans,
-  Inter,
-  Manrope,
-  Outfit,
-  Plus_Jakarta_Sans
-} from "next/font/google";
+import { Instrument_Sans, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
 

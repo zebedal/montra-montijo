@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ export default function EventCard({ event }: Props) {
 
   return (
     <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
-      <div className="relative aspect-16/9 overflow-hidden bg-muted">
+      <div className="relative aspect-video overflow-hidden bg-muted">
         {event.imageUrl ? (
           <Image
             src={event.imageUrl}

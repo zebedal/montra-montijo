@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Hero from "@/components/OnboardingHero";
 import Benefits from "@/components/OnboardingBenefits";
 import PremiumCard from "@/components/OnboardingPremiumCard";

@@ -7,7 +7,6 @@ import { Building2, Crown, MapPin, Search, Tags } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 import {
   searchBusinesses,

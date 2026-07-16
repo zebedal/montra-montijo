@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import type { BusinessFormData } from "@/lib/schemas/businessFormSchema";
-import { UploadImage } from "@/components/business/BusinessImagesUpload";
+import { UploadImage } from "@/types/upload-image";
 
 export type BusinessUploadDraft = {
   form: BusinessFormData;

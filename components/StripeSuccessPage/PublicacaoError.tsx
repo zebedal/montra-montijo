@@ -1,9 +1,3 @@
-import Link from "next/link";
-
-interface ErrorProps {
-  message?: string;
-}
-
 import { AlertTriangle, Mail } from "lucide-react";
 import { Button } from "../ui/button";
 

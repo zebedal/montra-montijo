@@ -81,6 +81,7 @@ export default function BusinessForm({
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [categorySearch, setCategorySearch] = useState<string>("");
   const [showSocials, setShowSocials] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_isPublishing, setIsPublishing] = useState(false);
 
   const router = useRouter();

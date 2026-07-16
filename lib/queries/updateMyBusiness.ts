@@ -1,4 +1,3 @@
-import { OpeningHours } from "@/components/business/OpeningHours";
 import { BusinessFormData } from "../schemas/businessFormSchema";
 import { supabase } from "../supabase/client";
 
@@ -31,6 +30,7 @@ export async function updateMyBusiness(
     ...(logoPath && { logo_url: logoPath })
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: updated, error } = await supabase
     .from("businesses")
     .update(payload)

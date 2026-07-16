@@ -2,7 +2,6 @@ import { Building2 } from "lucide-react";
 
 import MyBusinessCard from "@/components/area-cliente/MyBusinessCard";
 import { getMyBusinesses } from "@/lib/queries/getMyBusinesses";
-import PremiumCheckoutToast from "@/components/area-cliente/PremiumCheckoutToast";
 import { Metadata } from "next";
 import PremiumCheckoutDialog from "@/components/area-cliente/PremiumCheckoutDialog";
 

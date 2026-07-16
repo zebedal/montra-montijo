@@ -1,5 +1,3 @@
-import { Loader2 } from "lucide-react";
-
 function Processing() {
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
