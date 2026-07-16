@@ -17,6 +17,7 @@ import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { getRelatedBusinesses } from "@/lib/queries/getRelatedBusinesses";
 import RelatedBusinesses from "@/components/business/RelatedBusinesses";
 import BusinessClaimButton from "@/components/business/BusinessClaimButton";
+import BusinessOwnerPremiumBanner from "@/components/business/BusinessOwnerPremiumBanner";
 
 interface Props {
   params: Promise<{
@@ -151,6 +152,14 @@ export default async function BusinessPage({ params }: Props) {
 
   const supabase = await createClient();
 
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  const isBusinessOwner = Boolean(user) && business.user_id === user?.id;
+
+  const canActivatePremium = isBusinessOwner && business.plan !== "premium";
+
   const relatedBusinesses = business.category
     ? await getRelatedBusinesses({
         supabase,
@@ -204,7 +213,9 @@ export default async function BusinessPage({ params }: Props) {
           )}
 
           <BusinessHeader business={business} businessUrl={businessUrl} />
-
+          {canActivatePremium && (
+            <BusinessOwnerPremiumBanner business={business} />
+          )}
           <BusinessGallery images={images} />
         </div>
 

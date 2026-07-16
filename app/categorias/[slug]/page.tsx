@@ -101,7 +101,7 @@ export default async function CategoryPage({ params }: Props) {
   ).replace(/\/$/, "");
 
   const categoryUrl = `${siteUrl}/categorias/${category.slug}`;
-  console.log("console businesses: ", businesses);
+
   return (
     <>
       <CollectionPageJsonLd

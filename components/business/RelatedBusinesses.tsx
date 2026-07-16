@@ -35,7 +35,7 @@ export default function RelatedBusinesses({
           </h2>
 
           <p className="mt-2 text-muted-foreground">
-            Descubra outros negócios da categoria {categoryName}.
+            Descubra outros negócios na categoria {categoryName}.
           </p>
         </div>
 

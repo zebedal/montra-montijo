@@ -47,7 +47,7 @@ export default function RelatedBusinessCard({ business }: Props) {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   {business.category && (
-                    <p className="truncate text-xs font-semibold uppercase tracking-wide text-primary-green">
+                    <p className="inline-flex rounded-full bg-[#EAF3EE] px-2.5 py-1 text-xs font-semibold text-primary-light">
                       {business.category.name}
                     </p>
                   )}

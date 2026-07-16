@@ -23,7 +23,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 
-import type { BusinessSummary } from "@/types/business";
+import type { SubscriptionBusiness } from "@/types/business";
 import { cancelBusinessSubscription } from "@/lib/queries/cancelBusinessSubscription";
 import {
   activateBusinessPremium,
@@ -43,7 +43,7 @@ import {
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  business: BusinessSummary;
+  business: SubscriptionBusiness;
   variant?: "subscription" | "statistics";
 };
 
@@ -66,8 +66,6 @@ export default function SubscriptionDialog({
   variant = "subscription"
 }: Props) {
   const router = useRouter();
-
-  console.log("variant: ", variant);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
