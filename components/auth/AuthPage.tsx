@@ -56,6 +56,7 @@ export default function AuthPage() {
     const callbackUrl = new URL("/auth/callback", window.location.origin);
 
     callbackUrl.searchParams.set("next", redirectPath);
+    callbackUrl.searchParams.set("flow", "signup");
 
     return callbackUrl.toString();
   }, [redirectPath]);
@@ -172,7 +173,10 @@ export default function AuthPage() {
        * o Supabase pode devolver uma sessão imediatamente.
        */
       if (signupData.session) {
-        toast.success("Conta criada com sucesso.");
+        toast.success("Verifique o seu email.", {
+          description:
+            "Se este endereço ainda não estiver registado, receberá um link de confirmação."
+        });
 
         router.replace(redirectPath);
         return;
@@ -227,7 +231,8 @@ export default function AuthPage() {
             <h1 className="text-2xl font-bold">Verifique o seu email</h1>
 
             <p className="text-sm leading-6 text-muted-foreground">
-              Enviámos um link de confirmação para:
+              Se ainda não existir uma conta associada a este endereço, enviámos
+              um link para confirmar o registo:
             </p>
 
             <p className="font-medium text-foreground">{confirmationEmail}</p>
