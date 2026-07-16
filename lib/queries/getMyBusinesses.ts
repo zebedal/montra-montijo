@@ -34,7 +34,7 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
   stripe_subscription_id,
   subscription_status,
   cancel_at_period_end,
-  current_period_end
+  current_period_end 
 `
     )
     .eq("user_id", user.id);
@@ -54,7 +54,7 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
 
   const { data: categories } = await supabase
     .from("categories")
-    .select("id, name, slug")
+    .select("id, name, slug, schema_org_type")
     .in("id", categoryIds);
 
   const categoriesMap = new Map(
