@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Loader2, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -21,15 +22,20 @@ import { Routes } from "@/types";
 type FormData = {
   email: string;
   password: string;
+  confirmPassword?: string;
 };
+
+type AuthMode = "login" | "signup";
 
 export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [mode, setMode] = useState<"login" | "signup">("login");
-
-  const schema = mode === "login" ? loginSchema : signupSchema;
+  const [mode, setMode] = useState<AuthMode>("login");
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(
+    null
+  );
+  const [isResending, setIsResending] = useState(false);
 
   const { user, loading } = useUser();
 
@@ -40,39 +46,117 @@ export default function AuthPage() {
       ? nextPath
       : Routes.AREA_CLIENTE;
 
+  const schema = mode === "login" ? loginSchema : signupSchema;
+
+  const emailRedirectTo = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+
+    callbackUrl.searchParams.set("next", redirectPath);
+
+    return callbackUrl.toString();
+  }, [redirectPath]);
+
   useEffect(() => {
     if (!loading && user) {
       router.replace(redirectPath);
     }
-  }, [user, loading, router, nextPath, redirectPath]);
+  }, [user, loading, router, redirectPath]);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting }
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       email: "",
-      password: ""
+      password: "",
+      confirmPassword: ""
     }
   });
 
-  function changeMode(nextMode: "login" | "signup") {
+  const password = watch("password");
+
+  const passwordRequirements = [
+    {
+      label: "Pelo menos 8 caracteres",
+      valid: password.length >= 8
+    },
+    {
+      label: "Uma letra maiúscula",
+      valid: /[A-Z]/.test(password)
+    },
+    {
+      label: "Uma letra minúscula",
+      valid: /[a-z]/.test(password)
+    },
+    {
+      label: "Um número",
+      valid: /[0-9]/.test(password)
+    }
+  ];
+
+  function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
+    setConfirmationEmail(null);
 
     reset({
       email: "",
-      password: ""
+      password: "",
+      confirmPassword: ""
     });
+  }
+
+  async function handleResendConfirmation() {
+    if (!confirmationEmail || isResending) {
+      return;
+    }
+
+    setIsResending(true);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: confirmationEmail,
+        options: {
+          emailRedirectTo
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Email enviado novamente.", {
+        description:
+          "Verifique também a pasta de spam ou correio não solicitado."
+      });
+    } catch (error) {
+      toast.error("Não foi possível reenviar o email.", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Tente novamente dentro de alguns instantes."
+      });
+    } finally {
+      setIsResending(false);
+    }
   }
 
   async function onSubmit(data: FormData) {
     if (mode === "signup") {
       const { data: signupData, error } = await supabase.auth.signUp({
         email: data.email,
-        password: data.password
+        password: data.password,
+        options: {
+          emailRedirectTo
+        }
       });
 
       if (error) {
@@ -83,21 +167,30 @@ export default function AuthPage() {
         return;
       }
 
-      toast.success("Conta criada com sucesso.");
-
       /*
-       * Se o Supabase devolver sessão imediatamente,
-       * regressamos à página de origem.
-       *
-       * Se exigir confirmação por email, mantemos o fluxo
-       * normal para criação do primeiro negócio.
+       * Em ambientes onde a confirmação de email não é obrigatória,
+       * o Supabase pode devolver uma sessão imediatamente.
        */
-      if (signupData.session && redirectPath) {
+      if (signupData.session) {
+        toast.success("Conta criada com sucesso.");
+
         router.replace(redirectPath);
         return;
       }
 
-      router.push(Routes.CRIAR_NEGOCIO);
+      /*
+       * Com confirmação de email obrigatória, não existe sessão.
+       * Mostramos um ecrã dedicado em vez de encaminhar o utilizador
+       * para uma página protegida.
+       */
+      setConfirmationEmail(data.email);
+
+      reset({
+        email: "",
+        password: "",
+        confirmPassword: ""
+      });
+
       return;
     }
 
@@ -119,11 +212,73 @@ export default function AuthPage() {
 
     toast.success("Sessão iniciada com sucesso.");
 
-    router.replace(redirectPath ?? Routes.AREA_CLIENTE);
+    router.replace(redirectPath);
+  }
+
+  if (confirmationEmail) {
+    return (
+      <div className="mx-auto my-20 max-w-md px-4">
+        <div className="flex flex-col items-center space-y-6 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <Mail className="h-8 w-8 text-green-700" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Verifique o seu email</h1>
+
+            <p className="text-sm leading-6 text-muted-foreground">
+              Enviámos um link de confirmação para:
+            </p>
+
+            <p className="font-medium text-foreground">{confirmationEmail}</p>
+
+            <p className="text-sm leading-6 text-muted-foreground">
+              Clique no link enviado para confirmar a sua conta e continuar.
+              Verifique também a pasta de spam ou correio não solicitado.
+            </p>
+          </div>
+
+          <div className="w-full space-y-3">
+            <Button
+              type="button"
+              className="w-full bg-green-600 text-white hover:bg-green-700"
+              onClick={handleResendConfirmation}
+              disabled={isResending}
+            >
+              {isResending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />A reenviar...
+                </>
+              ) : (
+                "Reenviar email"
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => changeMode("login")}
+            >
+              Voltar ao início de sessão
+            </Button>
+          </div>
+
+          <div className="flex items-start gap-2 rounded-lg bg-muted p-4 text-left">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-700" />
+
+            <p className="text-xs leading-5 text-muted-foreground">
+              Não é necessário criar outra conta. Caso o email demore a chegar,
+              aguarde alguns instantes antes de o reenviar.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto mt-20 mb-20 max-w-md space-y-6">
+    <div className="mx-auto my-20 max-w-md space-y-6 px-4">
       <div className="space-y-1 text-center">
         <h1 className="text-2xl font-bold">
           {mode === "login" ? "Entrar" : "Criar conta"}
@@ -164,6 +319,35 @@ export default function AuthPage() {
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
 
+          {mode === "signup" && (
+            <div className="grid grid-cols-1 gap-1.5 rounded-lg bg-muted/60 p-3 sm:grid-cols-2">
+              {passwordRequirements.map((requirement) => (
+                <div
+                  key={requirement.label}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <span
+                    className={
+                      requirement.valid
+                        ? "h-1.5 w-1.5 rounded-full bg-green-600"
+                        : "h-1.5 w-1.5 rounded-full bg-muted-foreground/40"
+                    }
+                  />
+
+                  <span
+                    className={
+                      requirement.valid
+                        ? "text-green-700"
+                        : "text-muted-foreground"
+                    }
+                  >
+                    {requirement.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {mode === "login" && (
             <div className="flex justify-end">
               <Link
@@ -175,6 +359,23 @@ export default function AuthPage() {
             </div>
           )}
         </div>
+
+        {mode === "signup" && (
+          <div>
+            <Input
+              type="password"
+              placeholder="Confirmar palavra-passe"
+              autoComplete="new-password"
+              {...register("confirmPassword")}
+            />
+
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+        )}
 
         <Button
           type="submit"

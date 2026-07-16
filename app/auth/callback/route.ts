@@ -6,17 +6,21 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
 
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/";
+  const next = requestUrl.searchParams.get("next");
 
   /*
-   * Evitar redirects externos.
+   * Apenas permitimos redirects internos.
+   * Bloqueia valores como //site-malicioso.com.
    */
-  const safeNext = next.startsWith("/") ? next : "/";
+  const safeNext =
+    next?.startsWith("/") && !next.startsWith("//") ? next : "/area-cliente";
 
   if (!code) {
-    return NextResponse.redirect(
-      new URL("/recuperar-password?error=invalid_link", requestUrl.origin)
-    );
+    const loginUrl = new URL("/login", requestUrl.origin);
+
+    loginUrl.searchParams.set("error", "invalid_auth_link");
+
+    return NextResponse.redirect(loginUrl);
   }
 
   const supabase = await createClient();
@@ -24,14 +28,13 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    console.error(
-      "Erro ao trocar o código de recuperação por uma sessão:",
-      error
-    );
+    console.error("Erro ao trocar código por sessão:", error);
 
-    return NextResponse.redirect(
-      new URL("/recuperar-password?error=expired_link", requestUrl.origin)
-    );
+    const loginUrl = new URL("/login", requestUrl.origin);
+
+    loginUrl.searchParams.set("error", "expired_auth_link");
+
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.redirect(new URL(safeNext, requestUrl.origin));
