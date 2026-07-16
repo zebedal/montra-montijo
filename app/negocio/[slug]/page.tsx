@@ -70,6 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const result = await getBusinessPageData(slug);
   const business = result?.business;
+  const businessImages = result?.images ?? [];
 
   if (!business) {
     return {
@@ -83,6 +84,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+
   const title = `${business.name} no Montijo`;
 
   const description = createDescription({
@@ -91,7 +96,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: business.description
   });
 
-  const canonical = `/negocio/${business.slug}`;
+  const canonical = `${siteUrl}/negocio/${business.slug}`;
+
+  const shareImage =
+    businessImages[0]?.url ??
+    business.logo_url ??
+    `${siteUrl}/images/default-og-image.jpg`;
 
   return {
     title,
@@ -108,21 +118,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: "pt_PT",
       siteName: "Montra Montijo",
-      images: business.logo_url
-        ? [
-            {
-              url: business.logo_url,
-              alt: `Logótipo de ${business.name}`
-            }
-          ]
-        : undefined
+      images: [
+        {
+          url: shareImage,
+          width: 1200,
+          height: 630,
+          alt: `${business.name} na Montra Montijo`
+        }
+      ]
     },
 
     twitter: {
-      card: business.logo_url ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: business.logo_url ? [business.logo_url] : undefined
+      images: [shareImage]
     },
 
     robots: {
