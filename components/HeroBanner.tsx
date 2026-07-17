@@ -3,16 +3,18 @@
 import Image from "next/image";
 
 import SearchAutocomplete from "@/components/search/SearchAutoComplete";
+import heroImage from "@/public/images/background.webp";
 
 export function Hero() {
   return (
     <section className="relative flex h-125 w-full items-center justify-center text-center">
       <Image
         className="object-cover object-center"
-        src="/images/background.jpg"
+        src={heroImage}
         alt="Comércio local no Montijo"
         fill
-        priority
+        preload
+        placeholder="blur"
         sizes="100vw"
       />
 
