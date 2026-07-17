@@ -18,18 +18,17 @@ interface Props {
 export const metadata: Metadata = {
   title: "Estatísticas"
 };
-
 export default async function BusinessStatisticsPage({
   params,
   searchParams
 }: Props) {
-  const { id } = await params;
+  const { id: slug } = await params;
   const { days: daysParam } = await searchParams;
 
   const parsedDays = Number(daysParam);
   const days = [7, 30, 90].includes(parsedDays) ? parsedDays : 30;
 
-  const result = await getBusinessStatistics(id, days);
+  const result = await getBusinessStatistics(slug, days);
 
   if (!result.success) {
     if (result.reason === "unauthenticated") {

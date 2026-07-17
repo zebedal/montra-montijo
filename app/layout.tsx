@@ -110,7 +110,19 @@ export default function RootLayout({
 
         <div className="flex-1">{children}</div>
         <Footer />
-        <Toaster />
+        <Toaster
+          toastOptions={{
+            unstyled: true,
+            classNames: {
+              toast:
+                "flex text-sm items-center gap-3 rounded-lg border px-4 py-2 shadow-lg",
+              success:
+                "border-green-200 bg-green-50 text-green-900 dark:border-green-900/50 dark:bg-green-950 dark:text-green-100",
+              error:
+                "border-red-700 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100"
+            }
+          }}
+        />
       </body>
     </html>
   );
