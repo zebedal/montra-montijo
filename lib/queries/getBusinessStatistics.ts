@@ -116,7 +116,7 @@ function createDailyRange(days: number) {
 }
 
 export async function getBusinessStatistics(
-  businessId: string,
+  businessSlug: string,
   days = 30
 ): Promise<GetBusinessStatisticsResult> {
   const supabase = await createClient();
@@ -140,15 +140,15 @@ export async function getBusinessStatistics(
     .from("businesses")
     .select(
       `
-      id,
-      name,
-      slug,
-      user_id,
-      plan,
-      subscription_status
-    `
+    id,
+    name,
+    slug,
+    user_id,
+    plan,
+    subscription_status
+  `
     )
-    .eq("id", businessId)
+    .eq("slug", businessSlug)
     .eq("user_id", user.id)
     .maybeSingle();
 
