@@ -214,7 +214,7 @@ export default function AuthPage() {
       return;
     }
 
-    toast.success("Sessão iniciada com sucesso.");
+    toast.success("Sessão iniciada com sucesso.", { position: "top-center" });
 
     router.replace(redirectPath);
   }
