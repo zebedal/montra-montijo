@@ -14,6 +14,7 @@ import {
 import BusinessHomeCard from "@/components/business/BusinessHomeCard";
 import BusinessesPagination from "@/components/area-cliente/BusinessPagination";
 import PageContainer from "@/components/PageContainer";
+import heroImage from "@/public/images/montijo-praca.webp";
 
 type SearchParams = Promise<{
   page?: string | string[];
@@ -105,12 +106,13 @@ export default async function BusinessesPage({ searchParams }: Props) {
         }))}
       />
       <main className="min-h-[70vh]">
-        <section className="relative overflow-hidden">
+        <section className="relative h-112.5 overflow-hidden">
           <Image
-            src="/images/montijo-praca.jpg"
+            src={heroImage}
             alt="Vista sobre o Montijo"
             fill
-            priority
+            preload
+            placeholder="blur"
             sizes="100vw"
             className="object-cover"
           />

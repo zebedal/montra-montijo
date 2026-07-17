@@ -532,6 +532,10 @@ export default function BusinessForm({
 
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Imagens do negócio</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Arraste e largue as imagens para alterar a sua ordem. A primeira
+              imagem será utilizada como imagem principal.
+            </p>
             <BusinessImagesUpload images={images ?? []} onChange={setImages} />
           </section>
 
