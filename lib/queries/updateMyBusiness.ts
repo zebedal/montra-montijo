@@ -1,21 +1,32 @@
 import { BusinessFormData } from "../schemas/businessFormSchema";
 import { supabase } from "../supabase/client";
+import { createSlug } from "../utils";
+
+type UpdatedBusiness = {
+  id: string;
+  name: string;
+  slug: string;
+};
 
 export async function updateMyBusiness(
   businessId: string,
   data: BusinessFormData,
   logoPath?: string
-): Promise<boolean> {
+): Promise<UpdatedBusiness | null> {
   const {
-    data: { user }
+    data: { user },
+    error: userError
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return false;
+  if (userError || !user) {
+    return null;
   }
+
+  const slug = createSlug(`${data.name}-${data.city}`);
 
   const payload = {
     name: data.name,
+    slug,
     category_id: data.category_id,
     description: data.description,
     phone: data.phone,
@@ -27,38 +38,32 @@ export async function updateMyBusiness(
     number: data.number,
     postal_code: data.postalCode,
     city: data.city,
-    ...(logoPath && { logo_url: logoPath })
+    ...(logoPath ? { logo_url: logoPath } : {})
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: updated, error } = await supabase
+  const { data: updatedBusiness, error: updateError } = await supabase
     .from("businesses")
     .update(payload)
     .eq("id", businessId)
     .eq("user_id", user.id)
-    .select();
+    .select("id, name, slug")
+    .single();
 
-  if (error) {
-    console.error(error);
-    return false;
+  if (updateError) {
+    console.error("Erro ao atualizar negócio:", updateError);
+    return null;
   }
 
-  /**
-   * Atualizar horários
-   */
-
-  // Remover horários existentes
   const { error: deleteHoursError } = await supabase
     .from("business_hours")
     .delete()
     .eq("business_id", businessId);
 
   if (deleteHoursError) {
-    console.error(deleteHoursError);
-    return false;
+    console.error("Erro ao remover horários:", deleteHoursError);
+    return null;
   }
 
-  // Inserir novos horários
   if (data.openingHours && data.openingHours.length > 0) {
     const { error: insertHoursError } = await supabase
       .from("business_hours")
@@ -73,10 +78,10 @@ export async function updateMyBusiness(
       );
 
     if (insertHoursError) {
-      console.error(insertHoursError);
-      return false;
+      console.error("Erro ao inserir horários:", insertHoursError);
+      return null;
     }
   }
 
-  return true;
+  return updatedBusiness;
 }
