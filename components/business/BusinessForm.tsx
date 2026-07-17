@@ -73,6 +73,7 @@ type Props = {
   initialData?: Partial<BusinessFormData>;
   businessId?: string;
   initialImages?: UploadImage[];
+  shouldRestoreDraft?: boolean;
 };
 
 export const defaultOpeningHours = [
@@ -97,7 +98,8 @@ export default function BusinessForm({
   mode = "create",
   initialData,
   businessId,
-  initialImages
+  initialImages,
+  shouldRestoreDraft = false
 }: Props) {
   const [showHours, setShowHours] = useState(
     mode === "edit" && (initialData?.openingHours?.length ?? 0) > 0
@@ -372,13 +374,7 @@ export default function BusinessForm({
   }, [initialData, reset]);
 
   useEffect(() => {
-    if (mode !== "create") {
-      return;
-    }
-
-    const shouldRestoreDraft = searchParams.get("restoreDraft") === "true";
-
-    if (!shouldRestoreDraft) {
+    if (mode !== "create" || !shouldRestoreDraft) {
       return;
     }
 
@@ -441,7 +437,7 @@ export default function BusinessForm({
       clearPendingForm();
       router.replace(CREATE_BUSINESS_ROUTE);
     }
-  }, [mode, reset, router, searchParams]);
+  }, [mode, reset, router, shouldRestoreDraft]);
 
   useEffect(() => {
     if (!selectedCategoryId || categorias.length === 0) {
