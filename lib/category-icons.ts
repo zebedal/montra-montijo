@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 import {
+  Baby,
   BookOpen,
   Brain,
   Building2,
@@ -15,6 +16,7 @@ import {
   Dumbbell,
   Flower2,
   GraduationCap,
+  HandCoins,
   Hammer,
   HeartPulse,
   Hotel,
@@ -99,8 +101,12 @@ export const categoryIcons: Record<string, LucideIcon> = {
   "centros-estudo": GraduationCap,
   explicacoes: GraduationCap,
   formacao: GraduationCap,
+  creches: Baby,
   atl: School,
   "atl-apoio-escolar": School,
+
+  // Serviços financeiros
+  "intermediacao-credito": HandCoins,
 
   // Eventos
   eventos: CalendarDays,
