@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  sendMonthlyFreeBusinessReportEmail,
+  type MonthlyReportRecommendation
+} from "@/lib/resend/sendMonthlyFreeBusinessReportEmail";
 import { sendMonthlyFreeBusinessReportEmailOnce } from "@/lib/resend/sendMonthlyFreeBusinessReportEmailOnce";
+import { hasUnsubscribedFromMonthlyReports } from "@/lib/resend/monthlyReportPreferences";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const BUSINESS_BATCH_SIZE = 100;
@@ -11,6 +16,11 @@ type FreeBusiness = {
   user_id: string;
   name: string;
   slug: string;
+  description: string | null;
+  logo_url: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
 };
 
 type MonthlyPeriod = {
@@ -25,7 +35,16 @@ type BusinessReportResult =
   | "would_send"
   | "already_sent"
   | "no_activity"
-  | "missing_email";
+  | "missing_email"
+  | "unsubscribed";
+
+function isAuthorized(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+
+  return Boolean(
+    cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`
+  );
+}
 
 function getPreviousMonthPeriod(referenceDate = new Date()): MonthlyPeriod {
   const end = new Date(
@@ -60,7 +79,9 @@ async function getAllEligibleBusinesses(): Promise<FreeBusiness[]> {
 
     const { data, error } = await supabaseAdmin
       .from("businesses")
-      .select("id, user_id, name, slug")
+      .select(
+        "id, user_id, name, slug, description, logo_url, phone, email, website"
+      )
       .eq("plan", "free")
       .eq("is_visible", true)
       .not("user_id", "is", null)
@@ -123,6 +144,86 @@ async function getBusinessActivity(
   };
 }
 
+async function getBusinessProfileRecommendations(
+  business: FreeBusiness
+): Promise<MonthlyReportRecommendation[]> {
+  const [imagesResult, hoursResult] = await Promise.all([
+    supabaseAdmin
+      .from("business_images")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq("business_id", business.id),
+    supabaseAdmin
+      .from("business_hours")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq("business_id", business.id)
+  ]);
+
+  if (imagesResult.error || hoursResult.error) {
+    console.error("Erro ao verificar a completude do negócio:", {
+      businessId: business.id,
+      imagesError: imagesResult.error,
+      hoursError: hoursResult.error
+    });
+
+    throw new Error("Não foi possível verificar a completude do negócio.");
+  }
+
+  const recommendations: MonthlyReportRecommendation[] = [];
+
+  if ((imagesResult.count ?? 0) === 0) {
+    recommendations.push({
+      title: "Adicione fotografias",
+      description:
+        "O negócio está a receber visualizações, mas ainda não apresenta fotografias do espaço, produtos ou serviços.",
+      ctaLabel: "Adicionar fotografias"
+    });
+  }
+
+  if (!business.phone?.trim() && !business.email?.trim() && !business.website?.trim()) {
+    recommendations.push({
+      title: "Complete os contactos",
+      description:
+        "Facilite o próximo passo a potenciais clientes adicionando pelo menos uma forma de contacto.",
+      ctaLabel: "Adicionar contactos"
+    });
+  }
+
+  if ((hoursResult.count ?? 0) === 0) {
+    recommendations.push({
+      title: "Adicione o horário",
+      description:
+        "Indique quando está disponível para evitar que potenciais clientes desistam por falta de informação.",
+      ctaLabel: "Adicionar horário"
+    });
+  }
+
+  if ((business.description?.trim().length ?? 0) < 80) {
+    recommendations.push({
+      title: "Melhore a descrição",
+      description:
+        "Explique melhor os principais produtos ou serviços para ajudar quem ainda não conhece o negócio.",
+      ctaLabel: "Completar descrição"
+    });
+  }
+
+  if (!business.logo_url?.trim()) {
+    recommendations.push({
+      title: "Adicione o logótipo",
+      description:
+        "Um logótipo torna o perfil mais reconhecível nas listagens da Montra Montijo.",
+      ctaLabel: "Adicionar logótipo"
+    });
+  }
+
+  return recommendations.slice(0, 2);
+}
+
 async function processBusinessReport({
   business,
   period,
@@ -137,6 +238,8 @@ async function processBusinessReport({
   if (activity.pageViews === 0 && activity.interactions === 0) {
     return "no_activity";
   }
+
+  const recommendations = await getBusinessProfileRecommendations(business);
 
   const {
     data: { user },
@@ -156,6 +259,10 @@ async function processBusinessReport({
     return "missing_email";
   }
 
+  if (hasUnsubscribedFromMonthlyReports(user.app_metadata)) {
+    return "unsubscribed";
+  }
+
   if (dryRun) {
     return "would_send";
   }
@@ -169,17 +276,15 @@ async function processBusinessReport({
     periodKey: period.key,
     periodLabel: period.label,
     pageViews: activity.pageViews,
-    interactions: activity.interactions
+    interactions: activity.interactions,
+    recommendations
   });
 
   return result.alreadySent ? "already_sent" : "sent";
 }
 
 export async function GET(request: NextRequest) {
-  const authorization = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || authorization !== `Bearer ${cronSecret}`) {
+  if (!isAuthorized(request)) {
     return NextResponse.json(
       {
         error: "Não autorizado."
@@ -202,6 +307,7 @@ export async function GET(request: NextRequest) {
       alreadySent: 0,
       noActivity: 0,
       missingEmail: 0,
+      unsubscribed: 0,
       failed: 0
     };
 
@@ -238,6 +344,7 @@ export async function GET(request: NextRequest) {
         if (result.value === "already_sent") totals.alreadySent += 1;
         if (result.value === "no_activity") totals.noActivity += 1;
         if (result.value === "missing_email") totals.missingEmail += 1;
+        if (result.value === "unsubscribed") totals.unsubscribed += 1;
       });
     }
 
@@ -259,6 +366,112 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Não foi possível processar os relatórios mensais."
+      },
+      {
+        status: 500
+      }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json(
+      {
+        error: "Não autorizado."
+      },
+      {
+        status: 401
+      }
+    );
+  }
+
+  try {
+    const body = (await request.json()) as {
+      businessId?: unknown;
+      email?: unknown;
+    };
+
+    const businessId =
+      typeof body.businessId === "string" ? body.businessId.trim() : "";
+    const email = typeof body.email === "string" ? body.email.trim() : "";
+
+    if (!businessId || !email || !/^\S+@\S+\.\S+$/.test(email)) {
+      return NextResponse.json(
+        {
+          error: "Indique um businessId e um email válidos."
+        },
+        {
+          status: 400
+        }
+      );
+    }
+
+    const { data: business, error: businessError } = await supabaseAdmin
+      .from("businesses")
+      .select(
+        "id, user_id, name, slug, plan, is_visible, description, logo_url, phone, email, website"
+      )
+      .eq("id", businessId)
+      .maybeSingle();
+
+    if (businessError) {
+      throw new Error("Não foi possível obter o negócio de teste.");
+    }
+
+    if (!business) {
+      return NextResponse.json(
+        {
+          error: "Negócio não encontrado."
+        },
+        {
+          status: 404
+        }
+      );
+    }
+
+    const period = getPreviousMonthPeriod();
+    const activity = await getBusinessActivity(business.id, period);
+    const recommendations = await getBusinessProfileRecommendations(
+      business as FreeBusiness
+    );
+
+    await sendMonthlyFreeBusinessReportEmail({
+      email,
+      businessName: business.name,
+      businessSlug: business.slug,
+      periodLabel: period.label,
+      pageViews: activity.pageViews,
+      interactions: activity.interactions,
+      businessId: business.id,
+      recommendations,
+      isTest: true
+    });
+
+    return NextResponse.json({
+      success: true,
+      test: true,
+      recordedAsMonthlyDelivery: false,
+      recipient: email,
+      business: {
+        id: business.id,
+        name: business.name,
+        plan: business.plan,
+        isVisible: business.is_visible
+      },
+      period: {
+        key: period.key,
+        label: period.label
+      },
+      activity,
+      recommendations
+    });
+  } catch (error) {
+    console.error("Erro ao enviar relatório mensal de teste:", error);
+
+    return NextResponse.json(
+      {
+        error: "Não foi possível enviar o relatório mensal de teste."
       },
       {
         status: 500

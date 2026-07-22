@@ -1,6 +1,13 @@
 import "server-only";
 
 import { resend } from "@/lib/resend/server";
+import { getMonthlyReportSiteUrl } from "@/lib/resend/monthlyReportPreferences";
+
+export type MonthlyReportRecommendation = {
+  title: string;
+  description: string;
+  ctaLabel: string;
+};
 
 type SendMonthlyFreeBusinessReportEmailParams = {
   email: string;
@@ -9,6 +16,10 @@ type SendMonthlyFreeBusinessReportEmailParams = {
   periodLabel: string;
   pageViews: number;
   interactions: number;
+  businessId: string;
+  recommendations?: MonthlyReportRecommendation[];
+  isTest?: boolean;
+  unsubscribeUrl?: string;
 };
 
 function escapeHtml(value: string) {
@@ -26,28 +37,40 @@ export async function sendMonthlyFreeBusinessReportEmail({
   businessSlug,
   periodLabel,
   pageViews,
-  interactions
+  interactions,
+  businessId,
+  recommendations = [],
+  isTest = false,
+  unsubscribeUrl
 }: SendMonthlyFreeBusinessReportEmailParams) {
   const currentYear = new Date().getFullYear();
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://www.montramontijo.pt"
-  ).replace(/\/$/, "");
+  const siteUrl = getMonthlyReportSiteUrl();
 
   const clientAreaUrl = `${siteUrl}/area-cliente`;
+  const editBusinessUrl = `${siteUrl}/area-cliente/negocio/${encodeURIComponent(
+    businessId
+  )}/editar`;
   const businessUrl = `${siteUrl}/negocio/${encodeURIComponent(businessSlug)}`;
-  const unsubscribeUrl = `mailto:geral@montramontijo.pt?subject=${encodeURIComponent(
-    "Cancelar relatórios mensais"
-  )}`;
+  const reportPreferencesUrl =
+    unsubscribeUrl ?? `${siteUrl}/cancelar-relatorios?status=test`;
 
   const safeBusinessName = escapeHtml(businessName);
   const safePeriodLabel = escapeHtml(periodLabel);
+  const safeRecommendations = recommendations.slice(0, 2).map((item) => ({
+    title: escapeHtml(item.title),
+    description: escapeHtml(item.description),
+    ctaLabel: escapeHtml(item.ctaLabel)
+  }));
+  const testText = isTest
+    ? "EMAIL DE TESTE — não foi registado como envio mensal\n\n"
+    : "";
 
   const { data, error } = await resend.emails.send({
     from: "Montra Montijo <geral@montramontijo.pt>",
     to: email,
-    subject: `${businessName}: atividade da página em ${periodLabel}`,
+    subject: `${isTest ? "[TESTE] " : ""}${businessName}: atividade da página em ${periodLabel}`,
     headers: {
-      "List-Unsubscribe": `<${unsubscribeUrl}>`
+      "List-Unsubscribe": `<${reportPreferencesUrl}>`
     },
     html: `
       <!DOCTYPE html>
@@ -75,6 +98,11 @@ export async function sendMonthlyFreeBusinessReportEmail({
 
                   <tr>
                     <td style="padding:10px 40px 40px;">
+                      ${
+                        isTest
+                          ? `<p style="margin:0 0 22px;padding:10px 14px;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:13px;line-height:1.5;font-weight:700;text-align:center;">EMAIL DE TESTE — não foi registado como envio mensal</p>`
+                          : ""
+                      }
                       <p style="margin:0 0 10px;font-size:13px;line-height:1.5;font-weight:700;letter-spacing:.08em;text-align:center;text-transform:uppercase;color:#15803d;">
                         Resumo de ${safePeriodLabel}
                       </p>
@@ -101,15 +129,36 @@ export async function sendMonthlyFreeBusinessReportEmail({
                         </tr>
                       </table>
 
-                      <p style="margin:0;font-size:16px;line-height:1.75;color:#374151;">
-                        Com o <strong>Plano Destaque</strong>, o negócio ganha prioridade nas listagens, presença rotativa na página inicial e acesso às estatísticas detalhadas.
-                      </p>
+                      ${
+                        safeRecommendations.length > 0
+                          ? `
+                            <h2 style="margin:0 0 16px;font-size:20px;line-height:1.4;color:#111827;">
+                              Aproveite melhor estas visualizações
+                            </h2>
+
+                            ${safeRecommendations
+                              .map(
+                                (item) => `
+                                  <div style="margin:0 0 12px;padding:18px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;">
+                                    <div style="font-size:15px;line-height:1.5;font-weight:700;color:#111827;">${item.title}</div>
+                                    <div style="margin-top:6px;font-size:14px;line-height:1.65;color:#4b5563;">${item.description}</div>
+                                  </div>
+                                `
+                              )
+                              .join("")}
+                          `
+                          : `
+                            <p style="margin:0;font-size:16px;line-height:1.75;color:#374151;">
+                              O perfil está bem preenchido. Com o <strong>Plano Destaque</strong>, o negócio ganha prioridade nas listagens, presença rotativa na página inicial e acesso às estatísticas detalhadas.
+                            </p>
+                          `
+                      }
 
                       <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:34px auto 26px;">
                         <tr>
                           <td align="center" bgcolor="#16a34a" style="border-radius:10px;">
-                            <a href="${clientAreaUrl}" style="display:inline-block;padding:16px 28px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:650;border-radius:10px;">
-                              Ativar Plano Destaque — 4,99 €/mês
+                            <a href="${safeRecommendations.length > 0 ? editBusinessUrl : clientAreaUrl}" style="display:inline-block;padding:16px 28px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:650;border-radius:10px;">
+                              ${safeRecommendations.length > 0 ? safeRecommendations[0].ctaLabel : "Ativar Plano Destaque — 4,99 €/mês"}
                             </a>
                           </td>
                         </tr>
@@ -124,7 +173,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
                       <p style="margin:0;font-size:12px;line-height:1.7;color:#6b7280;text-align:center;">
                         Está a receber este resumo porque publicou este negócio na Montra Montijo.
                         Se não pretender receber relatórios mensais,
-                        <a href="${unsubscribeUrl}" style="color:#4b5563;text-decoration:underline;">pode pedir a desativação</a>.
+                        <a href="${reportPreferencesUrl}" style="color:#4b5563;text-decoration:underline;">pode cancelar automaticamente</a>.
                       </p>
                     </td>
                   </tr>
@@ -140,20 +189,28 @@ export async function sendMonthlyFreeBusinessReportEmail({
       </html>
     `,
     text: `
-A página de ${businessName} teve atividade em ${periodLabel}
+${testText}A página de ${businessName} teve atividade em ${periodLabel}
 
 Visualizações da página: ${pageViews}
 Interações com contactos: ${interactions}
 
-Com o Plano Destaque, o negócio ganha prioridade nas listagens, presença rotativa na página inicial e acesso às estatísticas detalhadas.
+${
+  recommendations.length > 0
+    ? `Melhorias recomendadas:\n${recommendations
+        .slice(0, 2)
+        .map((item) => `- ${item.title}: ${item.description}`)
+        .join("\n")}`
+    : "O perfil está bem preenchido. Com o Plano Destaque, o negócio ganha prioridade nas listagens, presença rotativa na página inicial e acesso às estatísticas detalhadas."
+}
 
-Ativar Plano Destaque — 4,99 €/mês:
-${clientAreaUrl}
+${recommendations.length > 0 ? recommendations[0].ctaLabel : "Ativar Plano Destaque — 4,99 €/mês"}:
+${recommendations.length > 0 ? editBusinessUrl : clientAreaUrl}
 
 Ver a página do negócio:
 ${businessUrl}
 
-Se não pretender receber relatórios mensais, peça a desativação através de geral@montramontijo.pt.
+Cancelar os relatórios mensais:
+${reportPreferencesUrl}
     `.trim()
   });
 

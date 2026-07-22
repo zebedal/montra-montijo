@@ -1,6 +1,13 @@
 import "server-only";
 
-import { sendMonthlyFreeBusinessReportEmail } from "@/lib/resend/sendMonthlyFreeBusinessReportEmail";
+import {
+  sendMonthlyFreeBusinessReportEmail,
+  type MonthlyReportRecommendation
+} from "@/lib/resend/sendMonthlyFreeBusinessReportEmail";
+import {
+  createMonthlyReportUnsubscribeToken,
+  getMonthlyReportSiteUrl
+} from "@/lib/resend/monthlyReportPreferences";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 type SendMonthlyFreeBusinessReportEmailOnceParams = {
@@ -13,6 +20,7 @@ type SendMonthlyFreeBusinessReportEmailOnceParams = {
   periodLabel: string;
   pageViews: number;
   interactions: number;
+  recommendations: MonthlyReportRecommendation[];
 };
 
 type SendMonthlyFreeBusinessReportEmailOnceResult = {
@@ -29,7 +37,8 @@ export async function sendMonthlyFreeBusinessReportEmailOnce({
   periodKey,
   periodLabel,
   pageViews,
-  interactions
+  interactions,
+  recommendations
 }: SendMonthlyFreeBusinessReportEmailOnceParams): Promise<SendMonthlyFreeBusinessReportEmailOnceResult> {
   const emailType = `monthly_free_business_report:${periodKey}`;
 
@@ -58,7 +67,12 @@ export async function sendMonthlyFreeBusinessReportEmailOnce({
     businessSlug,
     periodLabel,
     pageViews,
-    interactions
+    interactions,
+    businessId,
+    recommendations,
+    unsubscribeUrl: `${getMonthlyReportSiteUrl()}/cancelar-relatorios?token=${encodeURIComponent(
+      createMonthlyReportUnsubscribeToken(userId)
+    )}`
   });
 
   const sentAt = new Date().toISOString();
