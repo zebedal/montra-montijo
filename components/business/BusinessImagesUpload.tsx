@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { UploadImage } from "@/types/upload-image";
 import { SortableImageCard } from "./SortableImageCard";
 
-const MAX_IMAGES = 6;
+const MAX_IMAGES = 8;
 
 type Props = {
   images: UploadImage[];

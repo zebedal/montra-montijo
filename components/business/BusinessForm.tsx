@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +43,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Routes } from "@/types";
 import {
   prepareBusinessMedia,
@@ -61,6 +61,11 @@ const PENDING_BUSINESS_FORM_NOTICE_KEY =
   "montra-pending-business-form-notice-shown";
 const AUTH_ROUTE = "/login";
 const CREATE_BUSINESS_ROUTE = "/criar-negocio";
+const CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "geral@montramontijo.pt";
+const CATEGORY_REQUEST_EMAIL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+  "Sugestão de nova categoria - Montra Montijo"
+)}`;
 
 type Categoria = {
   id: string;
@@ -560,6 +565,7 @@ export default function BusinessForm({
                           onBlur={field.onBlur}
                           placeholder="Seleciona uma categoria *"
                           aria-invalid={fieldState.invalid}
+                          aria-describedby="category-help"
                         />
 
                         <ComboboxContent>
@@ -582,6 +588,21 @@ export default function BusinessForm({
                           {fieldState.error.message}
                         </p>
                       )}
+
+                      <p
+                        id="category-help"
+                        className="text-sm text-muted-foreground"
+                      >
+                        Não encontras a categoria certa? Envia-nos a tua sugestão
+                        para{" "}
+                        <a
+                          href={CATEGORY_REQUEST_EMAIL}
+                          className="font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                          {CONTACT_EMAIL}
+                        </a>
+                        .
+                      </p>
                     </>
                   )}
                 />
