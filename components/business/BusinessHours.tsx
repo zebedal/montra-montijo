@@ -41,24 +41,26 @@ export function BusinessHours({ hours }: Props) {
     <Card>
       <CardHeader>
         <CardTitle>Horário</CardTitle>
-        <div className="mt-3 flex items-center gap-2 rounded-lg border px-3 py-2">
-          <div
-            className={`h-3 w-3 rounded-full ${
-              status.open ? "bg-green-500" : "bg-red-500"
-            }`}
-          />
+        {hasOpeningHours && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg border px-3 py-2">
+            <div
+              className={`h-3 w-3 rounded-full ${
+                status.open ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
 
-          <div className="text-sm">
-            <span className="font-medium">
-              {status.open ? "Aberto agora" : "Encerrado"}
-            </span>
+            <div className="text-sm">
+              <span className="font-medium">
+                {status.open ? "Aberto agora" : "Encerrado"}
+              </span>
 
-            <span className="text-muted-foreground">
-              {" • "}
-              {status.message}
-            </span>
+              <span className="text-muted-foreground">
+                {" • "}
+                {status.message}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </CardHeader>
 
       <CardContent>

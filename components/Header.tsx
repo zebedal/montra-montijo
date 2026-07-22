@@ -283,22 +283,6 @@ export function Header() {
                     </div>
                   </section>
 
-                  <section>
-                    <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300/75">
-                      Montra Montijo
-                    </p>
-
-                    <div className="space-y-1">
-                      <MobileNavLink href={Routes.SOBRE} icon={Info}>
-                        Sobre
-                      </MobileNavLink>
-
-                      <MobileNavLink href={Routes.CONTACTOS} icon={Mail}>
-                        Contactos
-                      </MobileNavLink>
-                    </div>
-                  </section>
-
                   {!loading && (
                     <section>
                       <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-300/75">
