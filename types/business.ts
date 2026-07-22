@@ -54,6 +54,7 @@ export type PublicBusinessDetails = {
   description: string | null;
   logo_url: string | null;
   phone: string;
+  whatsapp_phone: string | null;
   email: string | null;
   website: string | null;
   facebook: string | null;

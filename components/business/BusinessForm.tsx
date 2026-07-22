@@ -129,6 +129,8 @@ export default function BusinessForm({
       category_id: initialData?.category_id ?? "",
       description: initialData?.description ?? "",
       phone: initialData?.phone ?? "",
+      allowWhatsApp: initialData?.allowWhatsApp ?? false,
+      whatsappPhone: initialData?.whatsappPhone ?? "",
       email: initialData?.email ?? "",
       website: initialData?.website ?? "",
       facebook: initialData?.facebook ?? "",
@@ -157,6 +159,10 @@ export default function BusinessForm({
   const selectedCategoryId = useWatch({
     control,
     name: "category_id"
+  });
+  const allowWhatsApp = useWatch({
+    control,
+    name: "allowWhatsApp"
   });
 
   const isProcessing = isSubmitting || isPublishing || isCheckingAuth;
@@ -364,6 +370,8 @@ export default function BusinessForm({
       category_id: initialData.category_id ?? "",
       description: initialData.description ?? "",
       phone: initialData.phone ?? "",
+      allowWhatsApp: initialData.allowWhatsApp ?? false,
+      whatsappPhone: initialData.whatsappPhone ?? "",
       email: initialData.email ?? "",
       website: initialData.website ?? "",
       facebook: initialData.facebook ?? "",
@@ -405,6 +413,8 @@ export default function BusinessForm({
 
       reset({
         ...parsed.form,
+        allowWhatsApp: parsed.form.allowWhatsApp ?? false,
+        whatsappPhone: parsed.form.whatsappPhone ?? "",
         openingHours: hasOpeningHours ? parsed.form.openingHours : []
       });
 
@@ -628,6 +638,59 @@ export default function BusinessForm({
               {errors.phone && (
                 <p className="text-sm text-red-500">{errors.phone.message}</p>
               )}
+
+              <Controller
+                name="allowWhatsApp"
+                control={control}
+                render={({ field }) => (
+                  <div className="space-y-3 rounded-xl border p-4">
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          const enabled = checked === true;
+                          field.onChange(enabled);
+
+                          if (enabled && !getValues("whatsappPhone")) {
+                            setValue("whatsappPhone", getValues("phone"), {
+                              shouldDirty: true
+                            });
+                          }
+                        }}
+                      />
+
+                      <span className="space-y-1">
+                        <span className="block text-sm font-medium">
+                          Permitir contacto via WhatsApp
+                        </span>
+                        <span className="block text-sm text-muted-foreground">
+                          O número ficará visível na página pública do negócio.
+                        </span>
+                      </span>
+                    </label>
+
+                    {allowWhatsApp && (
+                      <div className="space-y-1 pl-7">
+                        <Input
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          placeholder="Número de WhatsApp"
+                          {...register("whatsappPhone")}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Pode usar o indicativo, por exemplo +351 912 345 678.
+                        </p>
+                        {errors.whatsappPhone && (
+                          <p className="text-sm text-red-500">
+                            {errors.whatsappPhone.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              />
 
               <Input placeholder="Email" {...register("email")} />
               <Input placeholder="Website" {...register("website")} />

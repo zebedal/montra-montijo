@@ -141,6 +141,9 @@ export async function publishBusiness({
         slug,
         description: form.description,
         phone: form.phone,
+        whatsapp_phone: form.allowWhatsApp
+          ? form.whatsappPhone?.trim() || null
+          : null,
         email: form.email || null,
         website: form.website || null,
         facebook: form.facebook || null,

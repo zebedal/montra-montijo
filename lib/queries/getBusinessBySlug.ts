@@ -40,6 +40,7 @@ type BusinessRow = {
   description: string | null;
   logo_url: string | null;
   phone: string;
+  whatsapp_phone: string | null;
   email: string | null;
   website: string | null;
   facebook: string | null;
@@ -83,6 +84,7 @@ export async function getBusinessBySlug({
         description,
         logo_url,
         phone,
+        whatsapp_phone,
         email,
         website,
         facebook,
@@ -173,6 +175,7 @@ export async function getBusinessBySlug({
       description: business.description,
       logo_url: logoUrl,
       phone: business.phone,
+      whatsapp_phone: business.whatsapp_phone,
       email: business.email,
       website: business.website,
       facebook: business.facebook,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Globe, Mail, MapPin, MapPinned, Phone } from "lucide-react";
-import { SiFacebook, SiInstagram } from "react-icons/si";
+import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ type BusinessContactProps = {
     postal_code: string | null;
     city: string | null;
     phone: string | null;
+    whatsapp_phone: string | null;
     email: string | null;
     website: string | null;
     instagram: string | null;
@@ -47,6 +48,16 @@ function getDisplayUrl(value: string) {
   } catch {
     return value;
   }
+}
+
+function getWhatsAppUrl(phone: string) {
+  let digits = phone.replace(/\D/g, "");
+
+  if (digits.length === 9) {
+    digits = `351${digits}`;
+  }
+
+  return `https://wa.me/${digits}`;
 }
 
 export function BusinessContact({ business }: BusinessContactProps) {
@@ -86,6 +97,20 @@ export function BusinessContact({ business }: BusinessContactProps) {
             href: `tel:${business.phone}`,
             eventType: "phone_click" as const,
             iconClass: "bg-green-100 text-green-700"
+          }
+        ]
+      : []),
+
+    ...(business.whatsapp_phone
+      ? [
+          {
+            label: "WhatsApp",
+            value: business.whatsapp_phone,
+            icon: SiWhatsapp,
+            href: getWhatsAppUrl(business.whatsapp_phone),
+            external: true,
+            eventType: "phone_click" as const,
+            iconClass: "bg-emerald-100 text-emerald-700"
           }
         ]
       : []),

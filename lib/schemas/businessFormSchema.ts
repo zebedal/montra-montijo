@@ -13,34 +13,50 @@ export const openingHourSchema = z.object({
 /**
  * BUSINESS
  */
-export const businessSchema = z.object({
-  name: z.string().min(2, "Indica o nome do negócio."),
+export const businessSchema = z
+  .object({
+    name: z.string().min(2, "Indica o nome do negócio."),
 
-  category_id: z.string().min(1, "Selecione uma categoria válida."),
+    category_id: z.string().min(1, "Selecione uma categoria válida."),
 
-  description: z
-    .string()
-    .min(20, "A descrição deve ter pelo menos 20 caracteres."),
+    description: z
+      .string()
+      .min(20, "A descrição deve ter pelo menos 20 caracteres."),
 
-  phone: z.string().min(9, "Número de telefone inválido."),
+    phone: z.string().min(9, "Número de telefone inválido."),
+    allowWhatsApp: z.boolean(),
+    whatsappPhone: z.string().optional().or(z.literal("")),
 
-  email: z.string().email().optional().or(z.literal("")),
+    email: z.string().email().optional().or(z.literal("")),
 
-  website: z.string().optional().or(z.literal("")),
-  facebook: z.string().optional().or(z.literal("")),
-  instagram: z.string().optional().or(z.literal("")),
+    website: z.string().optional().or(z.literal("")),
+    facebook: z.string().optional().or(z.literal("")),
+    instagram: z.string().optional().or(z.literal("")),
 
-  street: z.string().min(1, "A rua é obrigatória."),
-  number: z.string().min(1, "O número é obrigatório."),
-  postalCode: z
-    .string()
-    .regex(/^\d{4}-\d{3}$/, "O código postal deve ter o formato XXXX-XXX"),
+    street: z.string().min(1, "A rua é obrigatória."),
+    number: z.string().min(1, "O número é obrigatório."),
+    postalCode: z
+      .string()
+      .regex(/^\d{4}-\d{3}$/, "O código postal deve ter o formato XXXX-XXX"),
 
-  city: z.string().optional().or(z.literal("")),
-  images: z.array(z.string()),
-  logo: z.string().optional(),
-  openingHours: z.array(openingHourSchema).optional()
-});
+    city: z.string().optional().or(z.literal("")),
+    images: z.array(z.string()),
+    logo: z.string().optional(),
+    openingHours: z.array(openingHourSchema).optional()
+  })
+  .superRefine((data, context) => {
+    if (!data.allowWhatsApp) return;
+
+    const digits = data.whatsappPhone?.replace(/\D/g, "") ?? "";
+
+    if (digits.length < 9 || digits.length > 15) {
+      context.addIssue({
+        code: "custom",
+        path: ["whatsappPhone"],
+        message: "Indica um número de WhatsApp válido."
+      });
+    }
+  });
 
 export type BusinessFormData = z.infer<typeof businessSchema>;
 

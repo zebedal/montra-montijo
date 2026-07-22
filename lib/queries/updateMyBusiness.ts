@@ -30,6 +30,9 @@ export async function updateMyBusiness(
     category_id: data.category_id,
     description: data.description,
     phone: data.phone,
+    whatsapp_phone: data.allowWhatsApp
+      ? data.whatsappPhone?.trim() || null
+      : null,
     email: data.email,
     website: data.website,
     facebook: data.facebook,
