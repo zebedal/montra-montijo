@@ -15,9 +15,13 @@ import { supabase } from "@/lib/supabase/client";
 
 type Props = {
   initialDraftId: string | null;
+  canPublishTestBusiness?: boolean;
 };
 
-export default function BusinessPlanContent({ initialDraftId }: Props) {
+export default function BusinessPlanContent({
+  initialDraftId,
+  canPublishTestBusiness = false
+}: Props) {
   const router = useRouter();
   const { clearDraft } = useCreateBusiness();
 
@@ -26,8 +30,10 @@ export default function BusinessPlanContent({ initialDraftId }: Props) {
   const [isPublishingFree, setIsPublishingFree] = useState(false);
 
   const [isStartingPremium, setIsStartingPremium] = useState(false);
+  const [isPublishingTest, setIsPublishingTest] = useState(false);
 
-  const isSubmitting = isPublishingFree || isStartingPremium;
+  const isSubmitting =
+    isPublishingFree || isStartingPremium || isPublishingTest;
 
   useEffect(() => {
     if (draftId) {
@@ -177,6 +183,57 @@ export default function BusinessPlanContent({ initialDraftId }: Props) {
       );
 
       setIsStartingPremium(false);
+    }
+  }
+
+  async function publishHiddenTestBusiness() {
+    if (!draftId || isSubmitting || !canPublishTestBusiness) {
+      return;
+    }
+
+    try {
+      setIsPublishingTest(true);
+
+      const response = await fetch("/api/publish-business", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          draftId,
+          isFeatured: false,
+          isTest: true
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ?? "Não foi possível criar o negócio de teste."
+        );
+      }
+
+      clearDraft();
+
+      toast.success("Negócio de teste criado e mantido oculto.", {
+        position: "top-center"
+      });
+
+      router.replace("/area-cliente");
+    } catch (error) {
+      console.error("Erro ao criar negócio de teste:", error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível criar o negócio de teste.",
+        {
+          position: "top-center"
+        }
+      );
+    } finally {
+      setIsPublishingTest(false);
     }
   }
 
@@ -331,6 +388,38 @@ export default function BusinessPlanContent({ initialDraftId }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {canPublishTestBusiness && (
+        <div className="mt-6 w-full rounded-xl border border-dashed border-amber-400 bg-amber-50 p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-amber-950">
+                Ferramenta de administrador
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                Cria este negócio no plano gratuito, mas mantém-no fora das
+                páginas públicas, pesquisas e sitemap.
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={publishHiddenTestBusiness}
+              disabled={!draftId || isSubmitting}
+              className="shrink-0 border-amber-500 bg-white text-amber-950 hover:bg-amber-100"
+            >
+              {isPublishingTest ? (
+                <span className="flex items-center gap-2">
+                  <Spinner />A criar teste...
+                </span>
+              ) : (
+                "Criar negócio de teste (oculto)"
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

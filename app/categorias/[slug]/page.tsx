@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
+import { getSiteUrl } from "@/lib/site-url";
 
 type Props = {
   params: Promise<{
@@ -69,13 +70,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       type: "website",
       locale: "pt_PT",
-      siteName: "Montra Montijo"
+      siteName: "Montra Montijo",
+      images: ["/images/default-og-image.jpg"]
     },
 
     twitter: {
       card: "summary_large_image",
       title,
-      description
+      description,
+      images: ["/images/default-og-image.jpg"]
     },
 
     robots: {
@@ -96,9 +99,7 @@ export default async function CategoryPage({ params }: Props) {
 
   const businesses = await getBusinessesByCategory(category.slug);
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
   const categoryUrl = `${siteUrl}/categorias/${category.slug}`;
 

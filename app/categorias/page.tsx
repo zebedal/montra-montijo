@@ -4,6 +4,7 @@ import CategoriesView from "@/components/categorias/CategoriesPage";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
 
+import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -23,14 +24,16 @@ export const metadata: Metadata = {
     url: "/categorias",
     type: "website",
     locale: "pt_PT",
-    siteName: "Montra Montijo"
+    siteName: "Montra Montijo",
+    images: ["/images/default-og-image.jpg"]
   },
 
   twitter: {
     card: "summary_large_image",
     title: "Categorias de negócios no Montijo",
     description:
-      "Explore empresas, lojas, restaurantes e serviços locais por categoria na Montra Montijo."
+      "Explore empresas, lojas, restaurantes e serviços locais por categoria na Montra Montijo.",
+    images: ["/images/default-og-image.jpg"]
   },
 
   robots: {
@@ -71,9 +74,7 @@ export default async function CategoriesPage() {
       businessCount: category.businesses?.length ?? 0
     })) ?? [];
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
   const categoriesUrl = `${siteUrl}/categorias`;
 

@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import { getSiteUrl } from "@/lib/site-url";
 
 const inter = Instrument_Sans({
   subsets: ["latin"],
@@ -20,7 +21,7 @@ const manrope = Plus_Jakarta_Sans({
   variable: "--font-manrope"
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -65,14 +66,23 @@ export const metadata: Metadata = {
     siteName: "Montra Montijo",
     title: "Montra Montijo",
     description:
-      "Descubra restaurantes, lojas, empresas e serviços locais no Montijo."
+      "Descubra restaurantes, lojas, empresas e serviços locais no Montijo.",
+    images: [
+      {
+        url: "/images/default-og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Praça da República no Montijo"
+      }
+    ]
   },
 
   twitter: {
     card: "summary_large_image",
     title: "Montra Montijo",
     description:
-      "Descubra restaurantes, lojas, empresas e serviços locais no Montijo."
+      "Descubra restaurantes, lojas, empresas e serviços locais no Montijo.",
+    images: ["/images/default-og-image.jpg"]
   },
 
   robots: {

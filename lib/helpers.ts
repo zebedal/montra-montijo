@@ -23,6 +23,7 @@ type PublishBusinessOptions = {
   userId: string;
   draft: BusinessDraftData;
   isFeatured?: boolean;
+  isVisible?: boolean;
 };
 
 export type BusinessDraftData = {
@@ -101,7 +102,8 @@ export async function publishBusiness({
   businessId,
   userId,
   draft,
-  isFeatured = false
+  isFeatured = false,
+  isVisible = true
 }: PublishBusinessOptions): Promise<PublishBusinessReturn> {
   try {
     const { form, logoUrl, imageUrls } = draft;
@@ -150,7 +152,8 @@ export async function publishBusiness({
         latitude: coordinates?.latitude ?? null,
         longitude: coordinates?.longitude ?? null,
         logo_url: logoUrl,
-        plan: isFeatured ? "premium" : "free"
+        plan: isFeatured ? "premium" : "free",
+        is_visible: isVisible
       });
     console.log("Insert error:", insertError);
     if (insertError) throw insertError;

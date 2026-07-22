@@ -1,3 +1,5 @@
+import { getSiteUrl } from "@/lib/site-url";
+
 type Props = {
   business: {
     slug: string;
@@ -61,9 +63,7 @@ function getSchemaDay(day: string) {
 }
 
 export default function LocalBusinessJsonLd({ business, hours }: Props) {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const baseUrl = getSiteUrl();
 
   const businessPageUrl = `${baseUrl}/negocio/${business.slug}`;
 

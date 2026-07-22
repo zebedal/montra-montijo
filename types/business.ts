@@ -25,6 +25,7 @@ export type PublicBusinessSummary = {
 };
 
 export type BusinessSummary = PublicBusinessSummary & {
+  is_visible: boolean;
   stripe_subscription_id: string | null;
   subscription_status: string | null;
   cancel_at_period_end: boolean;

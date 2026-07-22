@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 
 import { getEventBySlug } from "@/lib/queries/getEventBySlug";
 import ShareButton from "@/components/business/ShareButton";
+import { getSiteUrl } from "@/lib/site-url";
 
 type Props = {
   params: Promise<{
@@ -24,9 +25,7 @@ type Props = {
   }>;
 };
 
-const siteUrl = (
-  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-).replace(/\/$/, "");
+const siteUrl = getSiteUrl();
 
 function formatEventDate(date: string): string {
   return new Intl.DateTimeFormat("pt-PT", {
@@ -125,14 +124,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
               alt: event.title
             }
           ]
-        : undefined
+        : [
+            {
+              url: `${siteUrl}/images/default-og-image.jpg`,
+              width: 1200,
+              height: 630,
+              alt: "Praça da República no Montijo"
+            }
+          ]
     },
 
     twitter: {
       card: "summary_large_image",
       title: event.title,
       description,
-      images: event.imageUrl ? [event.imageUrl] : undefined
+      images: event.imageUrl
+        ? [event.imageUrl]
+        : [`${siteUrl}/images/default-og-image.jpg`]
     },
 
     robots: {

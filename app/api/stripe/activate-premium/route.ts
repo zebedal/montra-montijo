@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe/server";
+import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 
 type RequestBody = {
@@ -60,12 +61,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const origin =
-      request.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL;
-
-    if (!origin) {
-      throw new Error("A URL da aplicação não está configurada.");
-    }
+    const origin = request.headers.get("origin") ?? getSiteUrl();
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

@@ -14,9 +14,12 @@ import BusinessCta from "@/components/BusinessCta";
 import WebsiteJsonLd from "@/components/seo/WebsiteJsonLd";
 import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
 import UpcomingEventsSection from "@/components/UpcomingEvents";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Comércio local no Montijo",
+  title: {
+    absolute: "Comércio local no Montijo | Montra Montijo"
+  },
 
   description:
     "Descubra o comércio local do Montijo. Encontre restaurantes, lojas, empresas e serviços locais na Montra Montijo.",
@@ -32,14 +35,23 @@ export const metadata: Metadata = {
     url: "/",
     type: "website",
     locale: "pt_PT",
-    siteName: "Montra Montijo"
+    siteName: "Montra Montijo",
+    images: [
+      {
+        url: "/images/default-og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Praça da República no Montijo"
+      }
+    ]
   },
 
   twitter: {
     card: "summary_large_image",
     title: "Comércio local no Montijo",
     description:
-      "Descubra restaurantes, lojas, empresas e serviços locais na Montra Montijo."
+      "Descubra restaurantes, lojas, empresas e serviços locais na Montra Montijo.",
+    images: ["/images/default-og-image.jpg"]
   },
 
   robots: {
@@ -195,9 +207,7 @@ export default async function Home() {
     .slice(0, 6)
     .map(mapBusiness);
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
   return (
     <main>

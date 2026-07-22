@@ -1,11 +1,10 @@
 import type { MetadataRoute } from "next";
 
 import { BUSINESSES_PER_PAGE } from "@/lib/queries/getPublicBusinesses";
+import { getSiteUrl } from "@/lib/site-url";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-const siteUrl = (
-  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-).replace(/\/$/, "");
+const siteUrl = getSiteUrl();
 
 export const revalidate = 3600;
 
@@ -35,6 +34,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${siteUrl}/criar-negocio`,
       changeFrequency: "monthly",
       priority: 0.7
+    },
+    {
+      url: `${siteUrl}/plano-destaque`,
+      changeFrequency: "monthly",
+      priority: 0.7
+    },
+    {
+      url: `${siteUrl}/sobre`,
+      changeFrequency: "monthly",
+      priority: 0.5
+    },
+    {
+      url: `${siteUrl}/contactos`,
+      changeFrequency: "monthly",
+      priority: 0.5
     }
   ];
 

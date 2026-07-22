@@ -15,6 +15,7 @@ import BusinessHomeCard from "@/components/business/BusinessHomeCard";
 import BusinessesPagination from "@/components/area-cliente/BusinessPagination";
 import PageContainer from "@/components/PageContainer";
 import heroImage from "@/public/images/montijo-praca.webp";
+import { getSiteUrl } from "@/lib/site-url";
 
 type SearchParams = Promise<{
   page?: string | string[];
@@ -63,12 +64,14 @@ export async function generateMetadata({
       url: canonical,
       type: "website",
       locale: "pt_PT",
-      siteName: "Montra Montijo"
+      siteName: "Montra Montijo",
+      images: ["/images/default-og-image.jpg"]
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} | Montra Montijo`,
-      description
+      description,
+      images: ["/images/default-og-image.jpg"]
     }
   };
 }
@@ -82,9 +85,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
     limit: BUSINESSES_PER_PAGE
   });
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
   if (total > 0 && requestedPage > totalPages) {
     redirect(totalPages <= 1 ? "/negocios" : `/negocios?page=${totalPages}`);

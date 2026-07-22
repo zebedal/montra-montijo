@@ -9,6 +9,7 @@ import {
   Building2,
   EllipsisVertical,
   ExternalLink,
+  Mail,
   MapPin,
   Pencil,
   Trash2,
@@ -31,12 +32,17 @@ import DeleteBusinessDialog from "@/components/area-cliente/DeleteBusinessDialog
 import type { BusinessSummary } from "@/types/business";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type Props = {
   business: BusinessSummary;
+  canSendTestReport?: boolean;
 };
 
-export default function MyBusinessCard({ business }: Props) {
+export default function MyBusinessCard({
+  business,
+  canSendTestReport = false
+}: Props) {
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState<{
     open: boolean;
     variant?: "subscription" | "statistics";
@@ -46,6 +52,7 @@ export default function MyBusinessCard({ business }: Props) {
   });
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isSendingTestReport, setIsSendingTestReport] = useState(false);
   const router = useRouter();
 
   function handleStatisticsClick() {
@@ -58,6 +65,55 @@ export default function MyBusinessCard({ business }: Props) {
 
     setSubscriptionDialogOpen({ open: true, variant: "statistics" });
   }
+
+  async function sendTestReport() {
+    if (isSendingTestReport) {
+      return;
+    }
+
+    try {
+      setIsSendingTestReport(true);
+
+      const response = await fetch(
+        "/api/cron/send-monthly-free-business-reports",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            businessId: business.id
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ?? "Não foi possível enviar o relatório de teste."
+        );
+      }
+
+      toast.success("Relatório de teste enviado para o teu email.", {
+        position: "top-center"
+      });
+      setDropdownOpen(false);
+    } catch (error) {
+      console.error("Erro ao enviar relatório de teste:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível enviar o relatório de teste.",
+        {
+          position: "top-center"
+        }
+      );
+    } finally {
+      setIsSendingTestReport(false);
+    }
+  }
+
   return (
     <>
       <div className="rounded-2xl border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
@@ -95,6 +151,15 @@ export default function MyBusinessCard({ business }: Props) {
                 >
                   {business.plan === "premium" ? "Premium" : "Gratuito"}
                 </Badge>
+
+                {!business.is_visible && (
+                  <Badge
+                    variant="outline"
+                    className="border-amber-500 text-amber-800"
+                  >
+                    Teste · oculto
+                  </Badge>
+                )}
               </div>
 
               {business.category && (
@@ -120,12 +185,26 @@ export default function MyBusinessCard({ business }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 md:ml-auto">
-            <Button asChild variant="outline">
-              <Link href={`/negocio/${business.slug}`}>
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Ver página
-              </Link>
-            </Button>
+            {business.is_visible && (
+              <Button asChild variant="outline">
+                <Link href={`/negocio/${business.slug}`}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Ver página
+                </Link>
+              </Button>
+            )}
+
+            {canSendTestReport && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void sendTestReport()}
+                disabled={isSendingTestReport}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                {isSendingTestReport ? "A enviar..." : "Testar relatório"}
+              </Button>
+            )}
 
             <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
@@ -149,36 +228,41 @@ export default function MyBusinessCard({ business }: Props) {
                     Editar negócio
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    setSubscriptionDialogOpen({
-                      open: true,
-                      variant: "subscription"
-                    });
-                    setDropdownOpen(false);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <BadgeCheck className="mr-2 h-4 w-4" />
-                  {business.plan === "premium"
-                    ? "Gerir subscrição"
-                    : "Ativar Premium"}
-                </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                {business.is_visible && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        setSubscriptionDialogOpen({
+                          open: true,
+                          variant: "subscription"
+                        });
+                        setDropdownOpen(false);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <BadgeCheck className="mr-2 h-4 w-4" />
+                      {business.plan === "premium"
+                        ? "Gerir subscrição"
+                        : "Ativar Premium"}
+                    </DropdownMenuItem>
 
-                <DropdownMenuItem
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    handleStatisticsClick();
-                  }}
-                  className="cursor-pointer"
-                >
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  Estatísticas
-                </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        handleStatisticsClick();
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      Estatísticas
+                    </DropdownMenuItem>
+                  </>
+                )}
 
                 <DropdownMenuSeparator />
 

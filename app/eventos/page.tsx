@@ -10,26 +10,6 @@ import { Button } from "@/components/ui/button";
 
 import { getUpcomingEvents } from "@/lib/queries/getUpcomingEvents";
 
-export const metadata: Metadata = {
-  title: "Agenda do Montijo",
-  description:
-    "Descubra os próximos eventos, espetáculos, atividades culturais, festas e iniciativas no concelho do Montijo.",
-
-  alternates: {
-    canonical: "/eventos"
-  },
-
-  openGraph: {
-    title: "Agenda do Montijo | Montra Montijo",
-    description:
-      "Consulte os próximos eventos, espetáculos e atividades no concelho do Montijo.",
-    url: "/eventos",
-    type: "website",
-    locale: "pt_PT",
-    siteName: "Montra Montijo"
-  }
-};
-
 type Props = {
   searchParams: Promise<{
     page?: string;
@@ -37,6 +17,41 @@ type Props = {
 };
 
 const PAGE_SIZE = 9;
+
+export async function generateMetadata({
+  searchParams
+}: Props): Promise<Metadata> {
+  const { page: pageParam } = await searchParams;
+  const parsedPage = Number(pageParam ?? "1");
+  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const title = page > 1 ? `Agenda do Montijo — Página ${page}` : "Agenda do Montijo";
+  const description =
+    "Descubra os próximos eventos, espetáculos, atividades culturais, festas e iniciativas no concelho do Montijo.";
+  const canonical = page > 1 ? `/eventos?page=${page}` : "/eventos";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical
+    },
+    openGraph: {
+      title: `${title} | Montra Montijo`,
+      description,
+      url: canonical,
+      type: "website",
+      locale: "pt_PT",
+      siteName: "Montra Montijo",
+      images: ["/images/default-og-image.jpg"]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Montra Montijo`,
+      description,
+      images: ["/images/default-og-image.jpg"]
+    }
+  };
+}
 
 export default async function EventsPage({ searchParams }: Props) {
   const { page: pageParam } = await searchParams;

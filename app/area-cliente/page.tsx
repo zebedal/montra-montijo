@@ -4,6 +4,7 @@ import MyBusinessCard from "@/components/area-cliente/MyBusinessCard";
 import { getMyBusinesses } from "@/lib/queries/getMyBusinesses";
 import { Metadata } from "next";
 import PremiumCheckoutDialog from "@/components/area-cliente/PremiumCheckoutDialog";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 
 export const metadata: Metadata = {
   title: "Os meus negócios",
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ClientAreaPage() {
-  const businesses = await getMyBusinesses();
+  const [businesses, admin] = await Promise.all([
+    getMyBusinesses(),
+    requireAdmin()
+  ]);
 
   if (!businesses || businesses.length === 0) {
     return (
@@ -62,7 +66,11 @@ export default async function ClientAreaPage() {
 
       <div className="space-y-4">
         {businesses.map((business) => (
-          <MyBusinessCard key={business.id} business={business} />
+          <MyBusinessCard
+            key={business.id}
+            business={business}
+            canSendTestReport={admin.authorized}
+          />
         ))}
       </div>
     </div>

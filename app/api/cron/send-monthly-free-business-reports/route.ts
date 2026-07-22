@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { requireAdmin } from "@/lib/auth/requireAdmin";
 import {
   sendMonthlyFreeBusinessReportEmail,
   type MonthlyReportRecommendation
@@ -375,7 +376,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAuthorized(request)) {
+  const isCronAuthorized = isAuthorized(request);
+  const admin = isCronAuthorized ? null : await requireAdmin();
+  const adminUserId = admin?.authorized ? admin.userId : null;
+
+  if (!isCronAuthorized && !admin?.authorized) {
     return NextResponse.json(
       {
         error: "Não autorizado."
@@ -394,12 +399,19 @@ export async function POST(request: NextRequest) {
 
     const businessId =
       typeof body.businessId === "string" ? body.businessId.trim() : "";
-    const email = typeof body.email === "string" ? body.email.trim() : "";
+    const requestedEmail =
+      typeof body.email === "string" ? body.email.trim() : "";
 
-    if (!businessId || !email || !/^\S+@\S+\.\S+$/.test(email)) {
+    if (
+      !businessId ||
+      (isCronAuthorized &&
+        (!requestedEmail || !/^\S+@\S+\.\S+$/.test(requestedEmail)))
+    ) {
       return NextResponse.json(
         {
-          error: "Indique um businessId e um email válidos."
+          error: isCronAuthorized
+            ? "Indique um businessId e um email válidos."
+            : "Indique um businessId válido."
         },
         {
           status: 400
@@ -430,6 +442,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!isCronAuthorized && business.user_id !== adminUserId) {
+      return NextResponse.json(
+        {
+          error: "Este negócio não pertence ao administrador."
+        },
+        {
+          status: 403
+        }
+      );
+    }
+
+    let recipientEmail = requestedEmail;
+
+    if (!isCronAuthorized && admin?.authorized) {
+      const {
+        data: { user: adminUser },
+        error: adminUserError
+      } = await supabaseAdmin.auth.admin.getUserById(admin.userId);
+
+      if (adminUserError || !adminUser?.email) {
+        throw new Error("O administrador não tem um email válido.");
+      }
+
+      recipientEmail = adminUser.email;
+    }
+
     const period = getPreviousMonthPeriod();
     const activity = await getBusinessActivity(business.id, period);
     const recommendations = await getBusinessProfileRecommendations(
@@ -437,7 +475,7 @@ export async function POST(request: NextRequest) {
     );
 
     await sendMonthlyFreeBusinessReportEmail({
-      email,
+      email: recipientEmail,
       businessName: business.name,
       businessSlug: business.slug,
       periodLabel: period.label,
@@ -452,7 +490,7 @@ export async function POST(request: NextRequest) {
       success: true,
       test: true,
       recordedAsMonthlyDelivery: false,
-      recipient: email,
+      recipient: recipientEmail,
       business: {
         id: business.id,
         name: business.name,

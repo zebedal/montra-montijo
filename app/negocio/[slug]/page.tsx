@@ -18,6 +18,7 @@ import { getRelatedBusinesses } from "@/lib/queries/getRelatedBusinesses";
 import RelatedBusinesses from "@/components/business/RelatedBusinesses";
 import BusinessClaimButton from "@/components/business/BusinessClaimButton";
 import BusinessOwnerPremiumBanner from "@/components/business/BusinessOwnerPremiumBanner";
+import { getSiteUrl } from "@/lib/site-url";
 
 interface Props {
   params: Promise<{
@@ -84,9 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
   const title = `${business.name} no Montijo`;
 
@@ -179,9 +178,7 @@ export default async function BusinessPage({ params }: Props) {
       })
     : [];
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
   const businessUrl = `${siteUrl}/negocio/${business.slug}`;
 

@@ -10,7 +10,8 @@ export async function POST(req: Request) {
   const supabase = await createClient();
 
   try {
-    const { draftId, isFeatured } = await req.json();
+    const { draftId, isTest } = await req.json();
+    const isFeatured = false;
 
     if (!draftId) {
       return NextResponse.json({ error: "DraftId em falta." }, { status: 400 });
@@ -26,6 +27,22 @@ export async function POST(req: Request) {
 
     if (authError || !user) {
       return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+    }
+
+    const isHiddenTestBusiness = isTest === true;
+
+    if (
+      isHiddenTestBusiness &&
+      (!process.env.ADMIN_USER_ID || user.id !== process.env.ADMIN_USER_ID)
+    ) {
+      return NextResponse.json(
+        {
+          error: "Não tem permissão para criar negócios de teste."
+        },
+        {
+          status: 403
+        }
+      );
     }
 
     /**
@@ -62,7 +79,8 @@ export async function POST(req: Request) {
         ...draft.data,
         ...movedAssets
       },
-      isFeatured
+      isFeatured,
+      isVisible: !isHiddenTestBusiness
     });
 
     /**
@@ -71,7 +89,7 @@ export async function POST(req: Request) {
      * Uma falha no email não deve impedir a publicação
      * do negócio.
      */
-    if (user.email) {
+    if (user.email && !isHiddenTestBusiness) {
       try {
         const result = await sendBusinessPublishedEmailOnce({
           userId: user.id,
@@ -103,7 +121,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       businessId: publishedBusiness.id,
-      businessSlug: publishedBusiness.slug
+      businessSlug: publishedBusiness.slug,
+      isVisible: !isHiddenTestBusiness
     });
   } catch (error) {
     console.error("PUBLISH ERROR:", error);

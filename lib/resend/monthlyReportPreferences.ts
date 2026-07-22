@@ -2,8 +2,9 @@ import "server-only";
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import { getSiteUrl } from "@/lib/site-url";
+
 const TOKEN_DURATION_SECONDS = 60 * 60 * 24 * 365;
-const PRODUCTION_SITE_URL = "https://www.montramontijo.pt";
 
 type MonthlyReportTokenPayload = {
   userId: string;
@@ -11,13 +12,11 @@ type MonthlyReportTokenPayload = {
 };
 
 export function getMonthlyReportSiteUrl() {
-  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
-  if (configuredUrl && !configuredUrl.includes("localhost")) {
-    return configuredUrl;
-  }
-
-  return PRODUCTION_SITE_URL;
+  return siteUrl.includes("localhost")
+    ? "https://www.montramontijo.pt"
+    : siteUrl;
 }
 
 function getSigningSecret() {

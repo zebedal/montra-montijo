@@ -36,13 +36,15 @@ export async function getBusinessesByCategory(
       number,
       postal_code,
       plan,
+      is_visible,
       stripe_subscription_id,
       subscription_status,
       cancel_at_period_end,
       current_period_end
     `
     )
-    .eq("category_id", category.id);
+    .eq("category_id", category.id)
+    .eq("is_visible", true);
 
   if (businessError) {
     console.error(businessError);

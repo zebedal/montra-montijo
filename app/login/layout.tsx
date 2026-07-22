@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   robots: {
@@ -8,6 +7,6 @@ export const metadata: Metadata = {
   }
 };
 
-export default function MyBusinessesLegacyPage() {
-  redirect("/area-cliente");
+export default function LoginLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

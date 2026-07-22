@@ -76,25 +76,52 @@ export async function searchBusinesses(
 
   const rows = (data ?? []) as SearchBusinessRow[];
 
-  return rows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    description: row.description,
-    logoUrl: getPublicStorageUrl(row.logo_url),
-    city: row.city,
-    plan: row.plan,
+  if (rows.length === 0) {
+    return [];
+  }
 
-    category:
-      row.category_id && row.category_name && row.category_slug
-        ? {
-            id: row.category_id,
-            name: row.category_name,
-            slug: row.category_slug
-          }
-        : null,
+  const { data: visibleBusinesses, error: visibilityError } = await supabase
+    .from("businesses")
+    .select("id")
+    .in(
+      "id",
+      rows.map((row) => row.id)
+    )
+    .eq("is_visible", true);
 
-    relevance: row.relevance,
-    matchType: row.match_type
-  }));
+  if (visibilityError) {
+    console.error(
+      "Erro ao confirmar a visibilidade dos negócios:",
+      visibilityError
+    );
+    return [];
+  }
+
+  const visibleBusinessIds = new Set(
+    (visibleBusinesses ?? []).map((business) => business.id)
+  );
+
+  return rows
+    .filter((row) => visibleBusinessIds.has(row.id))
+    .map((row) => ({
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      description: row.description,
+      logoUrl: getPublicStorageUrl(row.logo_url),
+      city: row.city,
+      plan: row.plan,
+
+      category:
+        row.category_id && row.category_name && row.category_slug
+          ? {
+              id: row.category_id,
+              name: row.category_name,
+              slug: row.category_slug
+            }
+          : null,
+
+      relevance: row.relevance,
+      matchType: row.match_type
+    }));
 }

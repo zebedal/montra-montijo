@@ -10,12 +10,18 @@ type Props = {
 };
 
 export default function CategoryHero({ title, slug, businessCount }: Props) {
+  const imageUrl =
+    slug === "agencias-viagem"
+      ? "/images/categorias/agencias-viagem.jpg"
+      : getCategoryCoverUrl(slug);
+
   return (
-    <section className="relative h-64 overflow-hidden">
+    <section className="relative h-72 overflow-hidden sm:h-80">
       <Image
-        src={getCategoryCoverUrl(slug)}
+        src={imageUrl}
         alt={title}
         fill
+        sizes="100vw"
         className="object-cover"
         priority
       />

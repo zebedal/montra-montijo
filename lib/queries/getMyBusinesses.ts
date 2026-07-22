@@ -30,6 +30,7 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
   number,
   postal_code,
   plan,
+  is_visible,
   category_id,
   stripe_subscription_id,
   subscription_status,
