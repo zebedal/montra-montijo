@@ -18,6 +18,7 @@ import {
   GraduationCap,
   HandCoins,
   Hammer,
+  HardHat,
   HeartPulse,
   Hotel,
   Laptop,
@@ -85,6 +86,7 @@ export const categoryIcons: Record<string, LucideIcon> = {
   canalizacao: Droplets,
   pintura: Paintbrush,
   reparacoes: Hammer,
+  "construcao-remodelacoes": HardHat,
   jardinagem: Trees,
   mudancas: Building2,
 
