@@ -43,7 +43,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Routes } from "@/types";
 import {
   prepareBusinessMedia,
@@ -593,8 +593,8 @@ export default function BusinessForm({
                         id="category-help"
                         className="text-sm text-muted-foreground"
                       >
-                        Não encontras a categoria certa? Envia-nos a tua sugestão
-                        para{" "}
+                        Não encontras a categoria certa? Envia-nos a tua
+                        sugestão para{" "}
                         <a
                           href={CATEGORY_REQUEST_EMAIL}
                           className="font-medium text-primary underline-offset-4 hover:underline"
