@@ -141,9 +141,11 @@ export async function publishBusiness({
         slug,
         description: form.description,
         phone: form.phone,
-        whatsapp_phone: form.allowWhatsApp
-          ? form.whatsappPhone?.trim() || null
-          : null,
+        ...(form.allowWhatsApp
+          ? {
+              whatsapp_phone: form.whatsappPhone?.trim() || null
+            }
+          : {}),
         email: form.email || null,
         website: form.website || null,
         facebook: form.facebook || null,
@@ -193,6 +195,19 @@ export async function publishBusiness({
       }));
 
       const { error } = await supabaseAdmin.from("business_hours").insert(rows);
+
+      if (error) throw error;
+    }
+
+    if (form.faqs?.length) {
+      const { error } = await supabaseAdmin.from("business_faqs").insert(
+        form.faqs.map((faq, index) => ({
+          business_id: businessId,
+          question: faq.question.trim(),
+          answer: faq.answer.trim(),
+          position: index
+        }))
+      );
 
       if (error) throw error;
     }

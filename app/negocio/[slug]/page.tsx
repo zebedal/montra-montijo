@@ -8,6 +8,7 @@ import { BusinessContact } from "@/components/business/BusinessContact";
 import { BusinessGallery } from "@/components/business/BusinessImageGallery";
 import { BusinessHeader } from "@/components/business/BusinessHeader";
 import { BusinessHours } from "@/components/business/BusinessHours";
+import { BusinessFaqs } from "@/components/business/BusinessFaqs";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
@@ -157,7 +158,7 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const { business, images, hours } = result;
+  const { business, images, hours, faqs } = result;
 
   const supabase = await createClient();
 
@@ -224,6 +225,7 @@ export default async function BusinessPage({ params }: Props) {
             <BusinessOwnerPremiumBanner business={business} />
           )}
           <BusinessGallery images={images} />
+          <BusinessFaqs faqs={faqs} />
         </div>
 
         <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">

@@ -6,6 +6,7 @@ import { getPublicStorageUrl } from "@/lib/helpers";
 import { getBusinessImages } from "@/lib/queries/getBusinessImages";
 import { UploadImage } from "@/types/upload-image";
 import { getBusinessHours } from "@/lib/queries/getBusinessHours";
+import { getBusinessFaqs } from "@/lib/queries/getBusinessFaqs";
 import { Metadata } from "next";
 
 type Props = {
@@ -66,6 +67,7 @@ export default async function EditBusinessPage({ params }: Props) {
   }));
 
   const businessHours = await getBusinessHours(id);
+  const businessFaqs = await getBusinessFaqs(id);
 
   const initialOpeningHours = businessHours.map((hour) => ({
     day: hour.day,
@@ -93,6 +95,10 @@ export default async function EditBusinessPage({ params }: Props) {
         postalCode: business.postal_code,
         city: business.city,
         logo: getPublicStorageUrl(business?.logo_url) ?? "",
+        faqs: businessFaqs.map(({ question, answer }) => ({
+          question,
+          answer
+        })),
         openingHours: initialOpeningHours
       }}
       businessId={business?.id}

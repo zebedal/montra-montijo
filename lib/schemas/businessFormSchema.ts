@@ -10,6 +10,19 @@ export const openingHourSchema = z.object({
   closed: z.boolean()
 });
 
+export const businessFaqSchema = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(5, "A pergunta deve ter pelo menos 5 caracteres.")
+    .max(160, "A pergunta não pode exceder 160 caracteres."),
+  answer: z
+    .string()
+    .trim()
+    .min(5, "A resposta deve ter pelo menos 5 caracteres.")
+    .max(1000, "A resposta não pode exceder 1000 caracteres.")
+});
+
 /**
  * BUSINESS
  */
@@ -42,6 +55,7 @@ export const businessSchema = z
     city: z.string().optional().or(z.literal("")),
     images: z.array(z.string()),
     logo: z.string().optional(),
+    faqs: z.array(businessFaqSchema).max(5, "Podes adicionar até 5 perguntas."),
     openingHours: z.array(openingHourSchema).optional()
   })
   .superRefine((data, context) => {

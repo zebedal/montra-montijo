@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import { useForm, Controller, useWatch } from "react-hook-form";
+import {
+  useForm,
+  Controller,
+  useFieldArray,
+  useWatch
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +36,7 @@ import { LogoUpload } from "./UploadLogo";
 import { BusinessImagesUpload } from "./BusinessImagesUpload";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
-import { Info, LogIn } from "lucide-react";
+import { Info, LogIn, Plus, Trash2 } from "lucide-react";
 
 import {
   Dialog,
@@ -142,6 +147,7 @@ export default function BusinessForm({
       city: initialData?.city ?? "Montijo",
       images: [],
       logo: initialData?.logo,
+      faqs: initialData?.faqs ?? [],
       openingHours: mode === "edit" ? (initialData?.openingHours ?? []) : []
     }
   });
@@ -155,6 +161,15 @@ export default function BusinessForm({
     reset,
     formState: { errors, isSubmitting, isDirty }
   } = form;
+
+  const {
+    fields: faqFields,
+    append: appendFaq,
+    remove: removeFaq
+  } = useFieldArray({
+    control,
+    name: "faqs"
+  });
 
   const selectedCategoryId = useWatch({
     control,
@@ -382,6 +397,7 @@ export default function BusinessForm({
       city: initialData.city ?? "Montijo",
       images: [],
       logo: initialData.logo ?? "",
+      faqs: initialData.faqs ?? [],
       openingHours: initialData.openingHours ?? defaultOpeningHours
     });
   }, [initialData, reset]);
@@ -415,6 +431,7 @@ export default function BusinessForm({
         ...parsed.form,
         allowWhatsApp: parsed.form.allowWhatsApp ?? false,
         whatsappPhone: parsed.form.whatsappPhone ?? "",
+        faqs: parsed.form.faqs ?? [],
         openingHours: hasOpeningHours ? parsed.form.openingHours : []
       });
 
@@ -794,6 +811,73 @@ export default function BusinessForm({
                 images={images ?? []}
                 onChange={setImages}
               />
+            </section>
+
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Perguntas frequentes (opcional)
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Responde antecipadamente às dúvidas mais comuns dos teus
+                    clientes. Podes adicionar até 5.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={faqFields.length >= 5}
+                  onClick={() => appendFaq({ question: "", answer: "" })}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar pergunta
+                </Button>
+              </div>
+
+              {faqFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="space-y-3 rounded-xl border p-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium">
+                      Pergunta {index + 1}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Remover pergunta ${index + 1}`}
+                      onClick={() => removeFaq(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Input
+                    placeholder="Ex.: É necessário marcar?"
+                    {...register(`faqs.${index}.question`)}
+                  />
+                  {errors.faqs?.[index]?.question && (
+                    <p className="text-sm text-red-500">
+                      {errors.faqs[index].question.message}
+                    </p>
+                  )}
+
+                  <Textarea
+                    className="min-h-24"
+                    placeholder="Escreve uma resposta clara e útil."
+                    {...register(`faqs.${index}.answer`)}
+                  />
+                  {errors.faqs?.[index]?.answer && (
+                    <p className="text-sm text-red-500">
+                      {errors.faqs[index].answer.message}
+                    </p>
+                  )}
+                </div>
+              ))}
             </section>
 
             {/* HORARIO */}

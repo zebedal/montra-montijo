@@ -26,10 +26,18 @@ export type BusinessHour = {
   is_closed: boolean;
 };
 
+export type BusinessFaq = {
+  id: string;
+  question: string;
+  answer: string;
+  position: number;
+};
+
 export type GetBusinessBySlugResult = {
   business: PublicBusinessDetails;
   images: BusinessImage[];
   hours: BusinessHour[];
+  faqs: BusinessFaq[];
 };
 
 type BusinessRow = {
@@ -126,7 +134,7 @@ export async function getBusinessBySlug({
         .data.publicUrl
     : null;
 
-  const [imagesResult, hoursResult] = await Promise.all([
+  const [imagesResult, hoursResult, faqsResult] = await Promise.all([
     supabase
       .from("business_images")
       .select("id, url, position")
@@ -141,7 +149,13 @@ export async function getBusinessBySlug({
       .eq("business_id", business.id)
       .order("id", {
         ascending: true
-      })
+      }),
+
+    supabase
+      .from("business_faqs")
+      .select("id, question, answer, position")
+      .eq("business_id", business.id)
+      .order("position", { ascending: true })
   ]);
 
   if (imagesResult.error) {
@@ -150,6 +164,10 @@ export async function getBusinessBySlug({
 
   if (hoursResult.error) {
     console.error("Erro ao obter os horários do negócio:", hoursResult.error);
+  }
+
+  if (faqsResult.error) {
+    console.error("Erro ao obter as perguntas frequentes:", faqsResult.error);
   }
 
   const images: BusinessImage[] = (imagesResult.data ?? []).map((image) => ({
@@ -164,6 +182,13 @@ export async function getBusinessBySlug({
     open_time: hour.open_time,
     close_time: hour.close_time,
     is_closed: hour.is_closed
+  }));
+
+  const faqs: BusinessFaq[] = (faqsResult.data ?? []).map((faq) => ({
+    id: faq.id,
+    question: faq.question,
+    answer: faq.answer,
+    position: faq.position ?? 0
   }));
 
   return {
@@ -190,6 +215,7 @@ export async function getBusinessBySlug({
       category: normalizeCategory(business.categories)
     },
     images,
-    hours
+    hours,
+    faqs
   };
 }

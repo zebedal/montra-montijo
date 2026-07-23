@@ -86,5 +86,33 @@ export async function updateMyBusiness(
     }
   }
 
+  const { error: deleteFaqsError } = await supabase
+    .from("business_faqs")
+    .delete()
+    .eq("business_id", businessId);
+
+  if (deleteFaqsError) {
+    console.error("Erro ao remover perguntas frequentes:", deleteFaqsError);
+    return null;
+  }
+
+  if (data.faqs.length > 0) {
+    const { error: insertFaqsError } = await supabase
+      .from("business_faqs")
+      .insert(
+        data.faqs.map((faq, index) => ({
+          business_id: businessId,
+          question: faq.question.trim(),
+          answer: faq.answer.trim(),
+          position: index
+        }))
+      );
+
+    if (insertFaqsError) {
+      console.error("Erro ao guardar perguntas frequentes:", insertFaqsError);
+      return null;
+    }
+  }
+
   return updatedBusiness;
 }
