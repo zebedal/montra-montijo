@@ -2,6 +2,7 @@ import { getPublicStorageUrl } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/server";
 
 import type { PublicBusiness } from "@/types/business";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 export const BUSINESSES_PER_PAGE = 12;
 
@@ -52,6 +53,7 @@ export async function getPublicBusinesses({
   limit = BUSINESSES_PER_PAGE
 }: GetPublicBusinessesOptions = {}): Promise<GetPublicBusinessesResult> {
   const supabase = await createClient();
+  const adminPreviewUserId = await getAdminPreviewUserId();
 
   const safePage = Number.isInteger(page) && page > 0 ? page : 1;
   const safeLimit = Number.isInteger(limit) && limit > 0 ? limit : 12;
@@ -59,7 +61,7 @@ export async function getPublicBusinesses({
   const from = (safePage - 1) * safeLimit;
   const to = from + safeLimit - 1;
 
-  const { data, error, count } = await supabase
+  let businessesQuery = supabase
     .from("businesses")
     .select(
       `
@@ -79,8 +81,15 @@ export async function getPublicBusinesses({
         count: "exact"
       }
     )
-    .eq("is_visible", true)
-    .order("plan", {
+    ;
+
+  businessesQuery = adminPreviewUserId
+    ? businessesQuery.or(
+        `is_visible.eq.true,user_id.eq.${adminPreviewUserId}`
+      )
+    : businessesQuery.eq("is_visible", true);
+
+  const { data, error, count } = await businessesQuery.order("plan", {
       ascending: false
     })
     .order("created_at", {

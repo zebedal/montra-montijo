@@ -9,6 +9,7 @@ type GetRelatedBusinessesOptions = {
   businessId: string;
   categoryId: string;
   limit?: number;
+  adminPreviewUserId?: string | null;
 };
 
 type RelatedBusinessRow = {
@@ -29,9 +30,10 @@ export async function getRelatedBusinesses({
   supabase,
   businessId,
   categoryId,
-  limit = 3
+  limit = 3,
+  adminPreviewUserId = null
 }: GetRelatedBusinessesOptions): Promise<PublicBusiness[]> {
-  const { data, error } = await supabase
+  let relatedQuery = supabase
     .from("businesses")
     .select(
       `
@@ -49,8 +51,15 @@ export async function getRelatedBusinesses({
       `
     )
     .eq("category_id", categoryId)
-    .eq("is_visible", true)
-    .neq("id", businessId)
+    .neq("id", businessId);
+
+  relatedQuery = adminPreviewUserId
+    ? relatedQuery.or(
+        `is_visible.eq.true,user_id.eq.${adminPreviewUserId}`
+      )
+    : relatedQuery.eq("is_visible", true);
+
+  const { data, error } = await relatedQuery
     .order("plan", {
       ascending: false
     })

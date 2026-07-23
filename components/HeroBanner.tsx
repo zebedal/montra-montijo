@@ -26,7 +26,7 @@ export function Hero() {
         </h1>
 
         <p className="mt-4 text-white/80">
-          Pesquisa restaurantes, serviços e negócios perto de ti
+          Pesquisa negócios e serviços perto de ti.
         </p>
 
         <SearchAutocomplete

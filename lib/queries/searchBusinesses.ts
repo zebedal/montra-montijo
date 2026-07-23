@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getPublicStorageUrl } from "@/lib/helpers";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 export type SearchMatchType =
   | "business_name"
@@ -62,6 +63,7 @@ export async function searchBusinesses(
   const offset = options.offset ?? 0;
 
   const supabase = await createClient();
+  const adminPreviewUserId = await getAdminPreviewUserId();
 
   const { data, error } = await supabase.rpc("search_businesses", {
     p_query: normalizedQuery,
@@ -80,14 +82,22 @@ export async function searchBusinesses(
     return [];
   }
 
-  const { data: visibleBusinesses, error: visibilityError } = await supabase
+  let visibilityQuery = supabase
     .from("businesses")
     .select("id")
     .in(
       "id",
       rows.map((row) => row.id)
-    )
-    .eq("is_visible", true);
+    );
+
+  visibilityQuery = adminPreviewUserId
+    ? visibilityQuery.or(
+        `is_visible.eq.true,user_id.eq.${adminPreviewUserId}`
+      )
+    : visibilityQuery.eq("is_visible", true);
+
+  const { data: visibleBusinesses, error: visibilityError } =
+    await visibilityQuery;
 
   if (visibilityError) {
     console.error(

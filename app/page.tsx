@@ -15,6 +15,7 @@ import WebsiteJsonLd from "@/components/seo/WebsiteJsonLd";
 import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
 import UpcomingEventsSection from "@/components/UpcomingEvents";
 import { getSiteUrl } from "@/lib/site-url";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 export const metadata: Metadata = {
   title: {
@@ -97,70 +98,50 @@ function mapBusiness(business: BusinessRow): PublicBusiness {
 
 export default async function Home() {
   const supabase = await createClient();
+  const adminPreviewUserId = await getAdminPreviewUserId();
+  let categoriesQuery = supabase.from("categories").select(`
+    id,
+    name,
+    slug,
+    businesses (id)
+  `);
+
+  let featuredQuery = supabase
+    .from("businesses")
+    .select(
+      `id,name,slug,description,logo_url,city,plan,created_at,category:categories(name,slug)`
+    )
+    .eq("plan", "premium");
+  let newestQuery = supabase
+    .from("businesses")
+    .select(
+      `id,name,slug,description,logo_url,city,plan,created_at,category:categories(name,slug)`
+    );
+
+  if (adminPreviewUserId) {
+    const previewFilter = `is_visible.eq.true,user_id.eq.${adminPreviewUserId}`;
+    featuredQuery = featuredQuery.or(previewFilter);
+    newestQuery = newestQuery.or(previewFilter);
+  } else {
+    categoriesQuery = categoriesQuery.eq("businesses.is_visible", true);
+    featuredQuery = featuredQuery.eq("is_visible", true);
+    newestQuery = newestQuery.eq("is_visible", true);
+  }
 
   const [
     { data: categoriesData, error: categoriesError },
     { data: featuredData, error: featuredError },
     { data: newestData, error: newestError }
   ] = await Promise.all([
-    supabase
-      .from("categories")
-      .select(
-        `
-          id,
-          name,
-          slug,
-          businesses (
-            id
-          )
-        `
-      )
-      .eq("businesses.is_visible", true),
+    categoriesQuery,
 
-    supabase
-      .from("businesses")
-      .select(
-        `
-          id,
-          name,
-          slug,
-          description,
-          logo_url,
-          city,
-          plan,
-          created_at,
-          category:categories (
-            name,
-            slug
-          )
-        `
-      )
-      .eq("is_visible", true)
-      .eq("plan", "premium")
+    featuredQuery
       .order("created_at", {
         ascending: false
       })
       .limit(6),
 
-    supabase
-      .from("businesses")
-      .select(
-        `
-          id,
-          name,
-          slug,
-          description,
-          logo_url,
-          city,
-          plan,
-          created_at,
-          category:categories (
-            name,
-            slug
-          )
-        `
-      )
-      .eq("is_visible", true)
+    newestQuery
       .order("created_at", {
         ascending: false
       })
