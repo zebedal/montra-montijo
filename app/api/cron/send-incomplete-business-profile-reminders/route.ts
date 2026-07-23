@@ -14,6 +14,7 @@ type Business = {
   user_id: string;
   name: string;
   description: string | null;
+  logo_url: string | null;
 };
 
 type Result =
@@ -38,7 +39,7 @@ async function getEligibleBusinesses(windowStart: string, cutoff: string) {
   while (true) {
     const { data, error } = await supabaseAdmin
       .from("businesses")
-      .select("id, user_id, name, description")
+      .select("id, user_id, name, description, logo_url")
       .eq("is_visible", true)
       .not("user_id", "is", null)
       .gt("created_at", windowStart)
@@ -65,8 +66,9 @@ async function getEligibleBusinesses(windowStart: string, cutoff: string) {
   return businesses;
 }
 
-async function getMissingItems(business: Business) {
-  const [imagesResult, hoursResult] = await Promise.all([
+async function getProfileCompletion(business: Business) {
+  const [imagesResult, hoursResult, servicesResult, faqsResult] =
+    await Promise.all([
     supabaseAdmin
       .from("business_images")
       .select("id", {
@@ -80,14 +82,41 @@ async function getMissingItems(business: Business) {
         count: "exact",
         head: true
       })
+      .eq("business_id", business.id),
+    supabaseAdmin
+      .from("business_services")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
+      .eq("business_id", business.id),
+    supabaseAdmin
+      .from("business_faqs")
+      .select("id", {
+        count: "exact",
+        head: true
+      })
       .eq("business_id", business.id)
-  ]);
+    ]);
 
-  if (imagesResult.error || hoursResult.error) {
+  if (
+    imagesResult.error ||
+    hoursResult.error ||
+    servicesResult.error ||
+    faqsResult.error
+  ) {
     throw new Error("Não foi possível verificar o perfil do negócio.");
   }
 
   const missingItems: string[] = [];
+
+  if ((business.description?.trim().length ?? 0) < 80) {
+    missingItems.push("Uma descrição mais completa do negócio");
+  }
+
+  if (!business.logo_url) {
+    missingItems.push("Logo do negócio");
+  }
 
   if ((imagesResult.count ?? 0) === 0) {
     missingItems.push("Fotografias do espaço, produtos ou serviços");
@@ -97,11 +126,18 @@ async function getMissingItems(business: Business) {
     missingItems.push("Horário de funcionamento");
   }
 
-  if ((business.description?.trim().length ?? 0) < 80) {
-    missingItems.push("Uma descrição mais completa do negócio");
+  if ((servicesResult.count ?? 0) === 0) {
+    missingItems.push("Serviços e preços");
   }
 
-  return missingItems;
+  if ((faqsResult.count ?? 0) === 0) {
+    missingItems.push("Perguntas frequentes");
+  }
+
+  return {
+    missingItems,
+    completion: Math.round(((6 - missingItems.length) / 6) * 100)
+  };
 }
 
 async function processBusiness(business: Business): Promise<Result> {
@@ -120,7 +156,7 @@ async function processBusiness(business: Business): Promise<Result> {
     return "already_sent";
   }
 
-  const missingItems = await getMissingItems(business);
+  const { missingItems, completion } = await getProfileCompletion(business);
 
   if (missingItems.length === 0) {
     return "complete";
@@ -148,6 +184,7 @@ async function processBusiness(business: Business): Promise<Result> {
     businessId: business.id,
     email: user.email,
     businessName: business.name,
+    completion,
     missingItems
   });
 

@@ -7,6 +7,7 @@ type SendIncompleteBusinessProfileEmailParams = {
   email: string;
   businessId: string;
   businessName: string;
+  completion: number;
   missingItems: string[];
   unsubscribeUrl: string;
 };
@@ -24,6 +25,7 @@ export async function sendIncompleteBusinessProfileEmail({
   email,
   businessId,
   businessName,
+  completion,
   missingItems,
   unsubscribeUrl
 }: SendIncompleteBusinessProfileEmailParams) {
@@ -79,6 +81,15 @@ export async function sendIncompleteBusinessProfileEmail({
                         Um perfil completo ajuda potenciais clientes a compreender melhor o negócio e a entrar em contacto com mais confiança.
                       </p>
 
+                      <div style="margin:26px 0 10px;">
+                        <div style="margin-bottom:8px;font-size:14px;font-weight:700;color:#166534;text-align:center;">
+                          Perfil ${completion}% completo
+                        </div>
+                        <div style="height:10px;overflow:hidden;border-radius:999px;background:#dcfce7;">
+                          <div style="width:${completion}%;height:10px;border-radius:999px;background:#16a34a;"></div>
+                        </div>
+                      </div>
+
                       <div style="margin:28px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;">
                         <p style="margin:0 0 12px;font-size:15px;font-weight:700;color:#166534;">Ainda pode adicionar:</p>
                         <ul style="margin:0;padding-left:22px;color:#374151;font-size:15px;line-height:1.8;">
@@ -111,6 +122,8 @@ export async function sendIncompleteBusinessProfileEmail({
     `,
     text: `
 Complete a página de ${businessName}
+
+Perfil ${completion}% completo
 
 Um perfil completo ajuda potenciais clientes a compreender melhor o negócio e a entrar em contacto com mais confiança.
 

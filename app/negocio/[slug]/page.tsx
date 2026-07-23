@@ -22,6 +22,7 @@ import RelatedBusinesses from "@/components/business/RelatedBusinesses";
 import BusinessClaimButton from "@/components/business/BusinessClaimButton";
 import BusinessOwnerPremiumBanner from "@/components/business/BusinessOwnerPremiumBanner";
 import { getSiteUrl } from "@/lib/site-url";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 interface Props {
   params: Promise<{
@@ -169,6 +170,7 @@ export default async function BusinessPage({ params }: Props) {
   } = await supabase.auth.getUser();
 
   const isBusinessOwner = Boolean(user) && business.user_id === user?.id;
+  const adminPreviewUserId = await getAdminPreviewUserId();
 
   const canActivatePremium = isBusinessOwner && business.plan !== "premium";
 
@@ -188,6 +190,7 @@ export default async function BusinessPage({ params }: Props) {
         supabase,
         businessId: business.id,
         categoryId: business.category.id,
+        adminPreviewUserId,
         limit: 3
       })
     : [];

@@ -14,6 +14,7 @@ type Params = {
   businessId: string;
   email: string;
   businessName: string;
+  completion: number;
   missingItems: string[];
 };
 
@@ -22,6 +23,7 @@ export async function sendIncompleteBusinessProfileEmailOnce({
   businessId,
   email,
   businessName,
+  completion,
   missingItems
 }: Params) {
   const { data: existing, error: existingError } = await supabaseAdmin
@@ -50,6 +52,7 @@ export async function sendIncompleteBusinessProfileEmailOnce({
     email,
     businessId,
     businessName,
+    completion,
     missingItems,
     unsubscribeUrl
   });

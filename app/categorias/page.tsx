@@ -6,6 +6,7 @@ import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
 
 import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 export const metadata: Metadata = {
   title: "Categorias de negócios no Montijo",
@@ -44,8 +45,9 @@ export const metadata: Metadata = {
 
 export default async function CategoriesPage() {
   const supabase = await createClient();
+  const adminPreviewUserId = await getAdminPreviewUserId();
 
-  const { data, error } = await supabase
+  let categoriesQuery = supabase
     .from("categories")
     .select(
       `
@@ -56,9 +58,13 @@ export default async function CategoriesPage() {
           id
         )
       `
-    )
-    .eq("businesses.is_visible", true)
-    .order("name", {
+    );
+
+  if (!adminPreviewUserId) {
+    categoriesQuery = categoriesQuery.eq("businesses.is_visible", true);
+  }
+
+  const { data, error } = await categoriesQuery.order("name", {
       ascending: true
     });
 

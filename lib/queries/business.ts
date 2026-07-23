@@ -2,11 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 
 import type { BusinessSummary } from "@/types/business";
 import { getPublicStorageUrl } from "@/lib/helpers";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 export async function getBusinessesByCategory(
   slug: string
 ): Promise<BusinessSummary[]> {
   const supabase = await createClient();
+  const adminPreviewUserId = await getAdminPreviewUserId();
 
   const { data: category, error: categoryError } = await supabase
     .from("categories")
@@ -19,7 +21,7 @@ export async function getBusinessesByCategory(
     return [];
   }
 
-  const { data: businesses, error: businessError } = await supabase
+  let businessesQuery = supabase
     .from("businesses")
     .select(
       `
@@ -43,8 +45,15 @@ export async function getBusinessesByCategory(
       current_period_end
     `
     )
-    .eq("category_id", category.id)
-    .eq("is_visible", true);
+    .eq("category_id", category.id);
+
+  businessesQuery = adminPreviewUserId
+    ? businessesQuery.or(
+        `is_visible.eq.true,user_id.eq.${adminPreviewUserId}`
+      )
+    : businessesQuery.eq("is_visible", true);
+
+  const { data: businesses, error: businessError } = await businessesQuery;
 
   if (businessError) {
     console.error(businessError);

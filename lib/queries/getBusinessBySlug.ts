@@ -1,5 +1,6 @@
 import { PublicBusinessDetails } from "@/types/business";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 type GetBusinessBySlugOptions = {
   supabase: SupabaseClient;
@@ -91,7 +92,8 @@ export async function getBusinessBySlug({
   supabase,
   slug
 }: GetBusinessBySlugOptions): Promise<GetBusinessBySlugResult> {
-  const { data, error: businessError } = await supabase
+  const adminPreviewUserId = await getAdminPreviewUserId();
+  let businessQuery = supabase
     .from("businesses")
     .select(
       `
@@ -123,9 +125,15 @@ export async function getBusinessBySlug({
         )
       `
     )
-    .eq("slug", slug)
-    .eq("is_visible", true)
-    .maybeSingle();
+    .eq("slug", slug);
+
+  businessQuery = adminPreviewUserId
+    ? businessQuery.or(
+        `is_visible.eq.true,user_id.eq.${adminPreviewUserId}`
+      )
+    : businessQuery.eq("is_visible", true);
+
+  const { data, error: businessError } = await businessQuery.maybeSingle();
 
   if (businessError) {
     throw new Error(
