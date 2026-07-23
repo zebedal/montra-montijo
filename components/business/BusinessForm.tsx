@@ -15,6 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { getCategorias } from "@/lib/supabase/getCategories";
 
 import {
@@ -148,6 +155,7 @@ export default function BusinessForm({
       images: [],
       logo: initialData?.logo,
       faqs: initialData?.faqs ?? [],
+      services: initialData?.services ?? [],
       openingHours: mode === "edit" ? (initialData?.openingHours ?? []) : []
     }
   });
@@ -171,6 +179,15 @@ export default function BusinessForm({
     name: "faqs"
   });
 
+  const {
+    fields: serviceFields,
+    append: appendService,
+    remove: removeService
+  } = useFieldArray({
+    control,
+    name: "services"
+  });
+
   const selectedCategoryId = useWatch({
     control,
     name: "category_id"
@@ -178,6 +195,10 @@ export default function BusinessForm({
   const allowWhatsApp = useWatch({
     control,
     name: "allowWhatsApp"
+  });
+  const services = useWatch({
+    control,
+    name: "services"
   });
 
   const isProcessing = isSubmitting || isPublishing || isCheckingAuth;
@@ -398,6 +419,7 @@ export default function BusinessForm({
       images: [],
       logo: initialData.logo ?? "",
       faqs: initialData.faqs ?? [],
+      services: initialData.services ?? [],
       openingHours: initialData.openingHours ?? defaultOpeningHours
     });
   }, [initialData, reset]);
@@ -432,6 +454,7 @@ export default function BusinessForm({
         allowWhatsApp: parsed.form.allowWhatsApp ?? false,
         whatsappPhone: parsed.form.whatsappPhone ?? "",
         faqs: parsed.form.faqs ?? [],
+        services: parsed.form.services ?? [],
         openingHours: hasOpeningHours ? parsed.form.openingHours : []
       });
 
@@ -711,7 +734,7 @@ export default function BusinessForm({
 
               <Input placeholder="Email" {...register("email")} />
               <Input placeholder="Website" {...register("website")} />
-            </section>
+                </section>
 
             <section className="space-y-4">
               <h2 className="text-lg font-semibold">
@@ -813,7 +836,134 @@ export default function BusinessForm({
               />
             </section>
 
-            <section className="space-y-4">
+            {mode === "edit" && (
+              <>
+                <section
+                  id="servicos-e-precos"
+                  className="scroll-mt-24 space-y-4"
+                >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Serviços e preços (opcional)
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Mostra até 8 serviços ou produtos principais aos teus
+                    clientes.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={serviceFields.length >= 8}
+                  onClick={() =>
+                    appendService({
+                      name: "",
+                      description: "",
+                      priceType: "fixed",
+                      price: ""
+                    })
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar serviço
+                </Button>
+              </div>
+
+              {serviceFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="space-y-3 rounded-xl border p-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium">
+                      Serviço {index + 1}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Remover serviço ${index + 1}`}
+                      onClick={() => removeService(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Input
+                    placeholder="Nome do serviço ou produto"
+                    {...register(`services.${index}.name`)}
+                  />
+                  {errors.services?.[index]?.name && (
+                    <p className="text-sm text-red-500">
+                      {errors.services[index].name.message}
+                    </p>
+                  )}
+
+                  <Textarea
+                    className="min-h-20"
+                    placeholder="Descrição curta (opcional)"
+                    {...register(`services.${index}.description`)}
+                  />
+                  {errors.services?.[index]?.description && (
+                    <p className="text-sm text-red-500">
+                      {errors.services[index].description.message}
+                    </p>
+                  )}
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Controller
+                      name={`services.${index}.priceType`}
+                      control={control}
+                      render={({ field: priceTypeField }) => (
+                        <Select
+                          value={priceTypeField.value}
+                          onValueChange={priceTypeField.onChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Tipo de preço" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="fixed">Preço fixo</SelectItem>
+                            <SelectItem value="from">Desde</SelectItem>
+                            <SelectItem value="quote">
+                              Sob orçamento
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+
+                    {services?.[index]?.priceType !== "quote" && (
+                      <div className="space-y-1">
+                        <div className="relative">
+                          <Input
+                            inputMode="decimal"
+                            placeholder="Preço"
+                            className="pr-10"
+                            {...register(`services.${index}.price`)}
+                          />
+                          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">
+                            €
+                          </span>
+                        </div>
+                        {errors.services?.[index]?.price && (
+                          <p className="text-sm text-red-500">
+                            {errors.services[index].price.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </section>
+
+                <section
+                  id="perguntas-frequentes"
+                  className="scroll-mt-24 space-y-4"
+                >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold">
@@ -878,7 +1028,9 @@ export default function BusinessForm({
                   )}
                 </div>
               ))}
-            </section>
+                </section>
+              </>
+            )}
 
             {/* HORARIO */}
             <section className="space-y-4">

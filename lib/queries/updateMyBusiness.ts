@@ -114,5 +114,38 @@ export async function updateMyBusiness(
     }
   }
 
+  const { error: deleteServicesError } = await supabase
+    .from("business_services")
+    .delete()
+    .eq("business_id", businessId);
+
+  if (deleteServicesError) {
+    console.error("Erro ao remover serviços:", deleteServicesError);
+    return null;
+  }
+
+  if (data.services.length > 0) {
+    const { error: insertServicesError } = await supabase
+      .from("business_services")
+      .insert(
+        data.services.map((service, index) => ({
+          business_id: businessId,
+          name: service.name.trim(),
+          description: service.description.trim() || null,
+          price_type: service.priceType,
+          price:
+            service.priceType === "quote"
+              ? null
+              : Number(service.price.replace(",", ".")),
+          position: index
+        }))
+      );
+
+    if (insertServicesError) {
+      console.error("Erro ao guardar serviços:", insertServicesError);
+      return null;
+    }
+  }
+
   return updatedBusiness;
 }

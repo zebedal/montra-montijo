@@ -1,10 +1,13 @@
+import Link from "next/link";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BusinessCategorySummary } from "@/types/business";
 
 import FavoriteButton from "./FavoriteButton";
-import { Crown } from "lucide-react";
+import { Crown, Pencil } from "lucide-react";
 import ShareButton from "./ShareButton";
 
 type BusinessHeaderProps = {
@@ -18,9 +21,14 @@ type BusinessHeaderProps = {
     category: BusinessCategorySummary | null;
   };
   businessUrl: string;
+  isBusinessOwner?: boolean;
 };
 
-export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
+export function BusinessHeader({
+  business,
+  businessUrl,
+  isBusinessOwner = false
+}: BusinessHeaderProps) {
   return (
     <Card>
       <CardContent className="p-8">
@@ -51,12 +59,29 @@ export function BusinessHeader({ business, businessUrl }: BusinessHeaderProps) {
               </div>
 
               <div className="absolute right-0 top-0 flex items-center gap-2">
-                <FavoriteButton
-                  businessId={business.id}
-                  businessName={business.name}
-                  businessSlug={business.slug}
-                  iconOnly
-                />
+                {isBusinessOwner ? (
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full bg-background/90 shadow-sm backdrop-blur-sm hover:bg-background"
+                  >
+                    <Link
+                      href={`/area-cliente/negocio/${business.id}/editar`}
+                      aria-label={`Editar ${business.name}`}
+                      title="Editar negócio"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <FavoriteButton
+                    businessId={business.id}
+                    businessName={business.name}
+                    businessSlug={business.slug}
+                    iconOnly
+                  />
+                )}
 
                 <ShareButton
                   title={business.name}

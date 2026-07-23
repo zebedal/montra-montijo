@@ -54,18 +54,57 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
     ...new Set(businesses.map((business) => business.category_id))
   ];
 
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name, slug, schema_org_type")
-    .in("id", categoryIds);
+  const businessIds = businesses.map((business) => business.id);
+
+  const [
+    { data: categories },
+    imagesResult,
+    hoursResult,
+    faqsResult,
+    servicesResult
+  ] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, name, slug, schema_org_type")
+      .in("id", categoryIds),
+    supabase.from("business_images").select("business_id").in("business_id", businessIds),
+    supabase.from("business_hours").select("business_id").in("business_id", businessIds),
+    supabase.from("business_faqs").select("business_id").in("business_id", businessIds),
+    supabase.from("business_services").select("business_id").in("business_id", businessIds)
+  ]);
 
   const categoriesMap = new Map(
     categories?.map((category) => [category.id, category]) ?? []
   );
 
-  return businesses.map((business) => ({
-    ...business,
-    logo_url: getPublicStorageUrl(business.logo_url),
-    category: categoriesMap.get(business.category_id)!
-  }));
+  const withImages = new Set(
+    (imagesResult.data ?? []).map((item) => item.business_id)
+  );
+  const withHours = new Set(
+    (hoursResult.data ?? []).map((item) => item.business_id)
+  );
+  const withFaqs = new Set(
+    (faqsResult.data ?? []).map((item) => item.business_id)
+  );
+  const withServices = new Set(
+    (servicesResult.data ?? []).map((item) => item.business_id)
+  );
+
+  return businesses.map((business) => {
+    const completedItems = [
+      (business.description?.trim().length ?? 0) >= 80,
+      Boolean(business.logo_url),
+      withImages.has(business.id),
+      withHours.has(business.id),
+      withServices.has(business.id),
+      withFaqs.has(business.id)
+    ].filter(Boolean).length;
+
+    return {
+      ...business,
+      logo_url: getPublicStorageUrl(business.logo_url),
+      category: categoriesMap.get(business.category_id)!,
+      profile_completion: Math.round((completedItems / 6) * 100)
+    };
+  });
 }

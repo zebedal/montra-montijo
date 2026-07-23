@@ -7,6 +7,7 @@ import { getBusinessImages } from "@/lib/queries/getBusinessImages";
 import { UploadImage } from "@/types/upload-image";
 import { getBusinessHours } from "@/lib/queries/getBusinessHours";
 import { getBusinessFaqs } from "@/lib/queries/getBusinessFaqs";
+import { getBusinessServices } from "@/lib/queries/getBusinessServices";
 import { Metadata } from "next";
 
 type Props = {
@@ -68,6 +69,7 @@ export default async function EditBusinessPage({ params }: Props) {
 
   const businessHours = await getBusinessHours(id);
   const businessFaqs = await getBusinessFaqs(id);
+  const businessServices = await getBusinessServices(id);
 
   const initialOpeningHours = businessHours.map((hour) => ({
     day: hour.day,
@@ -98,6 +100,12 @@ export default async function EditBusinessPage({ params }: Props) {
         faqs: businessFaqs.map(({ question, answer }) => ({
           question,
           answer
+        })),
+        services: businessServices.map((service) => ({
+          name: service.name,
+          description: service.description ?? "",
+          priceType: service.price_type,
+          price: service.price === null ? "" : String(service.price)
         })),
         openingHours: initialOpeningHours
       }}

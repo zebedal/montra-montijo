@@ -181,6 +181,30 @@ export default function MyBusinessCard({
                   <span className="truncate">{business.city}</span>
                 </div>
               )}
+
+              {typeof business.profile_completion === "number" &&
+                business.profile_completion < 100 && (
+                <div className="mt-3 max-w-xs space-y-1.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="font-medium">Perfil completo</span>
+                    <span className="text-muted-foreground">
+                      {business.profile_completion}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-green-600 transition-[width]"
+                      style={{ width: `${business.profile_completion}%` }}
+                    />
+                  </div>
+                  <Link
+                    href={`/area-cliente/negocio/${business.id}/editar`}
+                    className="inline-block text-xs font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Completar página
+                  </Link>
+                </div>
+                )}
             </div>
           </div>
 

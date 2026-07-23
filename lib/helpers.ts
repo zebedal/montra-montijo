@@ -212,6 +212,24 @@ export async function publishBusiness({
       if (error) throw error;
     }
 
+    if (form.services?.length) {
+      const { error } = await supabaseAdmin.from("business_services").insert(
+        form.services.map((service, index) => ({
+          business_id: businessId,
+          name: service.name.trim(),
+          description: service.description.trim() || null,
+          price_type: service.priceType,
+          price:
+            service.priceType === "quote"
+              ? null
+              : Number(service.price.replace(",", ".")),
+          position: index
+        }))
+      );
+
+      if (error) throw error;
+    }
+
     return {
       id: businessId,
       slug

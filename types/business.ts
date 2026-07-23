@@ -30,6 +30,7 @@ export type BusinessSummary = PublicBusinessSummary & {
   subscription_status: string | null;
   cancel_at_period_end: boolean;
   current_period_end: string | null;
+  profile_completion?: number;
 };
 
 export type PublicBusiness = {

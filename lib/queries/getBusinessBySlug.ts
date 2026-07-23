@@ -33,11 +33,21 @@ export type BusinessFaq = {
   position: number;
 };
 
+export type BusinessService = {
+  id: string;
+  name: string;
+  description: string | null;
+  price_type: "fixed" | "from" | "quote";
+  price: number | null;
+  position: number;
+};
+
 export type GetBusinessBySlugResult = {
   business: PublicBusinessDetails;
   images: BusinessImage[];
   hours: BusinessHour[];
   faqs: BusinessFaq[];
+  services: BusinessService[];
 };
 
 type BusinessRow = {
@@ -134,7 +144,8 @@ export async function getBusinessBySlug({
         .data.publicUrl
     : null;
 
-  const [imagesResult, hoursResult, faqsResult] = await Promise.all([
+  const [imagesResult, hoursResult, faqsResult, servicesResult] =
+    await Promise.all([
     supabase
       .from("business_images")
       .select("id, url, position")
@@ -155,8 +166,14 @@ export async function getBusinessBySlug({
       .from("business_faqs")
       .select("id, question, answer, position")
       .eq("business_id", business.id)
+      .order("position", { ascending: true }),
+
+    supabase
+      .from("business_services")
+      .select("id, name, description, price_type, price, position")
+      .eq("business_id", business.id)
       .order("position", { ascending: true })
-  ]);
+    ]);
 
   if (imagesResult.error) {
     console.error("Erro ao obter as imagens do negócio:", imagesResult.error);
@@ -168,6 +185,10 @@ export async function getBusinessBySlug({
 
   if (faqsResult.error) {
     console.error("Erro ao obter as perguntas frequentes:", faqsResult.error);
+  }
+
+  if (servicesResult.error) {
+    console.error("Erro ao obter os serviços:", servicesResult.error);
   }
 
   const images: BusinessImage[] = (imagesResult.data ?? []).map((image) => ({
@@ -190,6 +211,17 @@ export async function getBusinessBySlug({
     answer: faq.answer,
     position: faq.position ?? 0
   }));
+
+  const services: BusinessService[] = (servicesResult.data ?? []).map(
+    (service) => ({
+      id: service.id,
+      name: service.name,
+      description: service.description,
+      price_type: service.price_type,
+      price: service.price === null ? null : Number(service.price),
+      position: service.position ?? 0
+    })
+  );
 
   return {
     business: {
@@ -216,6 +248,7 @@ export async function getBusinessBySlug({
     },
     images,
     hours,
-    faqs
+    faqs,
+    services
   };
 }

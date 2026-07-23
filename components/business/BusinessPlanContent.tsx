@@ -118,7 +118,7 @@ export default function BusinessPlanContent({
       });
 
       router.replace(
-        `/criar-negocio/sucesso?slug=${encodeURIComponent(data.businessSlug)}`
+        `/criar-negocio/sucesso?slug=${encodeURIComponent(data.businessSlug)}&business_id=${encodeURIComponent(data.businessId)}`
       );
     } catch (error) {
       console.error("Erro ao publicar o negócio:", error);

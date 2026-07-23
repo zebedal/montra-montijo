@@ -9,6 +9,8 @@ import { BusinessGallery } from "@/components/business/BusinessImageGallery";
 import { BusinessHeader } from "@/components/business/BusinessHeader";
 import { BusinessHours } from "@/components/business/BusinessHours";
 import { BusinessFaqs } from "@/components/business/BusinessFaqs";
+import { BusinessServices } from "@/components/business/BusinessServices";
+import { BusinessOwnerCompletion } from "@/components/business/BusinessOwnerCompletion";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
@@ -158,7 +160,7 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const { business, images, hours, faqs } = result;
+  const { business, images, hours, faqs, services } = result;
 
   const supabase = await createClient();
 
@@ -169,6 +171,17 @@ export default async function BusinessPage({ params }: Props) {
   const isBusinessOwner = Boolean(user) && business.user_id === user?.id;
 
   const canActivatePremium = isBusinessOwner && business.plan !== "premium";
+
+  const completedProfileItems = [
+    (business.description?.trim().length ?? 0) >= 80,
+    Boolean(business.logo_url),
+    images.length > 0,
+    hours.length > 0,
+    services.length > 0,
+    faqs.length > 0
+  ].filter(Boolean).length;
+
+  const profileCompletion = Math.round((completedProfileItems / 6) * 100);
 
   const relatedBusinesses = business.category
     ? await getRelatedBusinesses({
@@ -220,11 +233,22 @@ export default async function BusinessPage({ params }: Props) {
             />
           )}
 
-          <BusinessHeader business={business} businessUrl={businessUrl} />
+          <BusinessHeader
+            business={business}
+            businessUrl={businessUrl}
+            isBusinessOwner={isBusinessOwner}
+          />
+          {isBusinessOwner && (
+            <BusinessOwnerCompletion
+              businessId={business.id}
+              completion={profileCompletion}
+            />
+          )}
           {canActivatePremium && (
             <BusinessOwnerPremiumBanner business={business} />
           )}
           <BusinessGallery images={images} />
+          <BusinessServices services={services} />
           <BusinessFaqs faqs={faqs} />
         </div>
 

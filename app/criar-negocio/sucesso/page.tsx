@@ -6,15 +6,16 @@ import { Routes } from "@/types";
 type Props = {
   searchParams: Promise<{
     slug?: string;
+    business_id?: string;
   }>;
 };
 
 export default async function BusinessSuccessPage({ searchParams }: Props) {
-  const { slug } = await searchParams;
+  const { slug, business_id: businessId } = await searchParams;
 
   if (!slug) {
     redirect(Routes.AREA_CLIENTE);
   }
 
-  return <Success slug={slug} />;
+  return <Success slug={slug} businessId={businessId} />;
 }

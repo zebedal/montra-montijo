@@ -23,6 +23,35 @@ export const businessFaqSchema = z.object({
     .max(1000, "A resposta não pode exceder 1000 caracteres.")
 });
 
+export const businessServiceSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, "O nome deve ter pelo menos 2 caracteres.")
+      .max(100, "O nome não pode exceder 100 caracteres."),
+    description: z
+      .string()
+      .trim()
+      .max(300, "A descrição não pode exceder 300 caracteres."),
+    priceType: z.enum(["fixed", "from", "quote"]),
+    price: z.string()
+  })
+  .superRefine((service, context) => {
+    if (service.priceType === "quote") return;
+
+    const normalizedPrice = service.price.trim().replace(",", ".");
+    const price = Number(normalizedPrice);
+
+    if (!normalizedPrice || !Number.isFinite(price) || price < 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["price"],
+        message: "Indica um preço válido."
+      });
+    }
+  });
+
 /**
  * BUSINESS
  */
@@ -56,6 +85,9 @@ export const businessSchema = z
     images: z.array(z.string()),
     logo: z.string().optional(),
     faqs: z.array(businessFaqSchema).max(5, "Podes adicionar até 5 perguntas."),
+    services: z
+      .array(businessServiceSchema)
+      .max(8, "Podes adicionar até 8 serviços."),
     openingHours: z.array(openingHourSchema).optional()
   })
   .superRefine((data, context) => {
