@@ -53,6 +53,7 @@ export default function SearchAutocomplete({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [shouldFetchSuggestions, setShouldFetchSuggestions] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -62,7 +63,7 @@ export default function SearchAutocomplete({
   useEffect(() => {
     const normalizedQuery = query.trim();
 
-    if (normalizedQuery.length < 2) {
+    if (!shouldFetchSuggestions || normalizedQuery.length < 2) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       setIsSuggestionsOpen(false);
@@ -116,7 +117,7 @@ export default function SearchAutocomplete({
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [query]);
+  }, [query, shouldFetchSuggestions]);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -143,6 +144,8 @@ export default function SearchAutocomplete({
       return;
     }
 
+    setShouldFetchSuggestions(false);
+    setSuggestions([]);
     setIsSuggestionsOpen(false);
     setActiveSuggestionIndex(-1);
 
@@ -151,6 +154,8 @@ export default function SearchAutocomplete({
 
   function handleSuggestionSelect(suggestion: SearchSuggestion) {
     setQuery(suggestion.value);
+    setShouldFetchSuggestions(false);
+    setSuggestions([]);
     setIsSuggestionsOpen(false);
     setActiveSuggestionIndex(-1);
 
@@ -227,10 +232,15 @@ export default function SearchAutocomplete({
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
+              setShouldFetchSuggestions(true);
               setIsSuggestionsOpen(true);
             }}
             onFocus={() => {
-              if (query.trim().length >= 2) {
+              if (
+                shouldFetchSuggestions &&
+                query.trim().length >= 2 &&
+                suggestions.length > 0
+              ) {
                 setIsSuggestionsOpen(true);
               }
             }}
