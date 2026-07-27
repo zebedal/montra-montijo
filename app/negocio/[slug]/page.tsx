@@ -12,6 +12,7 @@ import { BusinessFaqs } from "@/components/business/BusinessFaqs";
 import { BusinessServices } from "@/components/business/BusinessServices";
 import { BusinessOwnerCompletion } from "@/components/business/BusinessOwnerCompletion";
 import { BusinessMap } from "@/components/business/BusinessMap";
+import { BusinessServiceAreas } from "@/components/business/BusinessServiceAreas";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
@@ -162,7 +163,7 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const { business, images, hours, faqs, services } = result;
+  const { business, images, hours, faqs, services, serviceAreas } = result;
 
   const supabase = await createClient();
 
@@ -171,6 +172,8 @@ export default async function BusinessPage({ params }: Props) {
   } = await supabase.auth.getUser();
 
   const isBusinessOwner = Boolean(user) && business.user_id === user?.id;
+  const isClaimable =
+    !business.user_id || business.user_id === process.env.ADMIN_USER_ID;
   const adminPreviewUserId = await getAdminPreviewUserId();
 
   const canActivatePremium = isBusinessOwner && business.plan !== "premium";
@@ -202,7 +205,11 @@ export default async function BusinessPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <LocalBusinessJsonLd business={business} hours={hours} />
+      <LocalBusinessJsonLd
+        business={business}
+        hours={hours}
+        serviceAreas={serviceAreas}
+      />
       <BusinessPageTracker businessId={business.id} />
 
       {business.category && (
@@ -242,6 +249,15 @@ export default async function BusinessPage({ params }: Props) {
             businessUrl={businessUrl}
             isBusinessOwner={isBusinessOwner}
           />
+          {isClaimable && (
+            <BusinessClaimButton
+              businessId={business.id}
+              businessName={business.name}
+              businessSlug={business.slug}
+              currentOwnerUserId={business.user_id}
+              prominent
+            />
+          )}
           {isBusinessOwner && (
             <BusinessOwnerCompletion
               businessId={business.id}
@@ -256,12 +272,14 @@ export default async function BusinessPage({ params }: Props) {
             businessId={business.id}
             businessSlug={business.slug}
             isBusinessOwner={isBusinessOwner}
+            isClaimable={isClaimable}
           />
           <BusinessMap
             businessName={business.name}
             latitude={business.latitude}
             longitude={business.longitude}
           />
+          <BusinessServiceAreas areas={serviceAreas} />
           <BusinessServices services={services} />
           <BusinessFaqs faqs={faqs} />
         </div>
@@ -274,12 +292,6 @@ export default async function BusinessPage({ params }: Props) {
             is24Hours={business.is_24_hours}
           />
 
-          <BusinessClaimButton
-            businessId={business.id}
-            businessName={business.name}
-            businessSlug={business.slug}
-            currentOwnerUserId={business.user_id}
-          />
         </div>
       </div>
 

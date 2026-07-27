@@ -127,8 +127,14 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("PUBLISH ERROR:", error);
 
+    const publicMessage =
+      error instanceof Error &&
+      error.message.includes("áreas de atuação ainda não está configurada")
+        ? error.message
+        : "Erro ao publicar negócio.";
+
     return NextResponse.json(
-      { error: "Erro ao publicar negócio." },
+      { error: publicMessage },
       { status: 500 }
     );
   }

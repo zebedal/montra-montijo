@@ -1,6 +1,7 @@
 import { PublicBusinessDetails } from "@/types/business";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
+import { MARGEM_SUL_SERVICE_AREAS } from "@/lib/service-areas";
 
 type GetBusinessBySlugOptions = {
   supabase: SupabaseClient;
@@ -25,6 +26,7 @@ export type BusinessHour = {
   open_time: string | null;
   close_time: string | null;
   is_closed: boolean;
+  period_order: number;
 };
 
 export type BusinessFaq = {
@@ -43,12 +45,18 @@ export type BusinessService = {
   position: number;
 };
 
+export type BusinessServiceArea = {
+  slug: string;
+  name: string;
+};
+
 export type GetBusinessBySlugResult = {
   business: PublicBusinessDetails;
   images: BusinessImage[];
   hours: BusinessHour[];
   faqs: BusinessFaq[];
   services: BusinessService[];
+  serviceAreas: BusinessServiceArea[];
 };
 
 type BusinessRow = {
@@ -154,7 +162,13 @@ export async function getBusinessBySlug({
         .data.publicUrl
     : null;
 
-  const [imagesResult, hoursResult, faqsResult, servicesResult] =
+  const [
+    imagesResult,
+    hoursResult,
+    faqsResult,
+    servicesResult,
+    serviceAreasResult
+  ] =
     await Promise.all([
     supabase
       .from("business_images")
@@ -166,9 +180,9 @@ export async function getBusinessBySlug({
 
     supabase
       .from("business_hours")
-      .select("day, open_time, close_time, is_closed")
+      .select("day, open_time, close_time, is_closed, period_order")
       .eq("business_id", business.id)
-      .order("id", {
+      .order("period_order", {
         ascending: true
       }),
 
@@ -182,7 +196,12 @@ export async function getBusinessBySlug({
       .from("business_services")
       .select("id, name, description, price_type, price, position")
       .eq("business_id", business.id)
-      .order("position", { ascending: true })
+      .order("position", { ascending: true }),
+
+    supabase
+      .from("business_service_areas")
+      .select("area_slug")
+      .eq("business_id", business.id)
     ]);
 
   if (imagesResult.error) {
@@ -201,6 +220,13 @@ export async function getBusinessBySlug({
     console.error("Erro ao obter os serviços:", servicesResult.error);
   }
 
+  if (serviceAreasResult.error) {
+    console.error(
+      "Erro ao obter as áreas de atuação:",
+      serviceAreasResult.error
+    );
+  }
+
   const images: BusinessImage[] = (imagesResult.data ?? []).map((image) => ({
     id: image.id,
     position: image.position ?? 0,
@@ -212,7 +238,8 @@ export async function getBusinessBySlug({
     day: hour.day,
     open_time: hour.open_time,
     close_time: hour.close_time,
-    is_closed: hour.is_closed
+    is_closed: hour.is_closed,
+    period_order: hour.period_order ?? 0
   }));
 
   const faqs: BusinessFaq[] = (faqsResult.data ?? []).map((faq) => ({
@@ -232,6 +259,13 @@ export async function getBusinessBySlug({
       position: service.position ?? 0
     })
   );
+
+  const selectedAreaSlugs = new Set(
+    (serviceAreasResult.data ?? []).map((area) => area.area_slug)
+  );
+  const serviceAreas: BusinessServiceArea[] = MARGEM_SUL_SERVICE_AREAS.filter(
+    (area) => selectedAreaSlugs.has(area.slug)
+  ).map((area) => ({ ...area }));
 
   return {
     business: {
@@ -260,6 +294,7 @@ export async function getBusinessBySlug({
     images,
     hours,
     faqs,
-    services
+    services,
+    serviceAreas
   };
 }

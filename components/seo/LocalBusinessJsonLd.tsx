@@ -1,4 +1,5 @@
 import { getSiteUrl } from "@/lib/site-url";
+import type { BusinessServiceArea } from "@/lib/queries/getBusinessBySlug";
 
 type Props = {
   business: {
@@ -34,7 +35,9 @@ type Props = {
     open_time: string | null;
     close_time: string | null;
     is_closed: boolean;
+    period_order?: number;
   }[];
+  serviceAreas: BusinessServiceArea[];
 };
 
 const schemaDays: Record<string, string> = {
@@ -63,7 +66,11 @@ function getSchemaDay(day: string) {
   return schemaDays[normalizedDay] ?? day;
 }
 
-export default function LocalBusinessJsonLd({ business, hours }: Props) {
+export default function LocalBusinessJsonLd({
+  business,
+  hours,
+  serviceAreas
+}: Props) {
   const baseUrl = getSiteUrl();
 
   const businessPageUrl = `${baseUrl}/negocio/${business.slug}`;
@@ -148,6 +155,14 @@ export default function LocalBusinessJsonLd({ business, hours }: Props) {
 
     openingHoursSpecification:
       openingHours.length > 0 ? openingHours : undefined,
+
+    areaServed:
+      serviceAreas.length > 0
+        ? serviceAreas.map((area) => ({
+            "@type": "AdministrativeArea",
+            name: area.name
+          }))
+        : undefined,
 
     knowsAbout: business.category?.name || undefined,
 

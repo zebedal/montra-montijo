@@ -6,6 +6,7 @@ interface BusinessHour {
   open_time: string | null;
   close_time: string | null;
   is_closed: boolean;
+  period_order?: number;
 }
 
 interface Props {
@@ -34,9 +35,20 @@ export function BusinessHours({ hours, is24Hours }: Props) {
 
   const status = getBusinessStatus(hours);
 
-  const sortedHours = [...hours].sort(
-    (a, b) => orderedDays.indexOf(a.day) - orderedDays.indexOf(b.day)
-  );
+  const groupedHours = orderedDays.map((day) => ({
+    day,
+    periods: hours
+      .filter(
+        (hour) =>
+          hour.day === day &&
+          !hour.is_closed &&
+          hour.open_time &&
+          hour.close_time
+      )
+      .sort((a, b) =>
+        (a.open_time ?? "").localeCompare(b.open_time ?? "")
+      )
+  }));
 
   return (
     <Card>
@@ -83,20 +95,25 @@ export function BusinessHours({ hours, is24Hours }: Props) {
           </div>
         ) : (
           <div className="space-y-3">
-            {sortedHours.map((hour) => (
+            {groupedHours.map(({ day, periods }) => (
               <div
-                key={hour.day}
+                key={day}
                 className="flex items-center justify-between border-b pb-2 last:border-0"
               >
-                <span className="font-medium">{hour.day}</span>
+                <span className="font-medium">{day}</span>
 
-                {hour.is_closed ? (
+                {periods.length === 0 ? (
                   <span className="text-sm text-muted-foreground">
                     Encerrado
                   </span>
                 ) : (
-                  <span className="text-sm">
-                    {formatTime(hour.open_time)} – {formatTime(hour.close_time)}
+                  <span className="text-right text-sm">
+                    {periods
+                      .map(
+                        (period) =>
+                          `${formatTime(period.open_time)}–${formatTime(period.close_time)}`
+                      )
+                      .join(", ")}
                   </span>
                 )}
               </div>
