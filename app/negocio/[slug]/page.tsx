@@ -11,6 +11,7 @@ import { BusinessHours } from "@/components/business/BusinessHours";
 import { BusinessFaqs } from "@/components/business/BusinessFaqs";
 import { BusinessServices } from "@/components/business/BusinessServices";
 import { BusinessOwnerCompletion } from "@/components/business/BusinessOwnerCompletion";
+import { BusinessMap } from "@/components/business/BusinessMap";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
@@ -251,6 +252,11 @@ export default async function BusinessPage({ params }: Props) {
             <BusinessOwnerPremiumBanner business={business} />
           )}
           <BusinessGallery images={images} />
+          <BusinessMap
+            businessName={business.name}
+            latitude={business.latitude}
+            longitude={business.longitude}
+          />
           <BusinessServices services={services} />
           <BusinessFaqs faqs={faqs} />
         </div>

@@ -120,13 +120,6 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
       description: "Cliques em relação às visualizações",
       icon: BarChart3,
       iconClass: "bg-emerald-100 text-emerald-700"
-    },
-    {
-      label: "Como chegar",
-      value: totals.directionsClicks.toLocaleString("pt-PT"),
-      description: "Pedidos de direções",
-      icon: MapPinned,
-      iconClass: "bg-orange-100 text-orange-700"
     }
   ];
 
@@ -412,20 +405,6 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
 
                     <p className="font-semibold">
                       {totals.phoneClicks.toLocaleString("pt-PT")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex min-w-0 items-center gap-3 rounded-lg border p-3">
-                  <MapPinned className="h-5 w-5 shrink-0 text-orange-700" />
-
-                  <div className="min-w-0">
-                    <p className="truncate text-xs text-muted-foreground">
-                      Como chegar
-                    </p>
-
-                    <p className="font-semibold">
-                      {totals.directionsClicks.toLocaleString("pt-PT")}
                     </p>
                   </div>
                 </div>

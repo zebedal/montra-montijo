@@ -76,7 +76,12 @@ export const businessSchema = z
     instagram: z.string().optional().or(z.literal("")),
 
     street: z.string().min(1, "A rua é obrigatória."),
-    number: z.string().min(1, "O número é obrigatório."),
+    number: z
+      .string()
+      .trim()
+      .min(1, "O número é obrigatório.")
+      .max(30, "O número e a fração são demasiado longos.")
+      .regex(/^\d/i, "O número da porta deve começar por um algarismo."),
     postalCode: z
       .string()
       .regex(/^\d{4}-\d{3}$/, "O código postal deve ter o formato XXXX-XXX"),
