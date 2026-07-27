@@ -97,20 +97,21 @@ export function Header() {
   useEffect(() => {
     if (!user?.id) return;
 
+    const userId = user.id;
     let active = true;
 
     async function loadProfileName() {
       const { data, error } = await supabase
         .from("profiles")
         .select("full_name")
-        .eq("id", user.id)
+        .eq("id", userId)
         .maybeSingle();
 
       if (!active || error) return;
 
       if (data?.full_name?.trim()) {
         setProfileIdentity({
-          userId: user.id,
+          userId,
           name: data.full_name.trim()
         });
       }

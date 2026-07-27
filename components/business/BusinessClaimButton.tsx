@@ -33,6 +33,7 @@ import {
   type BusinessClaimFormData
 } from "@/lib/schemas/businessClaimSchema";
 import { useUser } from "@/lib/supabase/useUser";
+import { Routes } from "@/types";
 
 type Props = {
   businessId: string;
@@ -85,13 +86,24 @@ export default function BusinessClaimButton({
   const loginUrl = `/login?next=${encodeURIComponent(claimPath)}`;
 
   useEffect(() => {
-    if (isUserLoading || !user) {
+    if (isUserLoading) {
       return;
     }
 
     const pendingClaimId = searchParams.get("claim");
 
     if (pendingClaimId !== businessId) {
+      return;
+    }
+
+    if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoginDialogOpen(true);
+
+      router.replace(businessPath, {
+        scroll: false
+      });
+
       return;
     }
 
@@ -103,7 +115,6 @@ export default function BusinessClaimButton({
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDialogOpen(true);
 
     router.replace(businessPath, {
@@ -238,7 +249,7 @@ export default function BusinessClaimButton({
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 ">
             <Button
               type="button"
               variant="outline"
@@ -276,7 +287,13 @@ export default function BusinessClaimButton({
                 acesso.
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" asChild>
+                  <Link href={Routes.REIVINDICACOES}>
+                    Ver as minhas reivindicações
+                  </Link>
+                </Button>
+
                 <Button type="button" onClick={() => setDialogOpen(false)}>
                   Fechar
                 </Button>

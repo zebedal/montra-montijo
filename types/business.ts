@@ -66,6 +66,7 @@ export type PublicBusinessDetails = {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  is_24_hours: boolean;
   plan: "free" | "premium";
   category: BusinessCategorySummary | null;
 };

@@ -55,7 +55,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Routes } from "@/types";
 import {
   prepareBusinessMedia,
@@ -67,6 +67,7 @@ import { updateMyBusiness } from "@/lib/queries/updateMyBusiness";
 import { UploadImage } from "@/types/upload-image";
 import { uploadBusinessLogo } from "@/lib/queries/updateBusinessLogo";
 import { supabase } from "@/lib/supabase/client";
+import { BUSINESS_LOCALITIES } from "@/lib/business-localities";
 
 const PENDING_BUSINESS_FORM_KEY = "montra-pending-business-form";
 const PENDING_BUSINESS_FORM_NOTICE_KEY =
@@ -109,14 +110,6 @@ export const defaultOpeningHours = [
   { day: "Domingo", open: "", close: "", closed: true }
 ];
 
-function hasConfiguredOpeningHours(
-  openingHours: BusinessFormData["openingHours"]
-) {
-  return Boolean(
-    openingHours?.some((item) => item.open !== "" || item.close !== "")
-  );
-}
-
 export default function BusinessForm({
   mode = "create",
   initialData,
@@ -125,7 +118,9 @@ export default function BusinessForm({
   shouldRestoreDraft = false
 }: Props) {
   const [showHours, setShowHours] = useState(
-    mode === "edit" && (initialData?.openingHours?.length ?? 0) > 0
+    mode === "edit" &&
+      (Boolean(initialData?.is24Hours) ||
+        (initialData?.openingHours?.length ?? 0) > 0)
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [images, setImages] = useState<UploadImage[]>([]);
@@ -144,7 +139,6 @@ export default function BusinessForm({
   const [addressErrorKey, setAddressErrorKey] = useState("");
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessSchema),
@@ -159,6 +153,9 @@ export default function BusinessForm({
       website: initialData?.website ?? "",
       facebook: initialData?.facebook ?? "",
       instagram: initialData?.instagram ?? "",
+      hasPhysicalAddress:
+        initialData?.hasPhysicalAddress ??
+        (mode === "edit" && Boolean(initialData?.street)),
       street: initialData?.street ?? "",
 
       number: initialData?.number ?? "",
@@ -168,6 +165,7 @@ export default function BusinessForm({
       logo: initialData?.logo,
       faqs: initialData?.faqs ?? [],
       services: initialData?.services ?? [],
+      is24Hours: initialData?.is24Hours ?? false,
       openingHours: mode === "edit" ? (initialData?.openingHours ?? []) : []
     }
   });
@@ -212,21 +210,35 @@ export default function BusinessForm({
     control,
     name: "services"
   });
+  const hasPhysicalAddress = useWatch({
+    control,
+    name: "hasPhysicalAddress"
+  });
+  const is24Hours = useWatch({ control, name: "is24Hours" });
   const street = useWatch({ control, name: "street" });
   const number = useWatch({ control, name: "number" });
   const postalCode = useWatch({ control, name: "postalCode" });
+  const city = useWatch({ control, name: "city" });
 
   const isProcessing =
     isSubmitting || isPublishing || isCheckingAuth || isValidatingAddress;
 
-  function getAddressKey(data: Pick<BusinessFormData, "street" | "number" | "postalCode">) {
-    return [data.street, data.number, data.postalCode]
+  function getAddressKey(
+    data: Pick<
+      BusinessFormData,
+      "street" | "number" | "postalCode" | "city"
+    >
+  ) {
+    return [data.street, data.number, data.postalCode, data.city]
       .map((value) => value.trim().toLocaleLowerCase("pt-PT"))
       .join("|");
   }
 
   async function validateAddress(
-    data: Pick<BusinessFormData, "street" | "number" | "postalCode">
+    data: Pick<
+      BusinessFormData,
+      "street" | "number" | "postalCode" | "city"
+    >
   ) {
     const addressKey = getAddressKey(data);
 
@@ -263,7 +275,9 @@ export default function BusinessForm({
 
       setValidatedAddress(null);
       setValidatedAddressKey("");
-      setAddressError(message);
+      setAddressError(
+        `${message} Podes continuar: a morada será guardada, mas o mapa não será apresentado.`
+      );
       setAddressErrorKey(addressKey);
       return null;
     } finally {
@@ -331,13 +345,16 @@ export default function BusinessForm({
   }
 
   async function onSubmit(data: BusinessFormData) {
-    const address = await validateAddress(data);
+    const address = data.hasPhysicalAddress
+      ? await validateAddress(data)
+      : null;
 
-    if (!address) {
-      toast.error("Confirma a morada antes de continuar.", {
+    if (data.hasPhysicalAddress && !address) {
+      toast.warning("Não foi possível posicionar a morada no mapa.", {
+        description:
+          "O negócio será guardado com a morada indicada, mas sem mapa. Podes corrigi-la mais tarde.",
         position: "top-center"
       });
-      return;
     }
 
     if (mode === "edit") {
@@ -358,7 +375,17 @@ export default function BusinessForm({
           logoPath = await uploadBusinessLogo(businessId, logoFile);
         }
 
-        await updateMyBusiness(businessId, data, logoPath, address);
+        const updatedBusiness = await updateMyBusiness(
+          businessId,
+          data,
+          logoPath,
+          address
+        );
+
+        if (!updatedBusiness) {
+          throw new Error("O Supabase não confirmou a atualização do negócio.");
+        }
+
         await updateBusinessImages(businessId, images);
 
         toast.success("Negócio atualizado com sucesso.", {
@@ -366,6 +393,7 @@ export default function BusinessForm({
         });
 
         router.push(Routes.AREA_CLIENTE);
+        router.refresh();
       } catch (error) {
         console.error(error);
 
@@ -489,6 +517,8 @@ export default function BusinessForm({
       website: initialData.website ?? "",
       facebook: initialData.facebook ?? "",
       instagram: initialData.instagram ?? "",
+      hasPhysicalAddress:
+        initialData.hasPhysicalAddress ?? Boolean(initialData.street),
       street: initialData.street ?? "",
       number: initialData.number ?? "",
       postalCode: initialData.postalCode ?? "",
@@ -497,6 +527,7 @@ export default function BusinessForm({
       logo: initialData.logo ?? "",
       faqs: initialData.faqs ?? [],
       services: initialData.services ?? [],
+      is24Hours: initialData.is24Hours ?? false,
       openingHours: initialData.openingHours ?? defaultOpeningHours
     });
   }, [initialData, reset]);
@@ -521,18 +552,25 @@ export default function BusinessForm({
       };
 
       const hasOpeningHours = Boolean(
-        parsed.form.openingHours?.some(
+        parsed.form.is24Hours ||
+          parsed.form.openingHours?.some(
           (item) => item.open !== "" || item.close !== ""
         )
       );
 
       reset({
         ...parsed.form,
+        hasPhysicalAddress:
+          parsed.form.hasPhysicalAddress ?? Boolean(parsed.form.street),
         allowWhatsApp: parsed.form.allowWhatsApp ?? false,
         whatsappPhone: parsed.form.whatsappPhone ?? "",
         faqs: parsed.form.faqs ?? [],
         services: parsed.form.services ?? [],
-        openingHours: hasOpeningHours ? parsed.form.openingHours : []
+        is24Hours: parsed.form.is24Hours ?? false,
+        openingHours:
+          hasOpeningHours && !parsed.form.is24Hours
+            ? parsed.form.openingHours
+            : []
       });
 
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -840,11 +878,51 @@ export default function BusinessForm({
 
             {/* LOCALIZACAO */}
             <section className="space-y-4">
-              <h2 className="text-lg font-semibold">Localização</h2>
+              <div>
+                <h2 className="text-lg font-semibold">Localização</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Opcional para profissionais que não recebem clientes numa
+                  morada física ou preferem não a divulgar.
+                </p>
+              </div>
+
+              <Controller
+                control={control}
+                name="hasPhysicalAddress"
+                render={({ field }) => (
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border p-4">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked === true);
+
+                        if (checked !== true) {
+                          setValidatedAddress(null);
+                          setValidatedAddressKey("");
+                          setAddressError("");
+                          setAddressErrorKey("");
+                          form.clearErrors(["street", "number", "postalCode"]);
+                        }
+                      }}
+                    />
+                    <span>
+                      <span className="block text-sm font-medium">
+                        Adicionar uma morada física
+                      </span>
+                      <span className="block text-sm text-muted-foreground">
+                        A morada e o mapa ficarão visíveis na página do negócio.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              />
+
+              {hasPhysicalAddress && (
+                <div className="space-y-4">
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
-                  <Input {...form.register("street")} placeholder="Rua *" />
+                  <Input {...form.register("street")} placeholder="Rua" />
                   {errors.street && (
                     <p className="text-sm text-red-500">
                       {errors.street.message}
@@ -856,7 +934,7 @@ export default function BusinessForm({
                   <Input
                     {...form.register("number")}
                     inputMode="text"
-                    placeholder="Número / Fração *"
+                    placeholder="Número / Fração"
                   />
                   <p className="text-xs text-muted-foreground">
                     Ex.: 12, 1.º Esq.
@@ -893,9 +971,24 @@ export default function BusinessForm({
                   )}
                 </div>
 
-                <div>
-                  <Input value="Montijo" disabled />
-                </div>
+                <Controller
+                  control={control}
+                  name="city"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione a freguesia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BUSINESS_LOCALITIES.map((locality) => (
+                          <SelectItem key={locality} value={locality}>
+                            {locality}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
 
               <div className="space-y-2">
@@ -906,16 +999,18 @@ export default function BusinessForm({
                     isValidatingAddress || !street || !number || !postalCode
                   }
                   onClick={() =>
-                    void validateAddress({ street, number, postalCode })
+                    void validateAddress({ street, number, postalCode, city })
                   }
                 >
                   <LocateFixed />
-                  {isValidatingAddress ? "A validar morada..." : "Validar morada"}
+                  {isValidatingAddress
+                    ? "A localizar morada..."
+                    : "Verificar localização"}
                 </Button>
 
                 {validatedAddress &&
                   validatedAddressKey ===
-                    getAddressKey({ street, number, postalCode }) && (
+                    getAddressKey({ street, number, postalCode, city }) && (
                     <p className="flex items-start gap-2 text-sm text-green-700">
                       <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
                       <span>
@@ -930,10 +1025,12 @@ export default function BusinessForm({
 
                 {addressError &&
                   addressErrorKey ===
-                    getAddressKey({ street, number, postalCode }) && (
-                  <p className="text-sm text-red-500">{addressError}</p>
+                    getAddressKey({ street, number, postalCode, city }) && (
+                  <p className="text-sm text-amber-700">{addressError}</p>
                   )}
               </div>
+                </div>
+              )}
             </section>
 
             <section className="space-y-4">
@@ -980,7 +1077,7 @@ export default function BusinessForm({
                     appendService({
                       name: "",
                       description: "",
-                      priceType: "fixed",
+                      priceType: "none",
                       price: ""
                     })
                   }
@@ -1044,6 +1141,7 @@ export default function BusinessForm({
                             <SelectValue placeholder="Tipo de preço" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="none">Sem preço</SelectItem>
                             <SelectItem value="fixed">Preço fixo</SelectItem>
                             <SelectItem value="from">Desde</SelectItem>
                             <SelectItem value="quote">
@@ -1054,7 +1152,8 @@ export default function BusinessForm({
                       )}
                     />
 
-                    {services?.[index]?.priceType !== "quote" && (
+                    {services?.[index]?.priceType !== "none" &&
+                      services?.[index]?.priceType !== "quote" && (
                       <div className="space-y-1">
                         <div className="relative">
                           <Input
@@ -1073,7 +1172,7 @@ export default function BusinessForm({
                           </p>
                         )}
                       </div>
-                    )}
+                      )}
                   </div>
                 </div>
               ))}
@@ -1169,6 +1268,9 @@ export default function BusinessForm({
                         shouldDirty: true
                       });
                     } else {
+                      setValue("is24Hours", false, {
+                        shouldDirty: true
+                      });
                       setValue("openingHours", [], {
                         shouldDirty: true
                       });
@@ -1182,6 +1284,31 @@ export default function BusinessForm({
 
               {showHours && (
                 <>
+                  <Controller
+                    control={control}
+                    name="is24Hours"
+                    render={({ field }) => (
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border p-4">
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked === true)
+                          }
+                        />
+                        <span>
+                          <span className="block text-sm font-medium">
+                            Disponível 24 horas, todos os dias
+                          </span>
+                          <span className="block text-sm text-muted-foreground">
+                            Ideal para serviços permanentes ou de urgência.
+                          </span>
+                        </span>
+                      </label>
+                    )}
+                  />
+
+                  {!is24Hours && (
+                    <>
                   <div className="flex items-center justify-between border rounded-md p-3">
                     <div className="text-sm text-muted-foreground">
                       Define o horário de segunda-feira e aplica a todos os dias
@@ -1196,6 +1323,8 @@ export default function BusinessForm({
                     </Button>
                   </div>
                   <OpeningHours control={form.control} />
+                    </>
+                  )}
                 </>
               )}
             </section>

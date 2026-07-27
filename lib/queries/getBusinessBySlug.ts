@@ -38,7 +38,7 @@ export type BusinessService = {
   id: string;
   name: string;
   description: string | null;
-  price_type: "fixed" | "from" | "quote";
+  price_type: "none" | "fixed" | "from" | "quote";
   price: number | null;
   position: number;
 };
@@ -70,6 +70,7 @@ type BusinessRow = {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  is_24_hours: boolean;
   plan: string;
   categories: BusinessCategory | BusinessCategory[] | null;
 };
@@ -115,6 +116,7 @@ export async function getBusinessBySlug({
         city,
         latitude,
         longitude,
+        is_24_hours,
         plan,
         categories (
           id,
@@ -251,6 +253,7 @@ export async function getBusinessBySlug({
       city: business.city,
       latitude: business.latitude,
       longitude: business.longitude,
+      is_24_hours: business.is_24_hours,
       plan: business.plan === "premium" ? "premium" : "free",
       category: normalizeCategory(business.categories)
     },

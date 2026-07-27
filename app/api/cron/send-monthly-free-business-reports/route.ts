@@ -22,6 +22,7 @@ type FreeBusiness = {
   phone: string | null;
   email: string | null;
   website: string | null;
+  is_24_hours: boolean;
 };
 
 type MonthlyPeriod = {
@@ -81,7 +82,7 @@ async function getAllEligibleBusinesses(): Promise<FreeBusiness[]> {
     const { data, error } = await supabaseAdmin
       .from("businesses")
       .select(
-        "id, user_id, name, slug, description, logo_url, phone, email, website"
+        "id, user_id, name, slug, description, logo_url, phone, email, website, is_24_hours"
       )
       .eq("plan", "free")
       .eq("is_visible", true)
@@ -195,7 +196,7 @@ async function getBusinessProfileRecommendations(
     });
   }
 
-  if ((hoursResult.count ?? 0) === 0) {
+  if (!business.is_24_hours && (hoursResult.count ?? 0) === 0) {
     recommendations.push({
       title: "Adicione o horário",
       description:
@@ -422,7 +423,7 @@ export async function POST(request: NextRequest) {
     const { data: business, error: businessError } = await supabaseAdmin
       .from("businesses")
       .select(
-        "id, user_id, name, slug, plan, is_visible, description, logo_url, phone, email, website"
+        "id, user_id, name, slug, plan, is_visible, description, logo_url, phone, email, website, is_24_hours"
       )
       .eq("id", businessId)
       .maybeSingle();

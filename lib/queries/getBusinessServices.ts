@@ -4,7 +4,7 @@ export type BusinessService = {
   id: string;
   name: string;
   description: string | null;
-  price_type: "fixed" | "from" | "quote";
+  price_type: "none" | "fixed" | "from" | "quote";
   price: number | null;
   position: number;
 };

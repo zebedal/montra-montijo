@@ -12,7 +12,7 @@ export async function updateMyBusiness(
   businessId: string,
   data: BusinessFormData,
   logoPath?: string,
-  coordinates?: { latitude: number; longitude: number }
+  coordinates?: { latitude: number; longitude: number } | null
 ): Promise<UpdatedBusiness | null> {
   const {
     data: { user },
@@ -38,16 +38,13 @@ export async function updateMyBusiness(
     website: data.website,
     facebook: data.facebook,
     instagram: data.instagram,
-    street: data.street,
-    number: data.number,
-    postal_code: data.postalCode,
+    street: data.hasPhysicalAddress ? data.street : null,
+    number: data.hasPhysicalAddress ? data.number : null,
+    postal_code: data.hasPhysicalAddress ? data.postalCode : null,
     city: data.city,
-    ...(coordinates
-      ? {
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude
-        }
-      : {}),
+    latitude: coordinates?.latitude ?? null,
+    longitude: coordinates?.longitude ?? null,
+    is_24_hours: data.is24Hours,
     ...(logoPath ? { logo_url: logoPath } : {})
   };
 
@@ -74,7 +71,7 @@ export async function updateMyBusiness(
     return null;
   }
 
-  if (data.openingHours && data.openingHours.length > 0) {
+  if (!data.is24Hours && data.openingHours && data.openingHours.length > 0) {
     const { error: insertHoursError } = await supabase
       .from("business_hours")
       .insert(
@@ -141,7 +138,7 @@ export async function updateMyBusiness(
           description: service.description.trim() || null,
           price_type: service.priceType,
           price:
-            service.priceType === "quote"
+            service.priceType === "none" || service.priceType === "quote"
               ? null
               : Number(service.price.replace(",", ".")),
           position: index

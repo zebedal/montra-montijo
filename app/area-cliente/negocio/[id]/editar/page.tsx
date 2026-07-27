@@ -9,6 +9,7 @@ import { getBusinessHours } from "@/lib/queries/getBusinessHours";
 import { getBusinessFaqs } from "@/lib/queries/getBusinessFaqs";
 import { getBusinessServices } from "@/lib/queries/getBusinessServices";
 import { Metadata } from "next";
+import { getBusinessLocality } from "@/lib/business-localities";
 
 type Props = {
   params: Promise<{
@@ -47,7 +48,8 @@ export default async function EditBusinessPage({ params }: Props) {
       street,
       number,
       postal_code,
-      city
+      city,
+      is_24_hours
     `
     )
     .eq("id", id)
@@ -95,7 +97,8 @@ export default async function EditBusinessPage({ params }: Props) {
         street: business.street,
         number: business.number,
         postalCode: business.postal_code,
-        city: business.city,
+        city: getBusinessLocality(business.city),
+        is24Hours: business.is_24_hours,
         logo: getPublicStorageUrl(business?.logo_url) ?? "",
         faqs: businessFaqs.map(({ question, answer }) => ({
           question,

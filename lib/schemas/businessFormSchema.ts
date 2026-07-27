@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BUSINESS_LOCALITIES } from "@/lib/business-localities";
 
 /**
  * OPENING HOURS
@@ -34,11 +35,11 @@ export const businessServiceSchema = z
       .string()
       .trim()
       .max(300, "A descrição não pode exceder 300 caracteres."),
-    priceType: z.enum(["fixed", "from", "quote"]),
+    priceType: z.enum(["none", "fixed", "from", "quote"]),
     price: z.string()
   })
   .superRefine((service, context) => {
-    if (service.priceType === "quote") return;
+    if (service.priceType === "none" || service.priceType === "quote") return;
 
     const normalizedPrice = service.price.trim().replace(",", ".");
     const price = Number(normalizedPrice);
@@ -75,36 +76,68 @@ export const businessSchema = z
     facebook: z.string().optional().or(z.literal("")),
     instagram: z.string().optional().or(z.literal("")),
 
-    street: z.string().min(1, "A rua é obrigatória."),
+    hasPhysicalAddress: z.boolean(),
+    street: z.string().trim().max(200, "A rua é demasiado longa."),
     number: z
       .string()
       .trim()
-      .min(1, "O número é obrigatório.")
-      .max(30, "O número e a fração são demasiado longos.")
-      .regex(/^\d/i, "O número da porta deve começar por um algarismo."),
-    postalCode: z
-      .string()
-      .regex(/^\d{4}-\d{3}$/, "O código postal deve ter o formato XXXX-XXX"),
+      .max(30, "O número e a fração são demasiado longos."),
+    postalCode: z.string().trim(),
 
-    city: z.string().optional().or(z.literal("")),
+    city: z.enum(BUSINESS_LOCALITIES, {
+      message: "Selecione uma freguesia válida."
+    }),
     images: z.array(z.string()),
     logo: z.string().optional(),
     faqs: z.array(businessFaqSchema).max(5, "Podes adicionar até 5 perguntas."),
     services: z
       .array(businessServiceSchema)
       .max(8, "Podes adicionar até 8 serviços."),
+    is24Hours: z.boolean(),
     openingHours: z.array(openingHourSchema).optional()
   })
   .superRefine((data, context) => {
-    if (!data.allowWhatsApp) return;
+    if (data.allowWhatsApp) {
+      const digits = data.whatsappPhone?.replace(/\D/g, "") ?? "";
 
-    const digits = data.whatsappPhone?.replace(/\D/g, "") ?? "";
+      if (digits.length < 9 || digits.length > 15) {
+        context.addIssue({
+          code: "custom",
+          path: ["whatsappPhone"],
+          message: "Indica um número de WhatsApp válido."
+        });
+      }
+    }
 
-    if (digits.length < 9 || digits.length > 15) {
+    if (!data.hasPhysicalAddress) return;
+
+    if (!data.street) {
       context.addIssue({
         code: "custom",
-        path: ["whatsappPhone"],
-        message: "Indica um número de WhatsApp válido."
+        path: ["street"],
+        message: "Indica a rua."
+      });
+    }
+
+    if (!data.number) {
+      context.addIssue({
+        code: "custom",
+        path: ["number"],
+        message: "Indica o número da porta."
+      });
+    } else if (!/^\d/i.test(data.number)) {
+      context.addIssue({
+        code: "custom",
+        path: ["number"],
+        message: "O número da porta deve começar por um algarismo."
+      });
+    }
+
+    if (!/^\d{4}-\d{3}$/.test(data.postalCode)) {
+      context.addIssue({
+        code: "custom",
+        path: ["postalCode"],
+        message: "O código postal deve ter o formato XXXX-XXX"
       });
     }
   });

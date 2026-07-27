@@ -20,6 +20,7 @@ type Props = {
     longitude: number | null;
 
     logo_url: string | null;
+    is_24_hours: boolean;
 
     category: {
       name: string;
@@ -67,17 +68,34 @@ export default function LocalBusinessJsonLd({ business, hours }: Props) {
 
   const businessPageUrl = `${baseUrl}/negocio/${business.slug}`;
 
-  const openingHours = hours
-    .filter(
-      (hour) =>
-        !hour.is_closed && Boolean(hour.open_time) && Boolean(hour.close_time)
-    )
-    .map((hour) => ({
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: `https://schema.org/${getSchemaDay(hour.day)}`,
-      opens: hour.open_time,
-      closes: hour.close_time
-    }));
+  const openingHours = business.is_24_hours
+    ? [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ].map((day) => `https://schema.org/${day}`),
+          opens: "00:00",
+          closes: "23:59"
+        }
+      ]
+    : hours
+        .filter(
+          (hour) =>
+            !hour.is_closed && Boolean(hour.open_time) && Boolean(hour.close_time)
+        )
+        .map((hour) => ({
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: `https://schema.org/${getSchemaDay(hour.day)}`,
+          opens: hour.open_time,
+          closes: hour.close_time
+        }));
 
   const sameAs = [business.facebook, business.instagram].filter(
     (url): url is string => Boolean(url)

@@ -64,20 +64,22 @@ export default function BusinessCard({ business }: Props) {
               </div>
             )}
 
-            <div className="flex items-start gap-2 text-muted-foreground">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+            {(business.street || business.number || business.postal_code) && (
+              <div className="flex items-start gap-2 text-muted-foreground">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
 
-              <span className="line-clamp-2">
-                {[
-                  business.street,
-                  business.number,
-                  business.postal_code,
-                  business.city
-                ]
-                  .filter(Boolean)
-                  .join(", ")}
-              </span>
-            </div>
+                <span className="line-clamp-2">
+                  {[
+                    business.street,
+                    business.number,
+                    business.postal_code,
+                    business.city
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

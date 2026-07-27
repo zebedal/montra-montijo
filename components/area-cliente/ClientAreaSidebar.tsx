@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { Building2, Heart, Settings, User, FileQuestion } from "lucide-react";
 
@@ -40,6 +41,15 @@ const links = [
 
 export default function ClientAreaSidebar() {
   const pathname = usePathname();
+  const [pendingNavigation, setPendingNavigation] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
+
+  // Mantém o item selecionado imediatamente após o clique. Quando o pathname
+  // muda, a seleção volta automaticamente a ser determinada pela rota real.
+  const selectedPathname =
+    pendingNavigation?.from === pathname ? pendingNavigation.to : pathname;
 
   return (
     <aside className="rounded-xl border bg-card p-3 lg:self-start lg:sticky lg:top-28 lg:p-4">
@@ -50,13 +60,19 @@ export default function ClientAreaSidebar() {
       <nav className="grid grid-cols-3 gap-2 lg:block lg:space-y-1">
         {links.map(({ href, label, icon: Icon, exact }) => {
           const active = exact
-            ? pathname === href
-            : pathname === href || pathname.startsWith(`${href}/`);
+            ? selectedPathname === href
+            : selectedPathname === href ||
+              selectedPathname.startsWith(`${href}/`);
 
           return (
             <Link
               key={href}
               href={href}
+              prefetch={true}
+              aria-current={active ? "page" : undefined}
+              onNavigate={() =>
+                setPendingNavigation({ from: pathname, to: href })
+              }
               className={cn(
                 "flex flex-col items-center justify-center gap-2 rounded-lg p-3 text-center text-xs transition-colors lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:py-2 lg:text-sm",
                 active ? "bg-primary text-primary-foreground" : "hover:bg-muted"

@@ -179,7 +179,7 @@ export default async function BusinessPage({ params }: Props) {
     (business.description?.trim().length ?? 0) >= 80,
     Boolean(business.logo_url),
     images.length > 0,
-    hours.length > 0,
+    business.is_24_hours || hours.length > 0,
     services.length > 0,
     faqs.length > 0
   ].filter(Boolean).length;
@@ -251,7 +251,12 @@ export default async function BusinessPage({ params }: Props) {
           {canActivatePremium && (
             <BusinessOwnerPremiumBanner business={business} />
           )}
-          <BusinessGallery images={images} />
+          <BusinessGallery
+            images={images}
+            businessId={business.id}
+            businessSlug={business.slug}
+            isBusinessOwner={isBusinessOwner}
+          />
           <BusinessMap
             businessName={business.name}
             latitude={business.latitude}
@@ -264,7 +269,10 @@ export default async function BusinessPage({ params }: Props) {
         <div className="min-w-0 space-y-6 lg:sticky lg:top-6 lg:self-start">
           <BusinessContact business={business} />
 
-          <BusinessHours hours={hours} />
+          <BusinessHours
+            hours={hours}
+            is24Hours={business.is_24_hours}
+          />
 
           <BusinessClaimButton
             businessId={business.id}
