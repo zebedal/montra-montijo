@@ -1,15 +1,65 @@
 import { z } from "zod";
 import { BUSINESS_LOCALITIES } from "@/lib/business-localities";
+import { MARGEM_SUL_SERVICE_AREA_SLUGS } from "@/lib/service-areas";
 
 /**
  * OPENING HOURS
  */
-export const openingHourSchema = z.object({
-  day: z.string(),
-  open: z.string().optional(),
-  close: z.string().optional(),
-  closed: z.boolean()
-});
+export const openingPeriodSchema = z
+  .object({
+    open: z.string(),
+    close: z.string()
+  })
+  .superRefine((period, context) => {
+    if (!period.open || !period.close) {
+      context.addIssue({
+        code: "custom",
+        message: "Indica a hora de abertura e de fecho."
+      });
+      return;
+    }
+
+    if (period.open >= period.close) {
+      context.addIssue({
+        code: "custom",
+        message: "A hora de fecho deve ser posterior à hora de abertura."
+      });
+    }
+  });
+
+export const openingHourSchema = z
+  .object({
+    day: z.string(),
+    periods: z.array(openingPeriodSchema).max(4),
+    closed: z.boolean()
+  })
+  .superRefine((day, context) => {
+    if (day.closed) return;
+
+    if (day.periods.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["periods"],
+        message: "Adiciona pelo menos um período ou marca o dia como encerrado."
+      });
+      return;
+    }
+
+    const sortedPeriods = [...day.periods].sort((a, b) =>
+      a.open.localeCompare(b.open)
+    );
+
+    for (let index = 1; index < sortedPeriods.length; index += 1) {
+      if (sortedPeriods[index].open < sortedPeriods[index - 1].close) {
+        context.addIssue({
+          code: "custom",
+          path: ["periods"],
+          message: "Os períodos do mesmo dia não podem sobrepor-se."
+        });
+        break;
+      }
+    }
+  });
 
 export const businessFaqSchema = z.object({
   question: z
@@ -87,6 +137,8 @@ export const businessSchema = z
     city: z.enum(BUSINESS_LOCALITIES, {
       message: "Selecione uma freguesia válida."
     }),
+    servesAtCustomerLocation: z.boolean(),
+    serviceAreas: z.array(z.enum(MARGEM_SUL_SERVICE_AREA_SLUGS)).max(9),
     images: z.array(z.string()),
     logo: z.string().optional(),
     faqs: z.array(businessFaqSchema).max(5, "Podes adicionar até 5 perguntas."),
@@ -109,6 +161,14 @@ export const businessSchema = z
       }
     }
 
+    if (data.servesAtCustomerLocation && data.serviceAreas.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["serviceAreas"],
+        message: "Selecione pelo menos uma área onde presta serviços."
+      });
+    }
+
     if (!data.hasPhysicalAddress) return;
 
     if (!data.street) {
@@ -119,13 +179,7 @@ export const businessSchema = z
       });
     }
 
-    if (!data.number) {
-      context.addIssue({
-        code: "custom",
-        path: ["number"],
-        message: "Indica o número da porta."
-      });
-    } else if (!/^\d/i.test(data.number)) {
+    if (data.number && !/^\d/i.test(data.number)) {
       context.addIssue({
         code: "custom",
         path: ["number"],
@@ -145,3 +199,55 @@ export const businessSchema = z
 export type BusinessFormData = z.infer<typeof businessSchema>;
 
 export type OpeningHour = z.infer<typeof openingHourSchema>;
+export type OpeningPeriod = z.infer<typeof openingPeriodSchema>;
+
+export function normalizeOpeningHours(value: unknown): OpeningHour[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+
+    const legacyItem = item as {
+      day?: unknown;
+      open?: unknown;
+      close?: unknown;
+      periods?: unknown;
+      closed?: unknown;
+    };
+
+    if (typeof legacyItem.day !== "string") return [];
+
+    const periods = Array.isArray(legacyItem.periods)
+      ? legacyItem.periods.flatMap((period) => {
+          if (!period || typeof period !== "object") return [];
+
+          const candidate = period as { open?: unknown; close?: unknown };
+
+          return [
+            {
+              open: typeof candidate.open === "string" ? candidate.open : "",
+              close:
+                typeof candidate.close === "string" ? candidate.close : ""
+            }
+          ];
+        })
+      : typeof legacyItem.open === "string" ||
+          typeof legacyItem.close === "string"
+        ? [
+            {
+              open: typeof legacyItem.open === "string" ? legacyItem.open : "",
+              close:
+                typeof legacyItem.close === "string" ? legacyItem.close : ""
+            }
+          ]
+        : [];
+
+    return [
+      {
+        day: legacyItem.day,
+        periods,
+        closed: legacyItem.closed === true
+      }
+    ];
+  });
+}

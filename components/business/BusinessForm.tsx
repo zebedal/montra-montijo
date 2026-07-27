@@ -35,7 +35,8 @@ import {
 
 import {
   businessSchema,
-  BusinessFormData
+  BusinessFormData,
+  normalizeOpeningHours
 } from "@/lib/schemas/businessFormSchema";
 import { OpeningHours } from "./OpeningHours";
 
@@ -68,6 +69,7 @@ import { UploadImage } from "@/types/upload-image";
 import { uploadBusinessLogo } from "@/lib/queries/updateBusinessLogo";
 import { supabase } from "@/lib/supabase/client";
 import { BUSINESS_LOCALITIES } from "@/lib/business-localities";
+import { MARGEM_SUL_SERVICE_AREAS } from "@/lib/service-areas";
 
 const PENDING_BUSINESS_FORM_KEY = "montra-pending-business-form";
 const PENDING_BUSINESS_FORM_NOTICE_KEY =
@@ -101,13 +103,13 @@ type ValidatedAddress = {
 };
 
 export const defaultOpeningHours = [
-  { day: "Segunda", open: "", close: "", closed: false },
-  { day: "Terça", open: "", close: "", closed: false },
-  { day: "Quarta", open: "", close: "", closed: false },
-  { day: "Quinta", open: "", close: "", closed: false },
-  { day: "Sexta", open: "", close: "", closed: false },
-  { day: "Sábado", open: "", close: "", closed: false },
-  { day: "Domingo", open: "", close: "", closed: true }
+  { day: "Segunda", periods: [{ open: "", close: "" }], closed: false },
+  { day: "Terça", periods: [{ open: "", close: "" }], closed: false },
+  { day: "Quarta", periods: [{ open: "", close: "" }], closed: false },
+  { day: "Quinta", periods: [{ open: "", close: "" }], closed: false },
+  { day: "Sexta", periods: [{ open: "", close: "" }], closed: false },
+  { day: "Sábado", periods: [{ open: "", close: "" }], closed: false },
+  { day: "Domingo", periods: [], closed: true }
 ];
 
 export default function BusinessForm({
@@ -123,9 +125,13 @@ export default function BusinessForm({
         (initialData?.openingHours?.length ?? 0) > 0)
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [images, setImages] = useState<UploadImage[]>([]);
+  const [images, setImages] = useState<UploadImage[]>(
+    mode === "edit" ? (initialImages ?? []) : []
+  );
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(
+    mode === "edit" ? (initialData?.logo ?? null) : null
+  );
   const [categorySearch, setCategorySearch] = useState<string>("");
   const [showSocials, setShowSocials] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -161,6 +167,9 @@ export default function BusinessForm({
       number: initialData?.number ?? "",
       postalCode: initialData?.postalCode ?? "",
       city: initialData?.city ?? "Montijo",
+      servesAtCustomerLocation:
+        initialData?.servesAtCustomerLocation ?? false,
+      serviceAreas: initialData?.serviceAreas ?? [],
       images: [],
       logo: initialData?.logo,
       faqs: initialData?.faqs ?? [],
@@ -219,9 +228,25 @@ export default function BusinessForm({
   const number = useWatch({ control, name: "number" });
   const postalCode = useWatch({ control, name: "postalCode" });
   const city = useWatch({ control, name: "city" });
+  const servesAtCustomerLocation = useWatch({
+    control,
+    name: "servesAtCustomerLocation"
+  });
 
   const isProcessing =
     isSubmitting || isPublishing || isCheckingAuth || isValidatingAddress;
+  const initialImageIds = (initialImages ?? []).map((image) => image.id);
+  const currentImageIds = images.map((image) => image.id);
+  const imagesChanged =
+    mode === "edit" &&
+    (images.some((image) => Boolean(image.file)) ||
+      initialImageIds.length !== currentImageIds.length ||
+      initialImageIds.some((id, index) => id !== currentImageIds[index]));
+  const logoChanged =
+    mode === "edit" &&
+    (Boolean(logoFile) ||
+      (Boolean(initialData?.logo) && logoPreview === null));
+  const hasEditChanges = isDirty || imagesChanged || logoChanged;
 
   function getAddressKey(
     data: Pick<
@@ -369,10 +394,12 @@ export default function BusinessForm({
       try {
         setIsPublishing(true);
 
-        let logoPath: string | undefined;
+        let logoPath: string | null | undefined;
 
         if (logoFile) {
           logoPath = await uploadBusinessLogo(businessId, logoFile);
+        } else if (initialData?.logo && !logoPreview) {
+          logoPath = null;
         }
 
         const updatedBusiness = await updateMyBusiness(
@@ -482,8 +509,7 @@ export default function BusinessForm({
 
       return {
         ...day,
-        open: monday.open,
-        close: monday.close,
+        periods: monday.periods.map((period) => ({ ...period })),
         closed: monday.closed
       };
     });
@@ -523,6 +549,9 @@ export default function BusinessForm({
       number: initialData.number ?? "",
       postalCode: initialData.postalCode ?? "",
       city: initialData.city ?? "Montijo",
+      servesAtCustomerLocation:
+        initialData.servesAtCustomerLocation ?? false,
+      serviceAreas: initialData.serviceAreas ?? [],
       images: [],
       logo: initialData.logo ?? "",
       faqs: initialData.faqs ?? [],
@@ -551,11 +580,16 @@ export default function BusinessForm({
         hadImages?: boolean;
       };
 
+      const restoredOpeningHours = normalizeOpeningHours(
+        parsed.form.openingHours
+      );
       const hasOpeningHours = Boolean(
         parsed.form.is24Hours ||
-          parsed.form.openingHours?.some(
-          (item) => item.open !== "" || item.close !== ""
-        )
+          restoredOpeningHours.some((item) =>
+            item.periods.some(
+              (period) => period.open !== "" || period.close !== ""
+            )
+          )
       );
 
       reset({
@@ -567,9 +601,12 @@ export default function BusinessForm({
         faqs: parsed.form.faqs ?? [],
         services: parsed.form.services ?? [],
         is24Hours: parsed.form.is24Hours ?? false,
+        servesAtCustomerLocation:
+          parsed.form.servesAtCustomerLocation ?? false,
+        serviceAreas: parsed.form.serviceAreas ?? [],
         openingHours:
           hasOpeningHours && !parsed.form.is24Hours
-            ? parsed.form.openingHours
+            ? restoredOpeningHours
             : []
       });
 
@@ -934,7 +971,7 @@ export default function BusinessForm({
                   <Input
                     {...form.register("number")}
                     inputMode="text"
-                    placeholder="Número / Fração"
+                    placeholder="Número / Fração (opcional)"
                   />
                   <p className="text-xs text-muted-foreground">
                     Ex.: 12, 1.º Esq.
@@ -996,7 +1033,7 @@ export default function BusinessForm({
                   type="button"
                   variant="outline"
                   disabled={
-                    isValidatingAddress || !street || !number || !postalCode
+                    isValidatingAddress || !street || !postalCode
                   }
                   onClick={() =>
                     void validateAddress({ street, number, postalCode, city })
@@ -1030,6 +1067,99 @@ export default function BusinessForm({
                   )}
               </div>
                 </div>
+              )}
+            </section>
+
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold">Área de atuação</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Indica onde te deslocas para prestar serviços. Esta informação
+                  é independente da morada física.
+                </p>
+              </div>
+
+              <Controller
+                control={control}
+                name="servesAtCustomerLocation"
+                render={({ field }) => (
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border p-4">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={(checked) => {
+                        const enabled = checked === true;
+                        field.onChange(enabled);
+
+                        if (enabled && getValues("serviceAreas").length === 0) {
+                          setValue("serviceAreas", ["montijo"], {
+                            shouldDirty: true,
+                            shouldValidate: true
+                          });
+                        }
+
+                        if (!enabled) {
+                          setValue("serviceAreas", [], {
+                            shouldDirty: true,
+                            shouldValidate: true
+                          });
+                        }
+                      }}
+                    />
+                    <span>
+                      <span className="block text-sm font-medium">
+                        Presto serviços nas instalações do cliente
+                      </span>
+                      <span className="block text-sm text-muted-foreground">
+                        Por exemplo, ao domicílio, em empresas ou em obras.
+                      </span>
+                    </span>
+                  </label>
+                )}
+              />
+
+              {servesAtCustomerLocation && (
+                <Controller
+                  control={control}
+                  name="serviceAreas"
+                  render={({ field }) => (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">
+                        Onde prestas serviços?
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {MARGEM_SUL_SERVICE_AREAS.map((area) => {
+                          const checked = field.value.includes(area.slug);
+
+                          return (
+                            <label
+                              key={area.slug}
+                              className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-3 text-sm hover:bg-muted/50"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={(nextChecked) => {
+                                  field.onChange(
+                                    nextChecked === true
+                                      ? [...field.value, area.slug]
+                                      : field.value.filter(
+                                          (slug) => slug !== area.slug
+                                        )
+                                  );
+                                }}
+                              />
+                              <span>{area.name}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      {errors.serviceAreas && (
+                        <p className="text-sm text-red-500">
+                          {errors.serviceAreas.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
               )}
             </section>
 
@@ -1322,7 +1452,10 @@ export default function BusinessForm({
                       Copiar Segunda → Todos
                     </Button>
                   </div>
-                  <OpeningHours control={form.control} />
+                  <OpeningHours
+                    control={form.control}
+                    setValue={form.setValue}
+                  />
                     </>
                   )}
                 </>
@@ -1343,7 +1476,9 @@ export default function BusinessForm({
               <Button
                 type="submit"
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                disabled={isProcessing || (mode === "edit" && !isDirty)}
+                disabled={
+                  isProcessing || (mode === "edit" && !hasEditChanges)
+                }
                 size="lg"
               >
                 {isProcessing ? (

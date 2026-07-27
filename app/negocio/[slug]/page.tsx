@@ -12,6 +12,7 @@ import { BusinessFaqs } from "@/components/business/BusinessFaqs";
 import { BusinessServices } from "@/components/business/BusinessServices";
 import { BusinessOwnerCompletion } from "@/components/business/BusinessOwnerCompletion";
 import { BusinessMap } from "@/components/business/BusinessMap";
+import { BusinessServiceAreas } from "@/components/business/BusinessServiceAreas";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
@@ -162,7 +163,7 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const { business, images, hours, faqs, services } = result;
+  const { business, images, hours, faqs, services, serviceAreas } = result;
 
   const supabase = await createClient();
 
@@ -202,7 +203,11 @@ export default async function BusinessPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <LocalBusinessJsonLd business={business} hours={hours} />
+      <LocalBusinessJsonLd
+        business={business}
+        hours={hours}
+        serviceAreas={serviceAreas}
+      />
       <BusinessPageTracker businessId={business.id} />
 
       {business.category && (
@@ -262,6 +267,7 @@ export default async function BusinessPage({ params }: Props) {
             latitude={business.latitude}
             longitude={business.longitude}
           />
+          <BusinessServiceAreas areas={serviceAreas} />
           <BusinessServices services={services} />
           <BusinessFaqs faqs={faqs} />
         </div>
