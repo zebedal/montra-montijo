@@ -228,8 +228,8 @@ export default async function BusinessPage({ params }: Props) {
         />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] mt-14">
-        <div className="space-y-6">
+      <div className="mt-14 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-6">
           {business.category && (
             <BusinessBreadcrumb
               category={business.category}
@@ -261,7 +261,7 @@ export default async function BusinessPage({ params }: Props) {
           <BusinessFaqs faqs={faqs} />
         </div>
 
-        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <div className="min-w-0 space-y-6 lg:sticky lg:top-6 lg:self-start">
           <BusinessContact business={business} />
 
           <BusinessHours hours={hours} />

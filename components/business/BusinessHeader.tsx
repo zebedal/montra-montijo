@@ -30,10 +30,10 @@ export function BusinessHeader({
   isBusinessOwner = false
 }: BusinessHeaderProps) {
   return (
-    <Card>
-      <CardContent className="p-8">
-        <div className="flex flex-col gap-8 md:flex-row">
-          <Avatar className="h-32 w-32 rounded-xl">
+    <Card className="min-w-0 overflow-hidden">
+      <CardContent className="min-w-0 p-6 sm:p-8">
+        <div className="flex min-w-0 flex-col gap-8 md:flex-row">
+          <Avatar className="h-32 w-32 shrink-0 rounded-xl">
             <AvatarImage
               src={business.logo_url ?? undefined}
               alt={business.name}
@@ -44,10 +44,10 @@ export function BusinessHeader({
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-1 flex-col justify-center gap-3">
-            <div className="relative">
+          <div className="flex min-w-0 flex-1 flex-col justify-center gap-3">
+            <div className="relative min-w-0">
               <div className="min-w-0 pr-24 sm:pr-28">
-                <h1 className="text-3xl font-bold tracking-tight">
+                <h1 className="wrap-anywhere text-3xl font-bold tracking-tight">
                   {business.name}
                 </h1>
 
@@ -103,7 +103,7 @@ export function BusinessHeader({
             )}
 
             {business.description && (
-              <p className="max-w-3xl whitespace-pre-wrap wrap-break-word leading-7 text-muted-foreground">
+              <p className="max-w-3xl whitespace-pre-wrap wrap-anywhere leading-7 text-muted-foreground">
                 {business.description}
               </p>
             )}

@@ -9,7 +9,7 @@ interface SuccessProps {
 
 export default function Success({ slug, businessId }: SuccessProps) {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-20 space-y-6">
+    <div className="flex flex-col items-center justify-center text-center py-20 px-2.5 space-y-6">
       <CheckCircle className="h-14 w-14 text-green-600" />
 
       <div className="space-y-2">
@@ -28,12 +28,15 @@ export default function Success({ slug, businessId }: SuccessProps) {
             Queres tornar a página ainda mais útil?
           </h2>
           <p className="mt-1 text-sm leading-6 text-gray-500">
-            Estes passos são opcionais e podes completá-los agora ou mais
-            tarde.
+            Estes passos são opcionais e podes completá-los agora ou mais tarde.
           </p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Button asChild variant="outline" className="h-auto justify-start py-3">
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto justify-start py-3"
+            >
               <Link
                 href={`/area-cliente/negocio/${businessId}/editar#servicos-e-precos`}
               >
@@ -42,7 +45,11 @@ export default function Success({ slug, businessId }: SuccessProps) {
               </Link>
             </Button>
 
-            <Button asChild variant="outline" className="h-auto justify-start py-3">
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto justify-start py-3"
+            >
               <Link
                 href={`/area-cliente/negocio/${businessId}/editar#perguntas-frequentes`}
               >

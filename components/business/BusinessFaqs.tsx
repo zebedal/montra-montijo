@@ -15,17 +15,19 @@ export function BusinessFaqs({ faqs }: Props) {
   if (faqs.length === 0) return null;
 
   return (
-    <Card>
+    <Card className="min-w-0 overflow-hidden">
       <CardHeader>
         <CardTitle>Perguntas frequentes</CardTitle>
       </CardHeader>
       <CardContent>
         <Accordion type="multiple">
           {faqs.map((faq) => (
-            <AccordionItem key={faq.id} value={faq.id}>
-              <AccordionTrigger>{faq.question}</AccordionTrigger>
+            <AccordionItem key={faq.id} value={faq.id} className="min-w-0">
+              <AccordionTrigger className="min-w-0 wrap-anywhere">
+                {faq.question}
+              </AccordionTrigger>
               <AccordionContent>
-                <p className="whitespace-pre-line text-muted-foreground">
+                <p className="whitespace-pre-line wrap-anywhere text-muted-foreground">
                   {faq.answer}
                 </p>
               </AccordionContent>
