@@ -957,12 +957,10 @@ export default function BusinessForm({
               />
             </section>
 
-            {mode === "edit" && (
-              <>
-                <section
-                  id="servicos-e-precos"
-                  className="scroll-mt-24 space-y-4"
-                >
+            <section
+              id="servicos-e-precos"
+              className="scroll-mt-24 space-y-4"
+            >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold">
@@ -1081,6 +1079,7 @@ export default function BusinessForm({
               ))}
             </section>
 
+            {mode === "edit" && (
                 <section
                   id="perguntas-frequentes"
                   className="scroll-mt-24 space-y-4"
@@ -1150,7 +1149,6 @@ export default function BusinessForm({
                 </div>
               ))}
                 </section>
-              </>
             )}
 
             {/* HORARIO */}
