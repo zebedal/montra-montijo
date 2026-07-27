@@ -20,13 +20,15 @@ interface Props {
   businessId: string;
   businessSlug: string;
   isBusinessOwner?: boolean;
+  isClaimable?: boolean;
 }
 
 export function BusinessGallery({
   images,
   businessId,
   businessSlug,
-  isBusinessOwner = false
+  isBusinessOwner = false,
+  isClaimable = false
 }: Props) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -82,24 +84,28 @@ export function BusinessGallery({
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   {isBusinessOwner
                     ? "Adiciona imagens para mostrares o teu espaço, trabalho ou serviços aos clientes."
-                    : "É o proprietário? Reivindique esta página e mostre o seu espaço ou trabalho aos clientes."}
+                    : isClaimable
+                      ? "É o proprietário? Reivindique esta página e mostre o seu espaço ou trabalho aos clientes."
+                      : "Ainda não existem fotografias disponíveis para este negócio."}
                 </p>
 
-                <Button asChild size="sm" className="mt-4">
-                  <Link
-                    href={
-                      isBusinessOwner
-                        ? `/area-cliente/negocio/${businessId}/editar`
-                        : `/negocio/${businessSlug}?claim=${encodeURIComponent(
-                            businessId
-                          )}`
-                    }
-                  >
-                    {isBusinessOwner
-                      ? "Adicionar fotografias"
-                      : "Reivindicar esta página"}
-                  </Link>
-                </Button>
+                {(isBusinessOwner || isClaimable) && (
+                  <Button asChild size="sm" className="mt-4">
+                    <Link
+                      href={
+                        isBusinessOwner
+                          ? `/area-cliente/negocio/${businessId}/editar`
+                          : `/negocio/${businessSlug}?claim=${encodeURIComponent(
+                              businessId
+                            )}`
+                      }
+                    >
+                      {isBusinessOwner
+                        ? "Adicionar fotografias"
+                        : "Reivindicar esta página"}
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
           </div>

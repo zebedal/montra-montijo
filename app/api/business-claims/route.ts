@@ -133,6 +133,20 @@ export async function POST(request: Request) {
       );
     }
 
+    const isClaimable =
+      !business.user_id || business.user_id === process.env.ADMIN_USER_ID;
+
+    if (!isClaimable) {
+      return NextResponse.json(
+        {
+          error: "Este negócio já foi atribuído ao respetivo responsável."
+        },
+        {
+          status: 409
+        }
+      );
+    }
+
     /*
      * Confirmar se já existe um pedido pendente.
      */

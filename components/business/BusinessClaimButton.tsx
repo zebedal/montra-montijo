@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ type Props = {
   businessName: string;
   businessSlug: string;
   currentOwnerUserId: string | null;
+  prominent?: boolean;
 };
 
 const businessRoles = [
@@ -69,7 +71,8 @@ export default function BusinessClaimButton({
   businessId,
   businessName,
   businessSlug,
-  currentOwnerUserId
+  currentOwnerUserId,
+  prominent = false
 }: Props) {
   const { user, loading: isUserLoading } = useUser();
   const router = useRouter();
@@ -227,16 +230,47 @@ export default function BusinessClaimButton({
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleOpenClaim}
-        disabled={isUserLoading}
-        className="w-full"
-      >
-        <Building2 className="mr-2 h-4 w-4" />
-        Este negócio é seu?
-      </Button>
+      {prominent ? (
+        <Card className="overflow-hidden border-primary/25 bg-primary/5">
+          <CardContent className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Building2 className="size-5" />
+              </div>
+
+              <div>
+                <h2 className="font-semibold text-foreground">
+                  É responsável por este negócio?
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  Reivindique esta página para gerir fotografias, contactos,
+                  horários e outras informações.
+                </p>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleOpenClaim}
+              disabled={isUserLoading}
+              className="shrink-0 sm:self-center"
+            >
+              Reivindicar negócio
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleOpenClaim}
+          disabled={isUserLoading}
+          className="w-full"
+        >
+          <Building2 className="mr-2 h-4 w-4" />
+          Reivindicar negócio
+        </Button>
+      )}
 
       <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
         <DialogContent className="sm:max-w-md">

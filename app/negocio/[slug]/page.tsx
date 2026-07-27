@@ -172,6 +172,8 @@ export default async function BusinessPage({ params }: Props) {
   } = await supabase.auth.getUser();
 
   const isBusinessOwner = Boolean(user) && business.user_id === user?.id;
+  const isClaimable =
+    !business.user_id || business.user_id === process.env.ADMIN_USER_ID;
   const adminPreviewUserId = await getAdminPreviewUserId();
 
   const canActivatePremium = isBusinessOwner && business.plan !== "premium";
@@ -247,6 +249,15 @@ export default async function BusinessPage({ params }: Props) {
             businessUrl={businessUrl}
             isBusinessOwner={isBusinessOwner}
           />
+          {isClaimable && (
+            <BusinessClaimButton
+              businessId={business.id}
+              businessName={business.name}
+              businessSlug={business.slug}
+              currentOwnerUserId={business.user_id}
+              prominent
+            />
+          )}
           {isBusinessOwner && (
             <BusinessOwnerCompletion
               businessId={business.id}
@@ -261,6 +272,7 @@ export default async function BusinessPage({ params }: Props) {
             businessId={business.id}
             businessSlug={business.slug}
             isBusinessOwner={isBusinessOwner}
+            isClaimable={isClaimable}
           />
           <BusinessMap
             businessName={business.name}
@@ -280,12 +292,6 @@ export default async function BusinessPage({ params }: Props) {
             is24Hours={business.is_24_hours}
           />
 
-          <BusinessClaimButton
-            businessId={business.id}
-            businessName={business.name}
-            businessSlug={business.slug}
-            currentOwnerUserId={business.user_id}
-          />
         </div>
       </div>
 
