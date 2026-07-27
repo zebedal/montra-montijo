@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
   Building2,
@@ -11,11 +12,9 @@ import {
   Crown,
   Grid2X2,
   Heart,
-  Info,
   LayoutDashboard,
   LogIn,
   LogOut,
-  Mail,
   Menu,
   Plus,
   ShieldQuestion,
@@ -67,10 +66,62 @@ function MobileNavLink({ href, icon: Icon, children }: MobileNavLinkProps) {
   );
 }
 
+function getAuthDisplayName(user: ReturnType<typeof useUser>["user"]) {
+  const metadataName =
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.name ??
+    user?.user_metadata?.given_name;
+
+  if (typeof metadataName === "string" && metadataName.trim()) {
+    return metadataName.trim();
+  }
+
+  return user?.email?.split("@")[0] ?? "Utilizador";
+}
+
 export function Header() {
   const { user, loading } = useUser();
+  const [profileIdentity, setProfileIdentity] = useState({
+    userId: "",
+    name: ""
+  });
 
   const router = useRouter();
+
+  const displayName =
+    profileIdentity.userId === user?.id && profileIdentity.name
+      ? profileIdentity.name
+      : getAuthDisplayName(user);
+  const firstName = displayName.split(/\s+/)[0];
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let active = true;
+
+    async function loadProfileName() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!active || error) return;
+
+      if (data?.full_name?.trim()) {
+        setProfileIdentity({
+          userId: user.id,
+          name: data.full_name.trim()
+        });
+      }
+    }
+
+    void loadProfileName();
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -137,15 +188,17 @@ export function Header() {
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost">
-                      <User className="mr-2 h-5 w-5" />
-                      Conta
+                    <Button variant="ghost" className="max-w-48">
+                      <User className="mr-2 h-5 w-5 shrink-0" />
+                      <span className="truncate">Olá, {firstName}</span>
                     </Button>
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end" className="w-64">
                     <DropdownMenuLabel className="flex flex-col">
-                      <span className="font-semibold">Conta</span>
+                      <span className="truncate font-semibold">
+                        {displayName}
+                      </span>
 
                       <span className="truncate text-xs font-normal text-muted-foreground">
                         {user.email}
@@ -305,7 +358,7 @@ export function Header() {
 
                               <div className="min-w-0">
                                 <p className="text-sm font-medium text-white">
-                                  Conta
+                                  Olá, {firstName}
                                 </p>
 
                                 <p className="truncate text-xs text-white/45">

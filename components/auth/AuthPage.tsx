@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2, Mail } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ export default function AuthPage() {
     null
   );
   const [isResending, setIsResending] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { user, loading } = useUser();
 
@@ -147,6 +149,36 @@ export default function AuthPage() {
       });
     } finally {
       setIsResending(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    if (isGoogleLoading || !emailRedirectTo) {
+      return;
+    }
+
+    setIsGoogleLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: emailRedirectTo
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      toast.error("Não foi possível continuar com o Google.", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Tente novamente dentro de alguns instantes."
+      });
+
+      setIsGoogleLoading(false);
     }
   }
 
@@ -296,6 +328,27 @@ export default function AuthPage() {
         </p>
       </div>
 
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={handleGoogleSignIn}
+        disabled={isGoogleLoading || isSubmitting}
+      >
+        {isGoogleLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <FcGoogle className="h-5 w-5" />
+        )}
+        {isGoogleLoading ? "A redirecionar..." : "Continuar com Google"}
+      </Button>
+
+      <div className="flex items-center gap-3" aria-hidden="true">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-xs uppercase text-muted-foreground">ou</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <Input
@@ -385,7 +438,7 @@ export default function AuthPage() {
         <Button
           type="submit"
           className="w-full bg-green-600 text-white hover:bg-green-700"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isGoogleLoading}
         >
           {isSubmitting
             ? mode === "login"
