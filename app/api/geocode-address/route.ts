@@ -28,28 +28,34 @@ export async function POST(request: Request) {
 
   if (
     !street ||
-    !number ||
     !/^\d{4}-\d{3}$/.test(postalCode ?? "") ||
     !isBusinessLocality(city)
   ) {
     return Response.json(
-      { error: "Preenche uma rua, um número e um código postal válidos." },
+      { error: "Preenche uma rua e um código postal válidos." },
       { status: 400 }
     );
   }
 
   try {
-    const streetNumber = getStreetNumberForGeocoding(number);
+    const streetNumber = number ? getStreetNumberForGeocoding(number) : "";
     const searchableStreet = getStreetForGeocoding(street);
     const result = await geocodeAddress(
-      `${searchableStreet} ${streetNumber}, ${postalCode}, ${city}, Portugal`
+      [
+        [searchableStreet, streetNumber].filter(Boolean).join(" "),
+        postalCode,
+        city,
+        "Portugal"
+      ]
+        .filter(Boolean)
+        .join(", ")
     );
 
     if (!result) {
       return Response.json(
         {
           error:
-            "Não encontrámos esta morada no Montijo. Confirma a rua, o número e o código postal."
+            "Não encontrámos esta morada no Montijo. Confirma a rua e o código postal."
         },
         { status: 404 }
       );
@@ -57,7 +63,13 @@ export async function POST(request: Request) {
 
     return Response.json({
       ...result,
-      displayName: `${street} ${number}, ${postalCode}, ${city}`
+      displayName: [
+        [street, number].filter(Boolean).join(" "),
+        postalCode,
+        city
+      ]
+        .filter(Boolean)
+        .join(", ")
     });
   } catch (error) {
     console.error("Erro ao validar morada:", error);

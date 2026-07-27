@@ -1,18 +1,28 @@
 "use client";
 
-import { Control, Controller, useWatch } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  UseFormSetValue,
+  useFormState,
+  useWatch
+} from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
 
 import type { BusinessFormData } from "@/lib/schemas/businessFormSchema";
 
 type Props = {
   control: Control<BusinessFormData>;
+  setValue: UseFormSetValue<BusinessFormData>;
 };
 
-export function OpeningHours({ control }: Props) {
+export function OpeningHours({ control, setValue }: Props) {
+  const { errors } = useFormState({ control });
   const hours = useWatch({
     control,
     name: "openingHours"
@@ -24,46 +34,100 @@ export function OpeningHours({ control }: Props) {
     <div className="space-y-4">
       {hours.map((hour, index) => {
         const closed = hour.closed;
+        const hasError = Boolean(errors.openingHours?.[index]);
 
         return (
           <div
             key={hour.day}
-            className="grid gap-4 rounded-lg border p-4 md:grid-cols-[120px_1fr_auto] md:items-center"
+            className={`grid gap-4 rounded-lg border p-4 md:grid-cols-[120px_1fr_auto] md:items-start ${
+              hasError ? "border-red-500" : ""
+            }`}
           >
             {/* DIA */}
             <Label className="font-medium">{hour.day}</Label>
 
             {/* HORAS */}
-            <div className="flex flex-wrap items-center gap-3">
-              <Controller
-                control={control}
-                name={`openingHours.${index}.open`}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    type="time"
-                    disabled={closed}
-                    className="w-full sm:w-36"
-                  />
-                )}
-              />
+            <div className="space-y-3">
+              {!closed &&
+                hour.periods.map((period, periodIndex) => (
+                  <div
+                    key={periodIndex}
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    <Controller
+                      control={control}
+                      name={`openingHours.${index}.periods.${periodIndex}.open`}
+                      render={({ field, fieldState }) => (
+                        <Input
+                          {...field}
+                          type="time"
+                          aria-invalid={fieldState.invalid}
+                          className="w-full sm:w-36"
+                        />
+                      )}
+                    />
 
-              <span className="hidden md:block text-sm text-muted-foreground">
-                às
-              </span>
+                    <span className="text-sm text-muted-foreground">às</span>
 
-              <Controller
-                control={control}
-                name={`openingHours.${index}.close`}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    type="time"
-                    disabled={closed}
-                    className="w-full sm:w-36"
-                  />
-                )}
-              />
+                    <Controller
+                      control={control}
+                      name={`openingHours.${index}.periods.${periodIndex}.close`}
+                      render={({ field, fieldState }) => (
+                        <Input
+                          {...field}
+                          type="time"
+                          aria-invalid={fieldState.invalid}
+                          className="w-full sm:w-36"
+                        />
+                      )}
+                    />
+
+                    {hour.periods.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Remover período de ${hour.day}`}
+                        onClick={() =>
+                          setValue(
+                            `openingHours.${index}.periods`,
+                            hour.periods.filter(
+                              (_, itemIndex) => itemIndex !== periodIndex
+                            ),
+                            { shouldDirty: true, shouldValidate: true }
+                          )
+                        }
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+
+              {!closed && hour.periods.length < 4 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setValue(
+                      `openingHours.${index}.periods`,
+                      [...hour.periods, { open: "", close: "" }],
+                      { shouldDirty: true, shouldValidate: true }
+                    )
+                  }
+                >
+                  <Plus className="size-4" />
+                  Adicionar período
+                </Button>
+              )}
+
+              {hasError && (
+                <p className="text-sm text-red-500">
+                  Revê as horas deste dia. Preenche os dois campos e evita
+                  períodos sobrepostos.
+                </p>
+              )}
             </div>
 
             {/* ENCERRADO */}
@@ -74,9 +138,18 @@ export function OpeningHours({ control }: Props) {
                 render={({ field }) => (
                   <Checkbox
                     checked={field.value}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked === true)
-                    }
+                    onCheckedChange={(checked) => {
+                      const isClosed = checked === true;
+                      field.onChange(isClosed);
+
+                      if (!isClosed && hour.periods.length === 0) {
+                        setValue(
+                          `openingHours.${index}.periods`,
+                          [{ open: "", close: "" }],
+                          { shouldDirty: true, shouldValidate: true }
+                        );
+                      }
+                    }}
                   />
                 )}
               />

@@ -6,7 +6,8 @@ export async function getBusinessHours(businessId: string) {
   const { data, error } = await supabase
     .from("business_hours")
     .select("*")
-    .eq("business_id", businessId);
+    .eq("business_id", businessId)
+    .order("period_order", { ascending: true });
 
   if (error) {
     throw error;

@@ -39,7 +39,7 @@ export async function updateMyBusiness(
     facebook: data.facebook,
     instagram: data.instagram,
     street: data.hasPhysicalAddress ? data.street : null,
-    number: data.hasPhysicalAddress ? data.number : null,
+    number: data.hasPhysicalAddress ? data.number || null : null,
     postal_code: data.hasPhysicalAddress ? data.postalCode : null,
     city: data.city,
     latitude: coordinates?.latitude ?? null,
@@ -72,17 +72,45 @@ export async function updateMyBusiness(
   }
 
   if (!data.is24Hours && data.openingHours && data.openingHours.length > 0) {
+    const rows: Array<{
+      business_id: string;
+      day: string;
+      open_time: string | null;
+      close_time: string | null;
+      is_closed: boolean;
+      period_order: number;
+    }> = data.openingHours.flatMap((hour): Array<{
+      business_id: string;
+      day: string;
+      open_time: string | null;
+      close_time: string | null;
+      is_closed: boolean;
+      period_order: number;
+    }> =>
+      hour.closed
+        ? [
+            {
+              business_id: businessId,
+              day: hour.day,
+              open_time: null,
+              close_time: null,
+              is_closed: true,
+              period_order: 0
+            }
+          ]
+        : hour.periods.map((period, periodOrder) => ({
+            business_id: businessId,
+            day: hour.day,
+            open_time: period.open,
+            close_time: period.close,
+            is_closed: false,
+            period_order: periodOrder
+          }))
+    );
+
     const { error: insertHoursError } = await supabase
       .from("business_hours")
-      .insert(
-        data.openingHours.map((hour) => ({
-          business_id: businessId,
-          day: hour.day,
-          open_time: hour.closed ? null : hour.open,
-          close_time: hour.closed ? null : hour.close,
-          is_closed: hour.closed
-        }))
-      );
+      .insert(rows);
 
     if (insertHoursError) {
       console.error("Erro ao inserir horários:", insertHoursError);
@@ -147,6 +175,35 @@ export async function updateMyBusiness(
 
     if (insertServicesError) {
       console.error("Erro ao guardar serviços:", insertServicesError);
+      return null;
+    }
+  }
+
+  const { error: deleteServiceAreasError } = await supabase
+    .from("business_service_areas")
+    .delete()
+    .eq("business_id", businessId);
+
+  if (deleteServiceAreasError) {
+    console.error("Erro ao remover áreas de atuação:", deleteServiceAreasError);
+    return null;
+  }
+
+  if (data.servesAtCustomerLocation && data.serviceAreas.length > 0) {
+    const { error: insertServiceAreasError } = await supabase
+      .from("business_service_areas")
+      .insert(
+        data.serviceAreas.map((areaSlug) => ({
+          business_id: businessId,
+          area_slug: areaSlug
+        }))
+      );
+
+    if (insertServiceAreasError) {
+      console.error(
+        "Erro ao guardar áreas de atuação:",
+        insertServiceAreasError
+      );
       return null;
     }
   }

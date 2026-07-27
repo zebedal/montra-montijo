@@ -3,7 +3,10 @@ import { supabase } from "./supabase/client";
 import imageCompression from "browser-image-compression";
 import { uploadFile } from "./supabase/upload";
 
-import { BusinessFormData } from "./schemas/businessFormSchema";
+import {
+  BusinessFormData,
+  normalizeOpeningHours
+} from "./schemas/businessFormSchema";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { UploadImage } from "@/types/upload-image";
@@ -113,10 +116,30 @@ export async function publishBusiness({
   try {
     const { form, logoUrl, imageUrls } = draft;
 
+    if (form.servesAtCustomerLocation && form.serviceAreas.length > 0) {
+      const { error: serviceAreasTableError } = await supabaseAdmin
+        .from("business_service_areas")
+        .select("area_slug")
+        .limit(1);
+
+      if (serviceAreasTableError) {
+        if (serviceAreasTableError.code === "PGRST205") {
+          throw new Error(
+            "A funcionalidade de áreas de atuação ainda não está configurada. Executa a migração 20260727_add_business_service_areas.sql no Supabase."
+          );
+        }
+
+        throw serviceAreasTableError;
+      }
+    }
+
     const fullAddress = [
-      `${getStreetForGeocoding(form.street)} ${getStreetNumberForGeocoding(
-        form.number
-      )}`,
+      [
+        getStreetForGeocoding(form.street),
+        form.number ? getStreetNumberForGeocoding(form.number) : ""
+      ]
+        .filter(Boolean)
+        .join(" "),
       form.postalCode,
       form.city,
       "Portugal"
@@ -199,14 +222,44 @@ export async function publishBusiness({
      * OPENING HOURS
      */
 
-    if (!form.is24Hours && form.openingHours?.length) {
-      const rows = form.openingHours.map((hour) => ({
-        business_id: businessId,
-        day: hour.day,
-        open_time: hour.open || null,
-        close_time: hour.close || null,
-        is_closed: hour.closed
-      }));
+    const openingHours = normalizeOpeningHours(form.openingHours);
+
+    if (!form.is24Hours && openingHours.length) {
+      const rows: Array<{
+        business_id: string;
+        day: string;
+        open_time: string | null;
+        close_time: string | null;
+        is_closed: boolean;
+        period_order: number;
+      }> = openingHours.flatMap((hour): Array<{
+        business_id: string;
+        day: string;
+        open_time: string | null;
+        close_time: string | null;
+        is_closed: boolean;
+        period_order: number;
+      }> =>
+        hour.closed
+          ? [
+              {
+                business_id: businessId,
+                day: hour.day,
+                open_time: null,
+                close_time: null,
+                is_closed: true,
+                period_order: 0
+              }
+            ]
+          : hour.periods.map((period, periodOrder) => ({
+              business_id: businessId,
+              day: hour.day,
+              open_time: period.open,
+              close_time: period.close,
+              is_closed: false,
+              period_order: periodOrder
+            }))
+      );
 
       const { error } = await supabaseAdmin.from("business_hours").insert(rows);
 
@@ -240,6 +293,19 @@ export async function publishBusiness({
           position: index
         }))
       );
+
+      if (error) throw error;
+    }
+
+    if (form.servesAtCustomerLocation && form.serviceAreas.length > 0) {
+      const { error } = await supabaseAdmin
+        .from("business_service_areas")
+        .insert(
+          form.serviceAreas.map((areaSlug) => ({
+            business_id: businessId,
+            area_slug: areaSlug
+          }))
+        );
 
       if (error) throw error;
     }
@@ -511,6 +577,7 @@ export interface BusinessHour {
   open_time: string | null;
   close_time: string | null;
   is_closed: boolean;
+  period_order?: number;
 }
 
 const weekDays = [
@@ -530,41 +597,41 @@ export function getBusinessStatus(hours: BusinessHour[]) {
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const todayHours = hours.find((h) => h.day === today);
+  const todayHours = hours
+    .filter((hour) => hour.day === today)
+    .filter(
+      (hour) => !hour.is_closed && hour.open_time && hour.close_time
+    )
+    .sort((a, b) =>
+      (a.open_time ?? "").localeCompare(b.open_time ?? "")
+    );
 
-  if (!todayHours || todayHours.is_closed) {
+  if (todayHours.length === 0) {
     return {
       open: false,
       message: "Encerrado hoje"
     };
   }
 
-  if (!todayHours.open_time || !todayHours.close_time) {
-    return {
-      open: false,
-      message: "Horário indisponível"
-    };
-  }
+  for (const [index, period] of todayHours.entries()) {
+    const [openHour, openMinute] = period.open_time!.split(":").map(Number);
+    const [closeHour, closeMinute] = period.close_time!.split(":").map(Number);
+    const openMinutes = openHour * 60 + openMinute;
+    const closeMinutes = closeHour * 60 + closeMinute;
 
-  const [openHour, openMinute] = todayHours.open_time.split(":").map(Number);
+    if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+      return {
+        open: true,
+        message: `Fecha às ${period.close_time!.slice(0, 5)}`
+      };
+    }
 
-  const [closeHour, closeMinute] = todayHours.close_time.split(":").map(Number);
-
-  const openMinutes = openHour * 60 + openMinute;
-  const closeMinutes = closeHour * 60 + closeMinute;
-
-  if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
-    return {
-      open: true,
-      message: `Fecha às ${todayHours.close_time.slice(0, 5)}`
-    };
-  }
-
-  if (currentMinutes < openMinutes) {
-    return {
-      open: false,
-      message: `Abre às ${todayHours.open_time.slice(0, 5)}`
-    };
+    if (currentMinutes < openMinutes) {
+      return {
+        open: false,
+        message: `${index > 0 ? "Reabre" : "Abre"} às ${period.open_time!.slice(0, 5)}`
+      };
+    }
   }
 
   return {

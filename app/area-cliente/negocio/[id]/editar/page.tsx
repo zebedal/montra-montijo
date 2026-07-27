@@ -10,6 +10,7 @@ import { getBusinessFaqs } from "@/lib/queries/getBusinessFaqs";
 import { getBusinessServices } from "@/lib/queries/getBusinessServices";
 import { Metadata } from "next";
 import { getBusinessLocality } from "@/lib/business-localities";
+import { getBusinessServiceAreas } from "@/lib/queries/getBusinessServiceAreas";
 
 type Props = {
   params: Promise<{
@@ -72,13 +73,35 @@ export default async function EditBusinessPage({ params }: Props) {
   const businessHours = await getBusinessHours(id);
   const businessFaqs = await getBusinessFaqs(id);
   const businessServices = await getBusinessServices(id);
+  const businessServiceAreas = await getBusinessServiceAreas(id);
 
-  const initialOpeningHours = businessHours.map((hour) => ({
-    day: hour.day,
-    open: hour.open_time ?? "",
-    close: hour.close_time ?? "",
-    closed: hour.is_closed
-  }));
+  const orderedDays = [
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+    "Domingo"
+  ];
+  const initialOpeningHours = orderedDays.map((day) => {
+    const dayHours = businessHours.filter((hour) => hour.day === day);
+    const isClosed =
+      dayHours.length === 0 || dayHours.every((hour) => hour.is_closed);
+
+    return {
+      day,
+      periods: isClosed
+        ? []
+        : dayHours
+            .filter((hour) => !hour.is_closed)
+            .map((hour) => ({
+              open: hour.open_time ?? "",
+              close: hour.close_time ?? ""
+            })),
+      closed: isClosed
+    };
+  });
 
   return (
     <BusinessForm
@@ -99,6 +122,8 @@ export default async function EditBusinessPage({ params }: Props) {
         postalCode: business.postal_code,
         city: getBusinessLocality(business.city),
         is24Hours: business.is_24_hours,
+        servesAtCustomerLocation: businessServiceAreas.length > 0,
+        serviceAreas: businessServiceAreas,
         logo: getPublicStorageUrl(business?.logo_url) ?? "",
         faqs: businessFaqs.map(({ question, answer }) => ({
           question,
