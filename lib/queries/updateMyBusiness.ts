@@ -11,7 +11,8 @@ type UpdatedBusiness = {
 export async function updateMyBusiness(
   businessId: string,
   data: BusinessFormData,
-  logoPath?: string
+  logoPath?: string,
+  coordinates?: { latitude: number; longitude: number }
 ): Promise<UpdatedBusiness | null> {
   const {
     data: { user },
@@ -41,6 +42,12 @@ export async function updateMyBusiness(
     number: data.number,
     postal_code: data.postalCode,
     city: data.city,
+    ...(coordinates
+      ? {
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude
+        }
+      : {}),
     ...(logoPath ? { logo_url: logoPath } : {})
   };
 

@@ -79,7 +79,9 @@ export function BusinessGallery({ images }: Props) {
               "cursor-pointer",
               index === 0
                 ? "col-span-2 aspect-16/10 md:col-span-3 md:row-span-3 md:aspect-auto"
-                : "aspect-square"
+                : images.length === 3 && index === 2
+                  ? "aspect-square md:row-span-2 md:aspect-auto"
+                  : "aspect-square"
             ].join(" ")}
           >
             <Image

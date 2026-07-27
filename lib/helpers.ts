@@ -7,6 +7,7 @@ import { BusinessFormData } from "./schemas/businessFormSchema";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { UploadImage } from "@/types/upload-image";
+import { geocodeAddress, getStreetNumberForGeocoding } from "./geocoding";
 
 export const MAX_LOGO_SIZE_MB = 2;
 export const MAX_IMAGE_SIZE_MB = 5;
@@ -109,7 +110,7 @@ export async function publishBusiness({
     const { form, logoUrl, imageUrls } = draft;
 
     const fullAddress = [
-      `${form.street} ${form.number}`,
+      `${form.street} ${getStreetNumberForGeocoding(form.number)}`,
       form.postalCode,
       form.city,
       "Portugal"
@@ -120,7 +121,7 @@ export async function publishBusiness({
     let coordinates = null;
 
     if (form.street && form.postalCode) {
-      coordinates = await geocodeAddress(fullAddress);
+      coordinates = await geocodeAddress(fullAddress, form.postalCode);
     }
 
     /**
@@ -489,40 +490,6 @@ export async function getBusinessById({
     },
     images: imageUrls ?? [],
     hours: hours ?? []
-  };
-}
-
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
-
-export async function geocodeAddress(
-  address: string
-): Promise<Coordinates | null> {
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(address)}`,
-    {
-      headers: {
-        "User-Agent": "MontraMontijo/1.0"
-      },
-      cache: "no-store"
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Erro ao obter coordenadas.");
-  }
-
-  const results = await response.json();
-
-  if (!results.length) {
-    return null;
-  }
-
-  return {
-    latitude: Number(results[0].lat),
-    longitude: Number(results[0].lon)
   };
 }
 

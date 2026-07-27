@@ -262,18 +262,6 @@ export function BusinessContact({ business }: BusinessContactProps) {
             );
           }
         )}
-
-        <Button asChild className="mt-3 w-full">
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackBusinessEvent(business.id, "directions_click")}
-          >
-            <MapPinned className="mr-2 h-4 w-4" />
-            Como chegar
-          </a>
-        </Button>
       </CardContent>
     </Card>
   );

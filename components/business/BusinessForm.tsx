@@ -43,7 +43,7 @@ import { LogoUpload } from "./UploadLogo";
 import { BusinessImagesUpload } from "./BusinessImagesUpload";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
-import { Info, LogIn, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, Info, LocateFixed, LogIn, Plus, Trash2 } from "lucide-react";
 
 import {
   Dialog,
@@ -93,6 +93,12 @@ type Props = {
   shouldRestoreDraft?: boolean;
 };
 
+type ValidatedAddress = {
+  latitude: number;
+  longitude: number;
+  displayName: string;
+};
+
 export const defaultOpeningHours = [
   { day: "Segunda", open: "", close: "", closed: false },
   { day: "Terça", open: "", close: "", closed: false },
@@ -130,6 +136,12 @@ export default function BusinessForm({
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [isValidatingAddress, setIsValidatingAddress] = useState(false);
+  const [validatedAddress, setValidatedAddress] =
+    useState<ValidatedAddress | null>(null);
+  const [validatedAddressKey, setValidatedAddressKey] = useState("");
+  const [addressError, setAddressError] = useState("");
+  const [addressErrorKey, setAddressErrorKey] = useState("");
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -200,8 +212,64 @@ export default function BusinessForm({
     control,
     name: "services"
   });
+  const street = useWatch({ control, name: "street" });
+  const number = useWatch({ control, name: "number" });
+  const postalCode = useWatch({ control, name: "postalCode" });
 
-  const isProcessing = isSubmitting || isPublishing || isCheckingAuth;
+  const isProcessing =
+    isSubmitting || isPublishing || isCheckingAuth || isValidatingAddress;
+
+  function getAddressKey(data: Pick<BusinessFormData, "street" | "number" | "postalCode">) {
+    return [data.street, data.number, data.postalCode]
+      .map((value) => value.trim().toLocaleLowerCase("pt-PT"))
+      .join("|");
+  }
+
+  async function validateAddress(
+    data: Pick<BusinessFormData, "street" | "number" | "postalCode">
+  ) {
+    const addressKey = getAddressKey(data);
+
+    if (validatedAddress && validatedAddressKey === addressKey) {
+      return validatedAddress;
+    }
+
+    setIsValidatingAddress(true);
+    setAddressError("");
+
+    try {
+      const response = await fetch("/api/geocode-address", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = (await response.json()) as ValidatedAddress & {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error || "Não foi possível validar a morada.");
+      }
+
+      setValidatedAddress(result);
+      setValidatedAddressKey(addressKey);
+      setAddressErrorKey("");
+      return result;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível validar a morada.";
+
+      setValidatedAddress(null);
+      setValidatedAddressKey("");
+      setAddressError(message);
+      setAddressErrorKey(addressKey);
+      return null;
+    } finally {
+      setIsValidatingAddress(false);
+    }
+  }
 
   function preservePendingForm(data: BusinessFormData) {
     try {
@@ -263,6 +331,15 @@ export default function BusinessForm({
   }
 
   async function onSubmit(data: BusinessFormData) {
+    const address = await validateAddress(data);
+
+    if (!address) {
+      toast.error("Confirma a morada antes de continuar.", {
+        position: "top-center"
+      });
+      return;
+    }
+
     if (mode === "edit") {
       if (!businessId) {
         toast.error("Negócio inválido.", {
@@ -281,7 +358,7 @@ export default function BusinessForm({
           logoPath = await uploadBusinessLogo(businessId, logoFile);
         }
 
-        await updateMyBusiness(businessId, data, logoPath);
+        await updateMyBusiness(businessId, data, logoPath, address);
         await updateBusinessImages(businessId, images);
 
         toast.success("Negócio atualizado com sucesso.", {
@@ -775,8 +852,15 @@ export default function BusinessForm({
                   )}
                 </div>
 
-                <div>
-                  <Input {...form.register("number")} placeholder="Número" />
+                <div className="space-y-1">
+                  <Input
+                    {...form.register("number")}
+                    inputMode="text"
+                    placeholder="Número / Fração *"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Ex.: 12, 1.º Esq.
+                  </p>
                   {errors.number && (
                     <p className="text-sm text-red-500">
                       {errors.number.message}
@@ -812,6 +896,43 @@ export default function BusinessForm({
                 <div>
                   <Input value="Montijo" disabled />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={
+                    isValidatingAddress || !street || !number || !postalCode
+                  }
+                  onClick={() =>
+                    void validateAddress({ street, number, postalCode })
+                  }
+                >
+                  <LocateFixed />
+                  {isValidatingAddress ? "A validar morada..." : "Validar morada"}
+                </Button>
+
+                {validatedAddress &&
+                  validatedAddressKey ===
+                    getAddressKey({ street, number, postalCode }) && (
+                    <p className="flex items-start gap-2 text-sm text-green-700">
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                      <span>
+                        Morada encontrada: {validatedAddress.displayName}
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          A fração fica guardada, mas não altera a posição no
+                          mapa.
+                        </span>
+                      </span>
+                    </p>
+                  )}
+
+                {addressError &&
+                  addressErrorKey ===
+                    getAddressKey({ street, number, postalCode }) && (
+                  <p className="text-sm text-red-500">{addressError}</p>
+                  )}
               </div>
             </section>
 
