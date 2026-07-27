@@ -64,13 +64,18 @@ function getWhatsAppUrl(phone: string, businessName: string) {
 }
 
 export function BusinessContact({ business }: BusinessContactProps) {
-  const address = [
-    [business.street, business.number].filter(Boolean).join(" "),
-    business.postal_code,
-    business.city
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const hasPhysicalAddress = Boolean(
+    business.street || business.number || business.postal_code
+  );
+  const address = hasPhysicalAddress
+    ? [
+        [business.street, business.number].filter(Boolean).join(" "),
+        business.postal_code,
+        business.city
+      ]
+        .filter(Boolean)
+        .join(", ")
+    : "";
 
   const mapsUrl =
     business.latitude !== null && business.longitude !== null

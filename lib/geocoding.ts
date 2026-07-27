@@ -21,9 +21,19 @@ export function getStreetNumberForGeocoding(number: string) {
   return match?.[0] ?? number.trim();
 }
 
+export function getStreetForGeocoding(street: string) {
+  const parts = street
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  // Aceita valores como "Centro Comercial Saldanha, Av. Infante Dom
+  // Henrique" sem enviar o nome do local como se fizesse parte da rua.
+  return parts.at(-1) ?? street.trim();
+}
+
 export async function geocodeAddress(
-  address: string,
-  postalCode?: string
+  address: string
 ): Promise<GeocodedAddress | null> {
   const searchParams = new URLSearchParams({
     format: "jsonv2",
@@ -56,16 +66,12 @@ export async function geocodeAddress(
     return null;
   }
 
-  const expectedPostalCode = postalCode?.replace(/\D/g, "");
-  const resultPostalCode = result.address?.postcode?.replace(/\D/g, "");
-
-  if (
-    expectedPostalCode &&
-    resultPostalCode &&
-    expectedPostalCode !== resultPostalCode
-  ) {
-    return null;
-  }
+  /*
+   * O código postal do OpenStreetMap nem sempre coincide com o dos CTT ou do
+   * Google Maps, inclusive para a mesma porta. A pesquisa já está limitada ao
+   * concelho do Montijo; uma divergência entre fontes não deve invalidar uma
+   * morada que o Nominatim conseguiu localizar.
+   */
 
   const latitude = Number(result.lat);
   const longitude = Number(result.lon);

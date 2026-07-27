@@ -207,6 +207,31 @@ export async function POST(request: Request) {
       );
     }
 
+    /*
+     * A notificação é secundária: uma falha no Resend nunca deve apagar nem
+     * impedir um pedido de reivindicação que já ficou guardado.
+     */
+    try {
+      const { sendBusinessClaimNotificationEmail } = await import(
+        "@/lib/resend/sendBusinessClaimNotificationEmail"
+      );
+
+      await sendBusinessClaimNotificationEmail({
+        claimId: claim.id,
+        businessName: business.name,
+        claimantName: fullName,
+        claimantEmail: user.email ?? "Email não disponível",
+        roleInBusiness,
+        phone,
+        message
+      });
+    } catch (emailError) {
+      console.error(
+        "Reivindicação guardada, mas falhou a notificação por email:",
+        emailError
+      );
+    }
+
     return NextResponse.json({
       success: true,
       claimId: claim.id

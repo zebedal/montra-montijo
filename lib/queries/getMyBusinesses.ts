@@ -29,6 +29,7 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
   street,
   number,
   postal_code,
+  is_24_hours,
   plan,
   is_visible,
   category_id,
@@ -95,7 +96,7 @@ export async function getMyBusinesses(): Promise<BusinessSummary[]> {
       (business.description?.trim().length ?? 0) >= 80,
       Boolean(business.logo_url),
       withImages.has(business.id),
-      withHours.has(business.id),
+      business.is_24_hours || withHours.has(business.id),
       withServices.has(business.id),
       withFaqs.has(business.id)
     ].filter(Boolean).length;

@@ -15,6 +15,7 @@ type Business = {
   name: string;
   description: string | null;
   logo_url: string | null;
+  is_24_hours: boolean;
 };
 
 type Result =
@@ -39,7 +40,7 @@ async function getEligibleBusinesses(windowStart: string, cutoff: string) {
   while (true) {
     const { data, error } = await supabaseAdmin
       .from("businesses")
-      .select("id, user_id, name, description, logo_url")
+      .select("id, user_id, name, description, logo_url, is_24_hours")
       .eq("is_visible", true)
       .not("user_id", "is", null)
       .gt("created_at", windowStart)
@@ -122,7 +123,7 @@ async function getProfileCompletion(business: Business) {
     missingItems.push("Fotografias do espaço, produtos ou serviços");
   }
 
-  if ((hoursResult.count ?? 0) === 0) {
+  if (!business.is_24_hours && (hoursResult.count ?? 0) === 0) {
     missingItems.push("Horário de funcionamento");
   }
 

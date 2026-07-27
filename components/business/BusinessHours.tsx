@@ -10,6 +10,7 @@ interface BusinessHour {
 
 interface Props {
   hours: BusinessHour[];
+  is24Hours: boolean;
 }
 
 function formatTime(time: string | null) {
@@ -26,7 +27,7 @@ const orderedDays = [
   "Domingo"
 ];
 
-export function BusinessHours({ hours }: Props) {
+export function BusinessHours({ hours, is24Hours }: Props) {
   const hasOpeningHours = hours.some(
     (hour) => !hour.is_closed && hour.open_time && hour.close_time
   );
@@ -41,30 +42,40 @@ export function BusinessHours({ hours }: Props) {
     <Card>
       <CardHeader>
         <CardTitle>Horário</CardTitle>
-        {hasOpeningHours && (
+        {(is24Hours || hasOpeningHours) && (
           <div className="mt-3 flex items-center gap-2 rounded-lg border px-3 py-2">
             <div
               className={`h-3 w-3 rounded-full ${
-                status.open ? "bg-green-500" : "bg-red-500"
+                is24Hours || status.open ? "bg-green-500" : "bg-red-500"
               }`}
             />
 
             <div className="text-sm">
               <span className="font-medium">
-                {status.open ? "Aberto agora" : "Encerrado"}
+                {is24Hours
+                  ? "Disponível 24 horas"
+                  : status.open
+                    ? "Aberto agora"
+                    : "Encerrado"}
               </span>
 
-              <span className="text-muted-foreground">
+              {!is24Hours && <span className="text-muted-foreground">
                 {" • "}
                 {status.message}
-              </span>
+              </span>}
             </div>
           </div>
         )}
       </CardHeader>
 
       <CardContent>
-        {!hasOpeningHours ? (
+        {is24Hours ? (
+          <div className="flex h-28 items-center justify-center rounded-xl border border-green-200 bg-green-50 px-6 text-center">
+            <p className="text-sm font-medium text-green-800">
+              Este profissional está disponível 24 horas por dia, todos os dias.
+            </p>
+          </div>
+        ) : !hasOpeningHours ? (
           <div className="flex h-40 items-center justify-center text-center">
             <p className="text-sm text-muted-foreground">
               Este negócio ainda não definiu o seu horário de funcionamento.

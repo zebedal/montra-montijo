@@ -7,7 +7,11 @@ import { BusinessFormData } from "./schemas/businessFormSchema";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { UploadImage } from "@/types/upload-image";
-import { geocodeAddress, getStreetNumberForGeocoding } from "./geocoding";
+import {
+  geocodeAddress,
+  getStreetForGeocoding,
+  getStreetNumberForGeocoding
+} from "./geocoding";
 
 export const MAX_LOGO_SIZE_MB = 2;
 export const MAX_IMAGE_SIZE_MB = 5;
@@ -110,7 +114,9 @@ export async function publishBusiness({
     const { form, logoUrl, imageUrls } = draft;
 
     const fullAddress = [
-      `${form.street} ${getStreetNumberForGeocoding(form.number)}`,
+      `${getStreetForGeocoding(form.street)} ${getStreetNumberForGeocoding(
+        form.number
+      )}`,
       form.postalCode,
       form.city,
       "Portugal"
@@ -120,8 +126,14 @@ export async function publishBusiness({
 
     let coordinates = null;
 
-    if (form.street && form.postalCode) {
-      coordinates = await geocodeAddress(fullAddress, form.postalCode);
+    if (form.hasPhysicalAddress && form.street && form.postalCode) {
+      try {
+        coordinates = await geocodeAddress(fullAddress);
+      } catch (error) {
+        // A indisponibilidade do mapa não pode impedir a publicação. A morada
+        // continua guardada e pode voltar a ser localizada numa edição futura.
+        console.error("Não foi possível geocodificar a morada:", error);
+      }
     }
 
     /**
@@ -151,12 +163,13 @@ export async function publishBusiness({
         website: form.website || null,
         facebook: form.facebook || null,
         instagram: form.instagram || null,
-        street: form.street || null,
-        number: form.number || null,
-        postal_code: form.postalCode || null,
+        street: form.hasPhysicalAddress ? form.street || null : null,
+        number: form.hasPhysicalAddress ? form.number || null : null,
+        postal_code: form.hasPhysicalAddress ? form.postalCode || null : null,
         city: form.city || null,
         latitude: coordinates?.latitude ?? null,
         longitude: coordinates?.longitude ?? null,
+        is_24_hours: form.is24Hours,
         logo_url: logoUrl,
         plan: isFeatured ? "premium" : "free",
         is_visible: isVisible
@@ -186,7 +199,7 @@ export async function publishBusiness({
      * OPENING HOURS
      */
 
-    if (form.openingHours?.length) {
+    if (!form.is24Hours && form.openingHours?.length) {
       const rows = form.openingHours.map((hour) => ({
         business_id: businessId,
         day: hour.day,
@@ -221,7 +234,7 @@ export async function publishBusiness({
           description: service.description.trim() || null,
           price_type: service.priceType,
           price:
-            service.priceType === "quote"
+            service.priceType === "none" || service.priceType === "quote"
               ? null
               : Number(service.price.replace(",", ".")),
           position: index

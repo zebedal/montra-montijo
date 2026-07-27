@@ -1,33 +1,44 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import useSWR from "swr";
+import type { User } from "@supabase/supabase-js";
+
 import { supabase } from "./client";
-import { Session } from "@supabase/supabase-js";
+
+const AUTH_USER_KEY = "supabase-auth-user";
+
+async function getAuthenticatedUser(): Promise<User | null> {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) {
+    return null;
+  }
+
+  return data.user;
+}
 
 export function useUser() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: user, isLoading, mutate } = useSWR(
+    AUTH_USER_KEY,
+    getAuthenticatedUser,
+    {
+      dedupingInterval: 60_000,
+      revalidateOnFocus: false
+    }
+  );
 
   useEffect(() => {
-    async function getUser() {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      setLoading(false);
-    }
-
-    getUser();
-
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session: Session | null) => {
-        setUser(session?.user || null);
+      (_event, session) => {
+        void mutate(session?.user ?? null, { revalidate: false });
       }
     );
 
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [mutate]);
 
-  return { user, loading };
+  return { user: user ?? null, loading: isLoading };
 }

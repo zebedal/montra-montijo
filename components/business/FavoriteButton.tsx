@@ -121,6 +121,7 @@ export default function FavoriteButton({
       return;
     }
 
+    const userId = user.id;
     let cancelled = false;
 
     async function savePendingFavorite() {
@@ -128,7 +129,7 @@ export default function FavoriteButton({
 
       const { error } = await supabase.from("favorites").upsert(
         {
-          user_id: user.id,
+          user_id: userId,
           business_id: businessId
         },
         {
