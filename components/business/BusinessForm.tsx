@@ -125,9 +125,13 @@ export default function BusinessForm({
         (initialData?.openingHours?.length ?? 0) > 0)
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [images, setImages] = useState<UploadImage[]>([]);
+  const [images, setImages] = useState<UploadImage[]>(
+    mode === "edit" ? (initialImages ?? []) : []
+  );
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(
+    mode === "edit" ? (initialData?.logo ?? null) : null
+  );
   const [categorySearch, setCategorySearch] = useState<string>("");
   const [showSocials, setShowSocials] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -231,6 +235,18 @@ export default function BusinessForm({
 
   const isProcessing =
     isSubmitting || isPublishing || isCheckingAuth || isValidatingAddress;
+  const initialImageIds = (initialImages ?? []).map((image) => image.id);
+  const currentImageIds = images.map((image) => image.id);
+  const imagesChanged =
+    mode === "edit" &&
+    (images.some((image) => Boolean(image.file)) ||
+      initialImageIds.length !== currentImageIds.length ||
+      initialImageIds.some((id, index) => id !== currentImageIds[index]));
+  const logoChanged =
+    mode === "edit" &&
+    (Boolean(logoFile) ||
+      (Boolean(initialData?.logo) && logoPreview === null));
+  const hasEditChanges = isDirty || imagesChanged || logoChanged;
 
   function getAddressKey(
     data: Pick<
@@ -378,10 +394,12 @@ export default function BusinessForm({
       try {
         setIsPublishing(true);
 
-        let logoPath: string | undefined;
+        let logoPath: string | null | undefined;
 
         if (logoFile) {
           logoPath = await uploadBusinessLogo(businessId, logoFile);
+        } else if (initialData?.logo && !logoPreview) {
+          logoPath = null;
         }
 
         const updatedBusiness = await updateMyBusiness(
@@ -1458,7 +1476,9 @@ export default function BusinessForm({
               <Button
                 type="submit"
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                disabled={isProcessing || (mode === "edit" && !isDirty)}
+                disabled={
+                  isProcessing || (mode === "edit" && !hasEditChanges)
+                }
                 size="lg"
               >
                 {isProcessing ? (

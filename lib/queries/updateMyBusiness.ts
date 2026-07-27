@@ -11,7 +11,7 @@ type UpdatedBusiness = {
 export async function updateMyBusiness(
   businessId: string,
   data: BusinessFormData,
-  logoPath?: string,
+  logoPath?: string | null,
   coordinates?: { latitude: number; longitude: number } | null
 ): Promise<UpdatedBusiness | null> {
   const {
@@ -45,7 +45,7 @@ export async function updateMyBusiness(
     latitude: coordinates?.latitude ?? null,
     longitude: coordinates?.longitude ?? null,
     is_24_hours: data.is24Hours,
-    ...(logoPath ? { logo_url: logoPath } : {})
+    ...(logoPath !== undefined ? { logo_url: logoPath } : {})
   };
 
   const { data: updatedBusiness, error: updateError } = await supabase
