@@ -13,16 +13,22 @@ type Props = {
 };
 
 export default function BusinessCard({ business }: Props) {
+  const cardImageUrl = business.logo_url ?? business.image_url;
+
   return (
     <Link href={`/negocio/${business.slug}`}>
       <Card className="group h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
             <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-xl border bg-muted">
-              {business.logo_url ? (
+              {cardImageUrl ? (
                 <Image
-                  src={business?.logo_url}
-                  alt={business.name}
+                  src={cardImageUrl}
+                  alt={
+                    business.logo_url
+                      ? `Logótipo de ${business.name}`
+                      : `Fotografia de ${business.name}`
+                  }
                   fill
                   className="object-cover"
                 />

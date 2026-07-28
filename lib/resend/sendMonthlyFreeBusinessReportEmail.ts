@@ -16,6 +16,7 @@ type SendMonthlyFreeBusinessReportEmailParams = {
   periodLabel: string;
   pageViews: number;
   interactions: number;
+  directionsClicks: number;
   businessId: string;
   recommendations?: MonthlyReportRecommendation[];
   isTest?: boolean;
@@ -38,6 +39,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
   periodLabel,
   pageViews,
   interactions,
+  directionsClicks,
   businessId,
   recommendations = [],
   isTest = false,
@@ -129,6 +131,10 @@ export async function sendMonthlyFreeBusinessReportEmail({
                         </tr>
                       </table>
 
+                      <p style="margin:-12px 0 30px;font-size:14px;line-height:1.6;color:#4b5563;text-align:center;">
+                        Cliques na morada para consultar o mapa: <strong style="color:#111827;">${directionsClicks}</strong>
+                      </p>
+
                       ${
                         safeRecommendations.length > 0
                           ? `
@@ -193,6 +199,7 @@ ${testText}A página de ${businessName} teve atividade em ${periodLabel}
 
 Visualizações da página: ${pageViews}
 Interações com contactos: ${interactions}
+Cliques na morada para consultar o mapa: ${directionsClicks}
 
 ${
   recommendations.length > 0

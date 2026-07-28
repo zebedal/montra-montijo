@@ -42,7 +42,11 @@ export async function getBusinessesByCategory(
       stripe_subscription_id,
       subscription_status,
       cancel_at_period_end,
-      current_period_end
+      current_period_end,
+      images:business_images (
+        url,
+        position
+      )
     `
     )
     .eq("category_id", category.id);
@@ -64,15 +68,22 @@ export async function getBusinessesByCategory(
     return [];
   }
 
-  const result: BusinessSummary[] = businesses.map((business) => ({
-    ...business,
-    logo_url: getPublicStorageUrl(business.logo_url),
-    category,
-    stripe_subscription_id: business.stripe_subscription_id ?? null,
-    subscription_status: business.subscription_status ?? null,
-    cancel_at_period_end: business.cancel_at_period_end ?? false,
-    current_period_end: business.current_period_end ?? null
-  }));
+  const result: BusinessSummary[] = businesses.map((business) => {
+    const firstImage = [...(business.images ?? [])].sort(
+      (a, b) => (a.position ?? 0) - (b.position ?? 0)
+    )[0];
+
+    return {
+      ...business,
+      logo_url: getPublicStorageUrl(business.logo_url),
+      image_url: getPublicStorageUrl(firstImage?.url),
+      category,
+      stripe_subscription_id: business.stripe_subscription_id ?? null,
+      subscription_status: business.subscription_status ?? null,
+      cancel_at_period_end: business.cancel_at_period_end ?? false,
+      current_period_end: business.current_period_end ?? null
+    };
+  });
 
   return result.sort((a, b) => {
     if (a.plan === b.plan) {

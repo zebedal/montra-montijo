@@ -53,10 +53,14 @@ export default function NewBusinesses({ businesses }: Props) {
                 className="group flex min-w-0 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
               >
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
-                  {business.logoUrl ? (
+                  {business.logoUrl || business.imageUrl ? (
                     <Image
-                      src={business.logoUrl}
-                      alt={`Logótipo de ${business.name}`}
+                      src={business.logoUrl ?? business.imageUrl!}
+                      alt={
+                        business.logoUrl
+                          ? `Logótipo de ${business.name}`
+                          : `Fotografia de ${business.name}`
+                      }
                       fill
                       sizes="80px"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"

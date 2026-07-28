@@ -265,6 +265,10 @@ export async function getBusinessStatistics(
     {
       channel: "Facebook",
       value: totals.facebookClicks
+    },
+    {
+      channel: "Morada",
+      value: totals.directionsClicks
     }
   ];
 
