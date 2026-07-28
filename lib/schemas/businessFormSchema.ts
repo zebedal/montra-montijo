@@ -210,14 +210,6 @@ export const businessSchema = z
       });
     }
 
-    if (data.number && !/^\d/i.test(data.number)) {
-      context.addIssue({
-        code: "custom",
-        path: ["number"],
-        message: "O número da porta deve começar por um algarismo."
-      });
-    }
-
     if (!/^\d{4}-\d{3}$/.test(data.postalCode)) {
       context.addIssue({
         code: "custom",

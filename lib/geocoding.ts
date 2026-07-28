@@ -32,6 +32,30 @@ export function getStreetForGeocoding(street: string) {
   return parts.at(-1) ?? street.trim();
 }
 
+export function getPlaceNameForGeocoding(value: string) {
+  return value
+    .replace(
+      /\b(?:loja|fra[cç][aã]o|piso|andar)\s*[\p{L}\p{N}./-]+.*$/iu,
+      ""
+    )
+    .replace(/^centro comercial\s+/iu, "")
+    .replace(/[,-]\s*$/u, "")
+    .trim();
+}
+
+export async function geocodeFirstMatchingAddress(addresses: string[]) {
+  const uniqueAddresses = [...new Set(addresses.map((item) => item.trim()))]
+    .filter(Boolean);
+
+  for (const address of uniqueAddresses) {
+    const result = await geocodeAddress(address);
+
+    if (result) return result;
+  }
+
+  return null;
+}
+
 export async function geocodeAddress(
   address: string
 ): Promise<GeocodedAddress | null> {

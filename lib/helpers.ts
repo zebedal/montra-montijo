@@ -11,7 +11,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 import { UploadImage } from "@/types/upload-image";
 import {
-  geocodeAddress,
+  geocodeFirstMatchingAddress,
+  getPlaceNameForGeocoding,
   getStreetForGeocoding,
   getStreetNumberForGeocoding
 } from "./geocoding";
@@ -133,9 +134,11 @@ export async function publishBusiness({
       }
     }
 
+    const searchableStreet = getStreetForGeocoding(form.street);
+    const placeName = getPlaceNameForGeocoding(form.street);
     const fullAddress = [
       [
-        getStreetForGeocoding(form.street),
+        searchableStreet,
         form.number ? getStreetNumberForGeocoding(form.number) : ""
       ]
         .filter(Boolean)
@@ -151,7 +154,13 @@ export async function publishBusiness({
 
     if (form.hasPhysicalAddress && form.street && form.postalCode) {
       try {
-        coordinates = await geocodeAddress(fullAddress);
+        coordinates = await geocodeFirstMatchingAddress([
+          fullAddress,
+          [placeName, form.postalCode, form.city, "Portugal"]
+            .filter(Boolean)
+            .join(", "),
+          [placeName, form.city, "Portugal"].filter(Boolean).join(", ")
+        ]);
       } catch (error) {
         // A indisponibilidade do mapa não pode impedir a publicação. A morada
         // continua guardada e pode voltar a ser localizada numa edição futura.
