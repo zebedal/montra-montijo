@@ -23,7 +23,7 @@ export default function PopularCategories({
   return (
     <section className="mt-14">
       <PageContainer>
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-8">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">
               Categorias Populares
@@ -34,13 +34,6 @@ export default function PopularCategories({
             </p>
           </div>
 
-          <Link
-            href="/categorias"
-            className="hidden items-center gap-1 text-sm font-medium text-primary transition hover:underline md:flex"
-          >
-            Ver todas
-            <ChevronRight className="h-4 w-4" />
-          </Link>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -60,9 +53,9 @@ export default function PopularCategories({
 
                   <div className="absolute inset-0 bg-linear-to-t from-[#0e1f17] via-[#111111]/80 to-black/40" />
 
-                  <CardContent className="relative z-10 flex h-full min-h-56 flex-col items-center justify-center gap-4 p-6 text-center">
-                    <div className="rounded-full border border-white/20 bg-white/10 p-4 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/15">
-                      <Icon className="h-7 w-7 text-primary-green transition-transform duration-300 group-hover:scale-110" />
+                  <CardContent className="relative z-10 flex h-full min-h-48 flex-col items-center justify-center gap-3.5 p-5 text-center">
+                    <div className="rounded-full border border-white/20 bg-white/10 p-3.5 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/15">
+                      <Icon className="h-6 w-6 text-primary-green transition-transform duration-300 group-hover:scale-110" />
                     </div>
 
                     <div>
@@ -99,14 +92,6 @@ export default function PopularCategories({
             </Card>
           </Link>
         </div>
-
-        <Link
-          href="/categorias"
-          className="mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary md:hidden"
-        >
-          Ver todas as categorias
-          <ChevronRight className="h-4 w-4" />
-        </Link>
       </PageContainer>
     </section>
   );

@@ -10,7 +10,7 @@ import {
   ArrowRight,
   CalendarDays,
   ExternalLink,
-  ImageIcon,
+  ImagePlus,
   Info,
   Megaphone,
   Pencil,
@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { ImagePickerBadge } from "@/components/ImagePicker";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -204,11 +203,12 @@ export function CampaignManager({
           <CardContent className="py-16 text-center">
             <Megaphone className="mx-auto h-10 w-10 text-muted-foreground" />
             <h2 className="mt-4 text-xl font-semibold">
-              Precisa de um negócio com Plano Destaque
+              Precisa de um negócio com Plano Premium
             </h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               As campanhas estão disponíveis para negócios com uma subscrição
-              ativa do Plano Destaque.
+              ativa do Plano Premium. Este plano permite promover ofertas,
+              eventos e novidades na homepage e na página do negócio.
             </p>
             <ol className="mx-auto mt-6 max-w-md space-y-2 text-left text-sm text-muted-foreground">
               <li>
@@ -217,11 +217,11 @@ export function CampaignManager({
               </li>
               <li>
                 <span className="font-medium text-foreground">2.</span> Escolha
-                o negócio que pretende promover.
+                o negócio que pretende promover e abra a gestão da subscrição.
               </li>
               <li>
                 <span className="font-medium text-foreground">3.</span>{" "}
-                Selecione “Ativar Plano Destaque” e conclua a subscrição.
+                Ative ou atualize para o Plano Premium e conclua a subscrição.
               </li>
             </ol>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -233,7 +233,7 @@ export function CampaignManager({
               </Button>
               <Button asChild variant="outline">
                 <Link href={Routes.PLANO_DESTAQUE}>
-                  Conhecer o Plano Destaque
+                  Conhecer o Plano Premium
                 </Link>
               </Button>
             </div>
@@ -673,24 +673,41 @@ function CampaignForm({
                 MB.
               </p>
             </div>
-            {preview ? (
-              <div className="relative aspect-[16/9] max-w-xl overflow-hidden rounded-xl border">
-                <Image
-                  src={preview}
-                  alt="Pré-visualização da campanha"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="flex aspect-[16/9] max-w-xl items-center justify-center rounded-xl border border-dashed bg-muted/30">
-                <ImageIcon className="h-10 w-10 text-muted-foreground" />
-              </div>
-            )}
-            <ImagePickerBadge
-              label={preview ? "Alterar imagem" : "Escolher imagem"}
-              onChange={chooseImage}
-            />
+            <label className="group relative block aspect-[16/9] max-w-xl cursor-pointer overflow-hidden rounded-xl border-2 border-dashed bg-muted/20 transition hover:border-primary hover:bg-muted/35 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(event) => {
+                  chooseImage(event.target.files?.[0] ?? null);
+                  event.target.value = "";
+                }}
+              />
+
+              {preview ? (
+                <>
+                  <Image
+                    src={preview}
+                    alt="Pré-visualização da campanha"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/45 group-focus-within:bg-black/45">
+                    <span className="flex translate-y-2 items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-foreground opacity-0 shadow-lg transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                      <ImagePlus className="h-4 w-4" /> Alterar imagem
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <span className="flex h-full flex-col items-center justify-center px-6 text-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-background shadow-sm ring-1 ring-foreground/10 transition group-hover:scale-105">
+                    <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                  </span>
+                  <span className="mt-4 text-sm font-semibold">Adicionar imagem da campanha</span>
+                  <span className="mt-1 text-xs text-muted-foreground">Clique para escolher uma imagem</span>
+                </span>
+              )}
+            </label>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">

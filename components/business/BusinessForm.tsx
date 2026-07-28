@@ -105,7 +105,8 @@ type Props = {
   businessId?: string;
   initialImages?: UploadImage[];
   shouldRestoreDraft?: boolean;
-  businessPlan?: "free" | "premium";
+  preferredPlan?: "featured" | "premium" | null;
+  businessPlan?: "free" | "featured" | "premium";
   categorySlug?: string | null;
   primaryCta?: {
     enabled: boolean;
@@ -138,6 +139,7 @@ export default function BusinessForm({
   businessId,
   initialImages,
   shouldRestoreDraft = false,
+  preferredPlan = null,
   businessPlan = "free",
   categorySlug,
   primaryCta
@@ -379,8 +381,13 @@ export default function BusinessForm({
   }
 
   function goToAuthentication() {
+    const createBusinessUrl = new URL(CREATE_BUSINESS_ROUTE, window.location.origin);
+    createBusinessUrl.searchParams.set("restoreDraft", "true");
+    if (preferredPlan) {
+      createBusinessUrl.searchParams.set("plan", preferredPlan);
+    }
     const next = encodeURIComponent(
-      `${CREATE_BUSINESS_ROUTE}?restoreDraft=true`
+      `${createBusinessUrl.pathname}${createBusinessUrl.search}`
     );
 
     router.push(`${AUTH_ROUTE}?next=${next}`);
@@ -525,7 +532,11 @@ export default function BusinessForm({
       /**
        * 4. Ir para a escolha do plano
        */
-      router.push(`${Routes.CRIAR_NEGOCIO_PLANO}?draft=${draftId}`);
+      const planParams = new URLSearchParams({ draft: draftId });
+      if (preferredPlan) {
+        planParams.set("plan", preferredPlan);
+      }
+      router.push(`${Routes.CRIAR_NEGOCIO_PLANO}?${planParams.toString()}`);
     } catch (error) {
       console.error(error);
 

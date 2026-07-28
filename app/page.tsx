@@ -77,7 +77,7 @@ type BusinessRow = {
   description: string | null;
   logo_url: string | null;
   city: string | null;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
   created_at: string;
   images: {
     url: string;
@@ -139,7 +139,7 @@ export default async function Home() {
     .select(
       `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),specialties:business_specialties(specialty:specialties(id,name,slug)),category:categories(name,slug)`
     )
-    .eq("plan", "premium");
+    .in("plan", ["featured", "premium"]);
   let newestQuery = supabase
     .from("businesses")
     .select(

@@ -7,7 +7,7 @@ type SendBusinessPublishedEmailOnceParams = {
   email: string;
   businessName: string;
   businessSlug: string;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
 };
 
 type SendBusinessPublishedEmailOnceResult = {

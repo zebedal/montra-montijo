@@ -112,6 +112,6 @@ export async function getBusinessesByCategory(
       return a.name.localeCompare(b.name);
     }
 
-    return a.plan === "premium" ? -1 : 1;
+    return a.plan !== "free" ? -1 : 1;
   });
 }

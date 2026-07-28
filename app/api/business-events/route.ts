@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
     if (
       eventType === "primary_cta_click" &&
-      (business.plan !== "premium" || !business.primary_cta_enabled)
+      (business.plan === "free" || !business.primary_cta_enabled)
     ) {
       return NextResponse.json(
         { error: "A ação principal não está disponível." },

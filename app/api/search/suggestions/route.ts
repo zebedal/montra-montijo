@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { searchBusinesses } from "@/lib/queries/searchBusinesses";
 import { createClient } from "@/lib/supabase/server";
+import type { BusinessPlan } from "@/lib/business-plan";
 
 type CategoryRow = {
   id: string;
@@ -24,7 +25,7 @@ type Suggestion =
       businessId: string;
       categoryName: string | null;
       slug: string;
-      plan: "free" | "premium";
+      plan: "free" | "featured" | "premium";
     };
 
 function normalizeSearchValue(value: string): string {
@@ -159,7 +160,7 @@ export async function GET(request: Request) {
         businessId: business.id,
         slug: business.slug,
         categoryName: business.category?.name ?? null,
-        plan: business.plan === "premium" ? "premium" : "free"
+        plan: business.plan as BusinessPlan
       }));
 
     return NextResponse.json({

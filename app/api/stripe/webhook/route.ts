@@ -79,10 +79,15 @@ export async function POST(req: Request) {
 
         const currentPeriodEnd =
           subscription.items.data[0]?.current_period_end ?? null;
+        const priceId = subscription.items.data[0]?.price.id;
+        const plan = priceId === process.env.STRIPE_PRICE_PREMIUM_CAMPAIGNS
+          ? "premium"
+          : "featured";
 
         const { data: business, error } = await supabaseAdmin
           .from("businesses")
           .update({
+            plan,
             subscription_status: subscription.status,
             cancel_at_period_end: subscription.cancel_at_period_end,
             current_period_end: currentPeriodEnd

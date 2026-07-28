@@ -12,7 +12,7 @@ import { Routes } from "@/types";
 interface SuccessProps {
   businessId?: string;
   slug: string;
-  plan?: "free" | "premium";
+  plan?: "free" | "featured" | "premium";
 }
 
 export default function Success({
@@ -20,7 +20,9 @@ export default function Success({
   businessId,
   plan = "free"
 }: SuccessProps) {
+  const isPaid = plan !== "free";
   const isPremium = plan === "premium";
+  const planName = isPremium ? "Premium" : "Destaque";
 
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 px-2.5 space-y-6">
@@ -32,8 +34,8 @@ export default function Success({
         </h1>
 
         <p className="text-gray-500 max-w-md">
-          {isPremium
-            ? "O teu negócio está publicado com o Plano Destaque e já beneficia de maior visibilidade."
+          {isPaid
+            ? `O teu negócio está publicado com o Plano ${planName} e já beneficia das vantagens que escolheste.`
             : "O teu negócio já está disponível e visível na plataforma."}
         </p>
       </div>
@@ -41,7 +43,7 @@ export default function Success({
       {businessId && (
         <div className="w-full max-w-xl rounded-2xl border bg-white p-6 text-left shadow-sm">
           <div className="flex items-start gap-3">
-            {isPremium && (
+            {isPaid && (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50">
                 <Sparkles className="h-5 w-5 text-green-700" />
               </div>
@@ -49,36 +51,40 @@ export default function Success({
 
             <div>
               <h2 className="font-semibold text-gray-900">
-                {isPremium
-                  ? "Começa a tirar partido do Plano Destaque"
+                {isPaid
+                  ? `Começa a tirar partido do Plano ${planName}`
                   : "Queres tornar a página ainda mais útil?"}
               </h2>
               <p className="mt-1 text-sm leading-6 text-gray-500">
                 {isPremium
-                  ? "Configura as funcionalidades que ajudam a transformar visitas em ações."
+                  ? "Cria a tua primeira campanha e configura as funcionalidades que transformam visitas em ações."
+                  : isPaid
+                    ? "Configura as funcionalidades que ajudam a transformar visitas em ações."
                   : "Estes passos são opcionais e podes completá-los agora ou mais tarde."}
               </p>
             </div>
           </div>
 
-          {isPremium && (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {isPaid && (
+            <div className={`mt-5 grid gap-3 ${isPremium ? "sm:grid-cols-2" : ""}`}>
               <Button asChild className="h-auto justify-start py-4">
                 <Link href={`/area-cliente/negocio/${businessId}/editar#acao-principal`}>
                   <MousePointerClick className="mr-3 h-5 w-5" />
                   <span className="text-left"><span className="block font-semibold">Configurar ação principal</span><span className="mt-0.5 block text-xs font-normal text-primary-foreground/80">Transforma visitas em ações.</span></span>
                 </Link>
               </Button>
-              <Button asChild className="h-auto justify-start py-4">
-                <Link href={`/area-cliente/campanhas?business_id=${businessId}`}>
-                  <Megaphone className="mr-3 h-5 w-5" />
-                  <span className="text-left"><span className="block font-semibold">Criar campanha</span><span className="mt-0.5 block text-xs font-normal text-primary-foreground/80">Promove uma novidade ou oferta.</span></span>
-                </Link>
-              </Button>
+              {isPremium && (
+                <Button asChild className="h-auto justify-start bg-emerald-950 py-4 text-white hover:bg-emerald-900">
+                  <Link href={`/area-cliente/campanhas?business_id=${businessId}`}>
+                    <Megaphone className="mr-3 h-5 w-5 text-emerald-200" />
+                    <span className="text-left"><span className="block font-semibold">Criar campanha</span><span className="mt-0.5 block text-xs font-normal text-white/70">Promove uma novidade ou oferta.</span></span>
+                  </Link>
+                </Button>
+              )}
             </div>
           )}
 
-          <div className={`${isPremium ? "mt-3" : "mt-4"} grid gap-3 sm:grid-cols-2`}>
+          <div className={`${isPaid ? "mt-3" : "mt-4"} grid gap-3 sm:grid-cols-2`}>
             <Button
               asChild
               variant="outline"

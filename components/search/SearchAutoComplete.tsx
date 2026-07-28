@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Building2, Crown, LoaderCircle, Search, Tags } from "lucide-react";
+import { Building2, LoaderCircle, Search, Tags } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 type SearchSuggestion =
   | {
       type: "category";
@@ -22,7 +22,7 @@ type SearchSuggestion =
       businessId: string;
       categoryName: string | null;
       slug: string;
-      plan: "free" | "premium";
+      plan: "free" | "featured" | "premium";
     };
 
 type SuggestionsResponse = {
@@ -317,11 +317,8 @@ export default function SearchAutocomplete({
                   </div>
 
                   {suggestion.type === "business" &&
-                    suggestion.plan === "premium" && (
-                      <Badge className="shrink-0 gap-1 border-0 bg-yellow-600 text-white hover:bg-yellow-600">
-                        <Crown className="h-3 w-3" />
-                        Premium
-                      </Badge>
+                    suggestion.plan !== "free" && (
+                      <BusinessPlanBadge plan={suggestion.plan} className="shrink-0" />
                     )}
                 </button>
               );

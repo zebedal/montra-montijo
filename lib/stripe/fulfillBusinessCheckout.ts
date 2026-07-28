@@ -12,6 +12,7 @@ import {
 } from "@/lib/helpers";
 
 import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
+import type { PaidBusinessPlan } from "@/lib/business-plan";
 
 type FulfillBusinessCheckoutResult = {
   businessId: string;
@@ -73,6 +74,7 @@ export async function fulfillBusinessCheckout(
   }
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const plan: PaidBusinessPlan = session.metadata?.plan === "premium" ? "premium" : "featured";
 
   const currentPeriodEnd =
     subscription.items.data[0]?.current_period_end ?? null;
@@ -114,7 +116,7 @@ export async function fulfillBusinessCheckout(
   const { error: subscriptionUpdateError } = await supabaseAdmin
     .from("businesses")
     .update({
-      plan: "premium",
+      plan,
       stripe_subscription_id: subscription.id,
       subscription_status: subscription.status,
       cancel_at_period_end: subscription.cancel_at_period_end,

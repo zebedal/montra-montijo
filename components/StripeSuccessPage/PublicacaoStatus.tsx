@@ -15,6 +15,7 @@ type CheckoutStatus =
       status: "completed";
       businessId: string;
       businessSlug: string;
+      plan: "free" | "featured" | "premium";
     }
   | {
       status: "delayed";
@@ -257,7 +258,7 @@ export default function PublicacaoStatus({ initialSessionId }: Props) {
         <Success
           businessId={checkout.businessId}
           slug={checkout.businessSlug}
-          plan="premium"
+          plan={checkout.plan}
         />
       );
 

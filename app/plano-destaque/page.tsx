@@ -1,645 +1,195 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, BadgeCheck, Check, Crown, Megaphone, Sparkles, X } from "lucide-react";
+
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import FaqJsonLd from "@/components/seo/FaqJsonLd";
-import {
-  ArrowRight,
-  BadgeCheck,
-  BarChart3,
-  Check,
-  Crown,
-  Megaphone,
-  MousePointerClick,
-  Search,
-  Sparkles,
-  Star,
-  X
-} from "lucide-react";
-
 import PageContainer from "@/components/PageContainer";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from "@/components/ui/accordion";
+import PremiumCampaignShowcase from "@/components/business/PremiumCampaignShowcase";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
-  title: "Plano Destaque para negócios no Montijo",
-  description:
-    "Dê mais visibilidade ao seu negócio na Montra Montijo com o Plano Destaque. Presença na homepage, prioridade nas pesquisas e acesso a estatísticas.",
-
-  alternates: {
-    canonical: "/plano-destaque"
-  },
-
+  title: "Planos para negócios no Montijo",
+  description: "Compare os planos Gratuito, Destaque e Premium da Montra Montijo. Ganhe visibilidade, acompanhe resultados e promova campanhas locais.",
+  alternates: { canonical: "/plano-destaque" },
   openGraph: {
-    title: "Plano Destaque | Montra Montijo",
-    description:
-      "Aumente a visibilidade do seu negócio no Montijo por 4,99 € por mês, sem fidelização.",
+    title: "Planos | Montra Montijo",
+    description: "Escolha o plano certo para dar mais visibilidade ao seu negócio no Montijo.",
     url: "/plano-destaque",
     type: "website",
     locale: "pt_PT",
     siteName: "Montra Montijo",
-    images: [
-      {
-        url: "/images/plano-destaque.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Plano Destaque da Montra Montijo"
-      }
-    ]
+    images: [{ url: "/images/plano-premium.png", width: 1024, height: 1024, alt: "Planos da Montra Montijo" }]
   },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Plano Destaque | Montra Montijo",
-    description:
-      "Mais visibilidade para o seu negócio no Montijo por 4,99 € por mês.",
-    images: ["/images/plano-destaque.jpg"]
-  },
-
-  robots: {
-    index: true,
-    follow: true
-  }
+  twitter: { card: "summary_large_image", title: "Planos | Montra Montijo", description: "Compare os planos para negócios da Montra Montijo.", images: ["/images/plano-premium.png"] },
+  robots: { index: true, follow: true }
 };
 
-const premiumBenefits = [
+const plans = [
   {
-    title: "Destaque na página inicial",
-    description:
-      "O seu negócio pode surgir numa das áreas com maior visibilidade da Montra Montijo.",
-    icon: Star
+    name: "Gratuito",
+    price: "0 €",
+    description: "Para criar uma presença local completa e começar a ser encontrado.",
+    features: ["Página pública do negócio", "Contactos, fotografias e horários", "Presença nas categorias e pesquisas"],
+    cta: "Começar gratuitamente",
+    href: "/criar-negocio",
+    icon: BadgeCheck,
+    featured: false,
+    premium: false
   },
   {
-    title: "Prioridade nas pesquisas",
-    description:
-      "Os negócios em destaque têm prioridade quando existem resultados igualmente relevantes.",
-    icon: Search
+    name: "Destaque",
+    price: "4,99 €",
+    description: "Para ganhar prioridade e transformar visitas em ações de potenciais clientes.",
+    features: ["Tudo do plano Gratuito", "Rotação na homepage e prioridade", "Badge Destaque", "Botão de ação personalizado", "Estatísticas detalhadas"],
+    cta: "Escolher Destaque",
+    href: "/criar-negocio?plan=featured",
+    icon: Crown,
+    featured: true,
+    premium: false
   },
   {
-    title: "Identificação Premium",
-    description:
-      "O negócio recebe um badge visual que o diferencia nas páginas e listagens da plataforma.",
-    icon: Crown
-  },
-  {
-    title: "Botão de ação personalizado",
-    description:
-      "Destaque reservas, marcações, pedidos de orçamento ou compras e acompanhe cada clique.",
-    icon: MousePointerClick
-  },
-  {
-    title: "Campanha promocional",
-    description:
-      "Promova uma oferta, novidade ou evento com imagem, mensagem e ação próprias.",
-    icon: Megaphone
-  },
-  {
-    title: "Acesso a estatísticas",
-    description:
-      "Consulte dados sobre visualizações e acompanhe o desempenho da página do seu negócio.",
-    icon: BarChart3
+    name: "Premium",
+    price: "9,99 €",
+    description: "Para transformar ofertas, eventos e novidades em campanhas com grande visibilidade local.",
+    features: ["Tudo do Plano Destaque", "Criação de campanhas", "Exposição no carrossel da homepage", "Campanha na página do negócio", "Métricas de visualizações e cliques"],
+    cta: "Escolher Premium",
+    href: "/criar-negocio?plan=premium",
+    icon: Megaphone,
+    featured: false,
+    premium: true
   }
 ];
 
 const comparisonRows = [
-  {
-    label: "Página pública do negócio",
-    free: true,
-    premium: true
-  },
-  {
-    label: "Contactos, localização e redes sociais",
-    free: true,
-    premium: true
-  },
-  {
-    label: "Fotografias e horário de funcionamento",
-    free: true,
-    premium: true
-  },
-  {
-    label: "Presença nas categorias e pesquisas",
-    free: true,
-    premium: true
-  },
-  {
-    label: "Destaque na página inicial",
-    free: false,
-    premium: true
-  },
-  {
-    label: "Prioridade nos resultados de pesquisa",
-    free: false,
-    premium: true
-  },
-  {
-    label: "Badge de negócio em destaque",
-    free: false,
-    premium: true
-  },
-  {
-    label: "Botão de ação personalizado",
-    free: false,
-    premium: true
-  },
-  {
-    label: "Campanha promocional ativa",
-    free: false,
-    premium: true
-  },
-  {
-    label: "Acesso a estatísticas",
-    free: false,
-    premium: true
-  }
-];
-
-const steps = [
-  {
-    number: "01",
-    title: "Crie o negócio",
-    description:
-      "Preencha os dados, contactos, fotografias e horário do seu negócio."
-  },
-  {
-    number: "02",
-    title: "Escolha o Plano Destaque",
-    description:
-      "No momento da publicação, selecione a opção de maior visibilidade."
-  },
-  {
-    number: "03",
-    title: "Conclua o pagamento",
-    description: "O pagamento é processado de forma segura através da Stripe."
-  },
-  {
-    number: "04",
-    title: "Comece a destacar-se",
-    description:
-      "Após a confirmação, o negócio fica publicado com as vantagens Premium."
-  }
+  { label: "Página pública completa", free: true, featured: true, premium: true },
+  { label: "Presença em categorias e pesquisas", free: true, featured: true, premium: true },
+  { label: "Destaque rotativo na homepage", free: false, featured: true, premium: true },
+  { label: "Prioridade nos resultados", free: false, featured: true, premium: true },
+  { label: "Badge do plano", free: false, featured: true, premium: true },
+  { label: "Botão de ação personalizado", free: false, featured: true, premium: true },
+  { label: "Estatísticas detalhadas", free: false, featured: true, premium: true },
+  { label: "Criação de campanhas", free: false, featured: false, premium: true },
+  { label: "Campanhas no carrossel da homepage", free: false, featured: false, premium: true }
 ];
 
 const faqItems = [
-  {
-    question: "Quanto custa o Plano Destaque?",
-    answer:
-      "O Plano Destaque custa 4,99 € por mês. O valor e a periodicidade são apresentados antes da confirmação do pagamento."
-  },
-  {
-    question: "Existe fidelização?",
-    answer:
-      "Não. Pode cancelar a renovação da subscrição quando quiser. Depois do cancelamento, o negócio mantém as vantagens Premium até ao fim do período já pago."
-  },
-  {
-    question: "Posso começar com o plano gratuito?",
-    answer:
-      "Sim. Pode publicar o negócio gratuitamente e ativar o Plano Destaque mais tarde através da sua área de cliente."
-  },
-  {
-    question: "O plano garante mais clientes?",
-    answer:
-      "Não é possível garantir resultados comerciais específicos. O plano aumenta a visibilidade do negócio dentro da plataforma, mas os resultados dependem também da procura, da qualidade da informação publicada e da oferta do próprio negócio."
-  },
-  {
-    question: "O que acontece quando cancelo?",
-    answer:
-      "A renovação automática é interrompida. Salvo indicação diferente, o negócio mantém as vantagens Premium até ao fim do período já pago e depois regressa ao plano gratuito."
-  },
-  {
-    question: "Posso voltar a ativar o plano?",
-    answer:
-      "Sim. Depois de a subscrição terminar, pode voltar a ativar o Plano Destaque através da área de cliente."
-  },
-  {
-    question: "O pagamento é seguro?",
-    answer:
-      "Sim. Os pagamentos são processados através da Stripe. A Montra Montijo não guarda os dados completos do seu cartão."
-  },
-  {
-    question: "Posso ter vários negócios em destaque?",
-    answer:
-      "Sim. Cada negócio pode ter a sua própria subscrição. As subscrições e os planos são geridos individualmente."
-  }
+  { question: "Quanto custam os planos?", answer: "O Plano Destaque custa 4,99 € por mês e o Plano Premium custa 9,99 € por mês. O plano Gratuito não tem qualquer custo." },
+  { question: "O que distingue o Premium do Destaque?", answer: "O Premium inclui todas as vantagens do Destaque e acrescenta a criação de campanhas, com exposição na página do negócio e no carrossel de campanhas da homepage." },
+  { question: "Existe fidelização?", answer: "Não. Pode cancelar a renovação quando quiser e mantém as vantagens do plano até ao fim do período já pago." },
+  { question: "Posso começar gratuitamente?", answer: "Sim. Pode publicar gratuitamente e ativar um plano pago mais tarde através da área de cliente." },
+  { question: "O pagamento é seguro?", answer: "Sim. Os pagamentos são processados pela Stripe. A Montra Montijo não guarda os dados completos do cartão." },
+  { question: "Cada plano aplica-se a quantos negócios?", answer: "Cada subscrição está associada a um negócio. Se gerir vários negócios, pode escolher o plano adequado individualmente para cada um." }
 ];
 
-export default function FeaturedPlanPage() {
-  const siteUrl = getSiteUrl();
+function Availability({ enabled }: { enabled: boolean }) {
+  return enabled ? <Check className="h-5 w-5 text-green-600" /> : <X className="h-5 w-5 text-muted-foreground/35" />;
+}
 
+export default function PlansPage() {
+  const siteUrl = getSiteUrl();
   const pageUrl = `${siteUrl}/plano-destaque`;
+
   return (
     <main>
-      <BreadcrumbJsonLd
-        items={[
-          {
-            name: "Início",
-            url: siteUrl
-          },
-          {
-            name: "Plano Destaque",
-            url: pageUrl
-          }
-        ]}
-      />
-
+      <BreadcrumbJsonLd items={[{ name: "Início", url: siteUrl }, { name: "Planos", url: pageUrl }]} />
       <FaqJsonLd items={faqItems} />
-      <section className="relative overflow-hidden border-b text-white">
-        <Image
-          src="/images/plano-destaque.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="scale-105 object-cover object-center"
-        />
 
+      <section className="relative overflow-hidden text-white">
+        <Image src="/images/plano-destaque.jpg" alt="" fill priority sizes="100vw" className="scale-105 object-cover object-center" />
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(23,61,44,0.97)_0%,rgba(34,91,63,0.94)_55%,rgba(46,118,83,0.88)_100%)]" />
-
-        <div
-          aria-hidden="true"
-          className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl"
-        />
-
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-40 left-1/4 h-96 w-96 rounded-full bg-black/15 blur-3xl"
-        />
-
+        <div aria-hidden="true" className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+        <div aria-hidden="true" className="absolute -bottom-40 left-1/4 h-96 w-96 rounded-full bg-black/15 blur-3xl" />
+        <div aria-hidden="true" className="absolute left-[7%] top-20 h-3 w-3 rounded-full bg-amber-300 shadow-[0_0_28px_8px_rgba(252,211,77,0.28)]" />
+        <div aria-hidden="true" className="absolute bottom-16 right-[8%] h-20 w-20 rounded-full border border-amber-300/35" />
+        <div aria-hidden="true" className="absolute right-[18%] top-16 h-1 w-20 rotate-[-12deg] rounded-full bg-amber-300/70" />
         <PageContainer className="relative py-16 sm:py-20 lg:py-24">
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_420px]">
             <div className="max-w-3xl">
-              <Badge className="border border-white/15 bg-white/10 px-4 py-2 text-white backdrop-blur-sm hover:bg-white/10">
-                <Sparkles className="mr-2 h-4 w-4" />
-                Plano Destaque
-              </Badge>
-
-              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Dê mais visibilidade ao seu negócio
-              </h1>
-
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
-                Apareça em áreas de maior destaque, ganhe prioridade nas
-                pesquisas e acompanhe o desempenho da página do seu negócio.
-              </p>
-
+              <Badge className="border border-white/15 bg-white/10 px-4 py-2 text-white hover:bg-white/10"><Sparkles className="mr-2 h-4 w-4" /> Planos Montra Montijo</Badge>
+              <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">O plano certo para cada fase do seu negócio</h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-white/75">Comece gratuitamente, ganhe visibilidade com o Destaque ou transforme promoções em oportunidades com o Premium.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="secondary"
-                  className="min-w-52"
-                >
-                  <Link href="/criar-negocio">
-                    Destacar o meu negócio
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="min-w-52 border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white"
-                >
-                  <Link href="#comparacao">Comparar os planos</Link>
-                </Button>
+                <Button asChild size="lg" variant="secondary"><Link href="#planos">Comparar planos <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                <Button asChild size="lg" variant="outline" className="border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"><Link href="/criar-negocio">Criar negócio</Link></Button>
               </div>
-
-              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/80">
-                <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4" />
-                  Sem fidelização
-                </span>
-
-                <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4" />
-                  Cancelamento simples
-                </span>
-
-                <span className="flex items-center gap-2">
-                  <Check className="h-4 w-4" />
-                  Renovação mensal
-                </span>
-              </div>
+              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/70"><span>Sem fidelização</span><span>Cancelamento simples</span><span>Renovação mensal</span></div>
             </div>
-
             <Card className="border-white/15 bg-white/95 text-foreground shadow-2xl backdrop-blur-sm">
-              <CardHeader className="space-y-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-green/10">
-                    <Crown className="h-6 w-6 text-primary-green" />
-                  </div>
-
-                  <Badge className="bg-yellow-600 px-3 py-1 text-white hover:bg-yellow-600">
-                    Mais visibilidade
-                  </Badge>
-                </div>
-
-                <div>
-                  <CardTitle className="text-2xl">Plano Destaque</CardTitle>
-
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Para negócios que querem reforçar a sua presença na
-                    plataforma.
-                  </p>
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                <div className="flex items-end gap-2">
-                  <span className="text-5xl font-bold tracking-tight">
-                    4,99 €
-                  </span>
-
-                  <span className="pb-1 text-muted-foreground">/ mês</span>
-                </div>
-
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Renovação mensal. Cancele quando quiser.
-                </p>
-
-                <ul className="mt-7 space-y-3 text-sm">
-                  <li className="flex items-start gap-3">
-                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Destaque na página principal, através de um sistema de
-                    rotação entre negócios com Plano Destaque
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Prioridade nos resultados
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Badge Premium
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Botão de ação personalizado para reservas, marcações,
-                    orçamentos ou compras
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Campanha promocional com imagem, mensagem e ação próprias
-                  </li>
-
-                  <li className="flex items-start gap-3">
-                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Acesso a estatísticas, incluindo cliques na ação principal
-                  </li>
-                </ul>
-
-                <Button
-                  asChild
-                  size="lg"
-                  className="mt-8 w-full bg-primary-green text-white hover:bg-primary-green/90"
-                >
-                  <Link href="/criar-negocio">
-                    Começar agora
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+              <CardHeader><CardTitle className="text-2xl">Escolha até onde quer chegar</CardTitle><p className="mt-2 text-sm leading-6 text-muted-foreground">Do reforço da visibilidade à promoção ativa através de campanhas.</p></CardHeader>
+              <CardContent className="space-y-4">
+                <Link href="#planos" className="flex items-center justify-between gap-4 rounded-2xl border border-green-200 bg-green-50 p-4 transition hover:border-green-400">
+                  <div><p className="flex items-center gap-2 font-semibold"><Crown className="h-4 w-4 fill-amber-400 text-amber-500" /> Destaque</p><p className="mt-1 text-sm text-muted-foreground">Prioridade, CTA e estatísticas</p></div>
+                  <div className="text-right"><span className="text-2xl font-bold">4,99 €</span><p className="text-xs text-muted-foreground">por mês</p></div>
+                </Link>
+                <Link href="#planos" className="flex items-center justify-between gap-4 rounded-2xl bg-emerald-950 p-4 text-white shadow-lg transition hover:bg-emerald-900">
+                  <div><p className="flex items-center gap-2 font-semibold"><Megaphone className="h-4 w-4 text-emerald-300" /> Premium</p><p className="mt-1 text-sm text-white/65">Tudo do Destaque + campanhas</p></div>
+                  <div className="text-right"><span className="text-2xl font-bold">9,99 €</span><p className="text-xs text-white/55">por mês</p></div>
+                </Link>
+                <p className="text-center text-xs text-muted-foreground">Sem fidelização. Cancele quando quiser.</p>
               </CardContent>
             </Card>
           </div>
         </PageContainer>
       </section>
 
-      <section className="bg-background">
-        <PageContainer className="py-16 sm:py-20">
+      <section id="planos" className="scroll-mt-20 bg-[#f4f7f5]">
+        <PageContainer className="py-16 sm:py-20 lg:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-primary-green">
-              Vantagens
-            </p>
-
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Mais oportunidades para ser encontrado
-            </h2>
-
-            <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
-              O Plano Destaque reforça a presença do negócio nos principais
-              pontos de descoberta da Montra Montijo.
-            </p>
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-green-700">Escolha o seu plano</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Da presença local à promoção ativa</h2>
+            <p className="mt-4 text-muted-foreground">Todos os planos permitem apresentar o negócio. Os planos pagos acrescentam visibilidade, dados e ferramentas para gerar mais ações.</p>
           </div>
 
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {premiumBenefits.map((benefit) => {
-              const Icon = benefit.icon;
-
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {plans.map((plan) => {
+              const Icon = plan.icon;
               return (
-                <article
-                  key={benefit.title}
-                  className="rounded-2xl border bg-card p-6 shadow-sm"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-green/10">
-                    <Icon className="h-6 w-6 text-primary-green" />
-                  </div>
-
-                  <h3 className="mt-5 text-lg font-semibold">
-                    {benefit.title}
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {benefit.description}
-                  </p>
-                </article>
+                <Card key={plan.name} className={`relative flex h-full flex-col overflow-hidden ${plan.premium ? "border-emerald-700 bg-[#0d211b] text-white shadow-xl" : plan.featured ? "border-green-300 bg-green-50 shadow-lg" : ""}`}>
+                  {plan.premium && <Badge className="absolute right-5 top-5 bg-emerald-300 text-emerald-950 hover:bg-emerald-300">Acesso a campanhas</Badge>}
+                  <CardHeader className="space-y-5">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${plan.premium ? "bg-white/10" : plan.featured ? "bg-amber-100" : "bg-green-100"}`}><Icon className={`h-6 w-6 ${plan.premium ? "text-emerald-300" : plan.featured ? "fill-amber-400 text-amber-600" : "text-green-700"}`} /></div>
+                    <div><CardTitle className="text-2xl">{plan.name}</CardTitle><p className={`mt-2 text-sm leading-6 ${plan.premium ? "text-white/65" : "text-muted-foreground"}`}>{plan.description}</p></div>
+                    <div><span className="text-4xl font-bold">{plan.price}</span>{plan.name !== "Gratuito" && <span className={`ml-2 ${plan.premium ? "text-white/55" : "text-muted-foreground"}`}>/ mês</span>}</div>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col">
+                    <ul className="space-y-3 text-sm">{plan.features.map((feature) => <li key={feature} className="flex items-start gap-2.5"><BadgeCheck className={`mt-0.5 h-5 w-5 shrink-0 ${plan.premium ? "text-emerald-300" : "text-green-600"}`} />{feature}</li>)}</ul>
+                    <Button asChild size="lg" variant={plan.premium ? "secondary" : plan.featured ? "default" : "outline"} className="mt-8 w-full"><Link href={plan.href}>{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         </PageContainer>
       </section>
 
-      <section id="comparacao" className="border-y bg-muted/20 scroll-mt-20">
+      <section className="bg-background">
         <PageContainer className="py-16 sm:py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-primary-green">
-              Comparação
-            </p>
-
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Escolha o plano certo para o seu negócio
-            </h2>
-
-            <p className="mt-4 text-muted-foreground">
-              Pode começar gratuitamente e ativar o destaque quando considerar
-              que é o momento certo.
-            </p>
-          </div>
-
-          <div className="mx-auto mt-12 max-w-4xl overflow-hidden rounded-2xl border bg-background shadow-sm">
-            <div className="grid grid-cols-[1fr_100px_110px] border-b bg-muted/30 sm:grid-cols-[1fr_160px_180px]">
-              <div className="px-4 py-5 font-semibold sm:px-6">
-                Funcionalidade
-              </div>
-
-              <div className="px-3 py-5 text-center font-semibold">
-                Gratuito
-              </div>
-
-              <div className="bg-primary-green/5 px-3 py-5 text-center font-semibold text-primary-green">
-                Destaque
-              </div>
+          <div className="mx-auto max-w-3xl text-center"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-green-700">Comparação</p><h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Compare todas as funcionalidades</h2></div>
+          <div className="mx-auto mt-10 max-w-5xl overflow-x-auto rounded-2xl border bg-card shadow-sm">
+            <div className="min-w-[680px]">
+              <div className="grid grid-cols-[1fr_130px_130px_130px] bg-muted/40 font-semibold"><div className="p-5">Funcionalidade</div><div className="p-5 text-center">Gratuito</div><div className="p-5 text-center text-green-700">Destaque</div><div className="bg-emerald-950 p-5 text-center text-white">Premium</div></div>
+              {comparisonRows.map((row) => <div key={row.label} className="grid grid-cols-[1fr_130px_130px_130px] border-t"><div className="p-4 pl-5 text-sm">{row.label}</div><div className="flex items-center justify-center p-4"><Availability enabled={row.free} /></div><div className="flex items-center justify-center bg-green-50/50 p-4"><Availability enabled={row.featured} /></div><div className="flex items-center justify-center bg-emerald-950/[0.04] p-4"><Availability enabled={row.premium} /></div></div>)}
             </div>
-
-            {comparisonRows.map((row) => (
-              <div
-                key={row.label}
-                className="grid grid-cols-[1fr_100px_110px] border-b last:border-b-0 sm:grid-cols-[1fr_160px_180px]"
-              >
-                <div className="px-4 py-4 text-sm sm:px-6">{row.label}</div>
-
-                <div className="flex items-center justify-center px-3 py-4">
-                  {row.free ? (
-                    <Check className="h-5 w-5 text-primary-green" />
-                  ) : (
-                    <X className="h-5 w-5 text-muted-foreground/50" />
-                  )}
-                </div>
-
-                <div className="flex items-center justify-center bg-primary-green/[0.03] px-3 py-4">
-                  {row.premium ? (
-                    <Check className="h-5 w-5 text-primary-green" />
-                  ) : (
-                    <X className="h-5 w-5 text-muted-foreground/50" />
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
+        </PageContainer>
+      </section>
+
+      <PremiumCampaignShowcase />
+
+      <section className="bg-background">
+        <PageContainer className="py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl"><div className="text-center"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-green-700">Perguntas frequentes</p><h2 className="mt-3 text-3xl font-bold tracking-tight">Tudo o que precisa de saber</h2></div><Accordion type="single" collapsible className="mt-10">{faqItems.map((item, index) => <AccordionItem key={item.question} value={`item-${index}`}><AccordionTrigger className="text-left text-base">{item.question}</AccordionTrigger><AccordionContent className="text-sm leading-7 text-muted-foreground">{item.answer}</AccordionContent></AccordionItem>)}</Accordion></div>
         </PageContainer>
       </section>
 
       <section className="bg-background">
-        <PageContainer className="py-16 sm:py-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-wider text-primary-green">
-              Processo simples
-            </p>
-
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Como funciona?
-            </h2>
-
-            <p className="mt-4 text-muted-foreground">
-              Em poucos passos, o seu negócio fica publicado e com maior
-              visibilidade.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {steps.map((step) => (
-              <article
-                key={step.number}
-                className="rounded-2xl border bg-card p-6"
-              >
-                <span className="text-sm font-bold text-primary-green">
-                  {step.number}
-                </span>
-
-                <h3 className="mt-4 text-lg font-semibold">{step.title}</h3>
-
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {step.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </PageContainer>
-      </section>
-
-      <section className="border-y bg-muted/20">
-        <PageContainer className="py-16 sm:py-20">
-          <div className="mx-auto max-w-3xl">
-            <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary-green">
-                Perguntas frequentes
-              </p>
-
-              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                Tudo o que precisa de saber
-              </h2>
-
-              <p className="mt-4 text-muted-foreground">
-                Consulte as respostas às dúvidas mais comuns sobre o Plano
-                Destaque.
-              </p>
-            </div>
-
-            <Accordion type="single" collapsible className="mt-10">
-              {faqItems.map((item, index) => (
-                <AccordionItem key={item.question} value={`item-${index + 1}`}>
-                  <AccordionTrigger className="text-left text-base">
-                    {item.question}
-                  </AccordionTrigger>
-
-                  <AccordionContent className="text-sm leading-7 text-muted-foreground">
-                    {item.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </PageContainer>
-      </section>
-
-      <section className="bg-background">
-        <PageContainer className="py-16 sm:py-20">
-          <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-12 text-center text-primary-foreground shadow-lg sm:px-10 lg:px-16">
-            <div
-              aria-hidden="true"
-              className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"
-            />
-
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-black/10 blur-3xl"
-            />
-
-            <div className="relative mx-auto max-w-3xl">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
-                <Sparkles className="h-7 w-7" />
-              </div>
-
-              <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
-                Pronto para destacar o seu negócio?
-              </h2>
-
-              <p className="mt-4 text-base leading-7 text-primary-foreground/80 sm:text-lg">
-                Crie a página do seu negócio e escolha o Plano Destaque no
-                momento da publicação.
-              </p>
-
-              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                <Button asChild size="lg" variant="secondary">
-                  <Link href="/criar-negocio">
-                    Criar negócio
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-                >
-                  <Link href="/contactos">Contactar a Montra</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </PageContainer>
+        <PageContainer className="pb-20 pt-4"><div className="rounded-3xl bg-primary px-6 py-12 text-center text-primary-foreground sm:px-10"><Crown className="mx-auto h-8 w-8" /><h2 className="mt-5 text-3xl font-bold">Pronto para dar o próximo passo?</h2><p className="mx-auto mt-4 max-w-2xl text-primary-foreground/75">Crie o seu negócio e escolha o plano que melhor acompanha os seus objetivos.</p><Button asChild size="lg" variant="secondary" className="mt-7"><Link href="/criar-negocio">Criar negócio<ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div></PageContainer>
       </section>
     </main>
   );

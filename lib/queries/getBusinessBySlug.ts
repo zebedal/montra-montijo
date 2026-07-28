@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 import { MARGEM_SUL_SERVICE_AREAS } from "@/lib/service-areas";
 import type { BusinessCampaign } from "@/lib/business-campaign";
+import type { BusinessPlan } from "@/lib/business-plan";
 
 type GetBusinessBySlugOptions = {
   supabase: SupabaseClient;
@@ -361,7 +362,7 @@ export async function getBusinessBySlug({
       longitude: business.longitude,
       is_24_hours: business.is_24_hours,
       is_visible: business.is_visible,
-      plan: business.plan === "premium" ? "premium" : "free",
+      plan: business.plan as BusinessPlan,
       category: normalizeCategory(business.categories)
     },
     images,

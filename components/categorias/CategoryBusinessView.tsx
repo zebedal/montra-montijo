@@ -39,10 +39,10 @@ export default function CategoryBusinessesView({
     return {
       filtered,
       premiumBusinesses: businesses.filter(
-        (business) => business.plan === "premium"
+        (business) => business.plan !== "free"
       ),
       regularBusinesses: businesses.filter(
-        (business) => business.plan !== "premium"
+        (business) => business.plan === "free"
       )
     };
   }, [businesses, query]);
@@ -95,7 +95,7 @@ export default function CategoryBusinessesView({
               <h2 className="text-2xl font-bold">{categoryName} em destaque</h2>
 
               <p className="text-muted-foreground">
-                Conheça os negócios Premium desta categoria.
+                Conheça os negócios em destaque desta categoria.
               </p>
 
               <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-3">

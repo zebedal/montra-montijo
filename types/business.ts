@@ -1,4 +1,4 @@
-export type BusinessPlan = "free" | "premium";
+export type BusinessPlan = "free" | "featured" | "premium";
 
 export type BusinessSpecialtySummary = {
   id: string;
@@ -26,7 +26,7 @@ export type PublicBusinessSummary = {
   street: string | null;
   number: string | null;
   postal_code: string | null;
-  plan: "free" | "premium";
+  plan: BusinessPlan;
   category: BusinessCategorySummary;
 };
 
@@ -51,7 +51,7 @@ export type PublicBusiness = {
   imageUrl?: string | null;
   specialties?: BusinessSpecialtySummary[];
   city: string | null;
-  plan: "free" | "premium";
+  plan: BusinessPlan;
   hasActiveCampaign?: boolean;
   category: {
     name: string;
@@ -80,7 +80,7 @@ export type PublicBusinessDetails = {
   longitude: number | null;
   is_24_hours: boolean;
   is_visible: boolean;
-  plan: "free" | "premium";
+  plan: BusinessPlan;
   primary_cta_enabled: boolean;
   primary_cta_type: string | null;
   primary_cta_destination: string | null;
@@ -92,7 +92,7 @@ export type PublicBusinessDetails = {
 export type SubscriptionBusiness = {
   id: string;
   name: string;
-  plan: "free" | "premium";
+  plan: BusinessPlan;
   is_visible: boolean;
   stripe_subscription_id?: string | null;
   subscription_status?: string | null;

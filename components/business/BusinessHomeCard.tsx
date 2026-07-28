@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Building2, Crown, MapPin, Megaphone } from "lucide-react";
+import { Building2, MapPin, Megaphone } from "lucide-react";
 
 import FavoriteButton from "@/components/business/FavoriteButton";
 import { BusinessSpecialtyChips } from "@/components/business/BusinessSpecialtyChips";
 import { Badge } from "@/components/ui/badge";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 
 import type { PublicBusiness } from "@/types/business";
 
@@ -45,11 +46,8 @@ export default function BusinessHomeCard({
             </div>
           )}
 
-          {showPremiumBadge && business.plan === "premium" && (
-            <Badge className="absolute left-3 top-3 border-0 bg-yellow-600 py-3 text-white hover:bg-yellow-600">
-              <Crown className="mr-1 h-3.5 w-3.5" />
-              Premium
-            </Badge>
+          {showPremiumBadge && business.plan !== "free" && (
+            <BusinessPlanBadge plan={business.plan} className="absolute left-3 top-3 py-2" />
           )}
           {business.hasActiveCampaign && (
             <Badge className="absolute bottom-3 left-3 gap-1 border-0 bg-primary text-primary-foreground">

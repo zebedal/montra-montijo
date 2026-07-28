@@ -56,7 +56,7 @@ export async function DELETE(request: Request) {
     }
 
     const hasActivePremiumRenewal =
-      business.plan === "premium" && business.cancel_at_period_end !== true;
+      business.plan !== "free" && business.cancel_at_period_end !== true;
 
     /**
      * Premium com renovação ativa não pode ser apagado.
@@ -94,7 +94,7 @@ export async function DELETE(request: Request) {
      * terminá-la imediatamente no Stripe.
      */
     if (
-      business.plan === "premium" &&
+      business.plan !== "free" &&
       business.cancel_at_period_end &&
       business.stripe_subscription_id
     ) {

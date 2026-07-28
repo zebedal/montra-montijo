@@ -39,7 +39,7 @@ export default function DeleteBusinessDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const hasActivePremiumRenewal =
-    business.plan === "premium" && !business.cancel_at_period_end;
+    business.plan !== "free" && !business.cancel_at_period_end;
 
   async function handleDelete() {
     try {
@@ -103,7 +103,7 @@ export default function DeleteBusinessDialog({
                     fotografias e os horários.
                   </p>
 
-                  {business.plan === "premium" &&
+                  {business.plan !== "free" &&
                     business.cancel_at_period_end && (
                       <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-900">
                         Este negócio ainda tem Premium disponível. Ao apagá-lo,

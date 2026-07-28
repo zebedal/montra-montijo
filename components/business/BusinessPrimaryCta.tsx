@@ -12,7 +12,7 @@ import { trackBusinessEvent } from "@/lib/analytics/trackBusinessEvent";
 type Props = {
   business: {
     id: string;
-    plan: "free" | "premium";
+    plan: "free" | "featured" | "premium";
     whatsapp_phone: string | null;
     primary_cta_enabled: boolean;
     primary_cta_type: string | null;
@@ -23,7 +23,7 @@ type Props = {
 };
 
 export function BusinessPrimaryCta({ business }: Props) {
-  if (business.plan !== "premium" || !business.primary_cta_enabled) {
+  if (business.plan === "free" || !business.primary_cta_enabled) {
     return null;
   }
 

@@ -25,7 +25,7 @@ type FreeBusiness = {
   email: string | null;
   website: string | null;
   is_24_hours: boolean;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
   primary_cta_type: string | null;
 };
 

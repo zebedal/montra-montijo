@@ -287,10 +287,10 @@ export default function PremiumCheckoutDialog() {
                 <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
 
                 <div>
-                  <p className="text-sm font-semibold">Identificação Premium</p>
+                  <p className="text-sm font-semibold">Identificação Destaque</p>
 
                   <p className="mt-1 text-sm text-muted-foreground">
-                    O badge Premium passa a destacar o negócio junto dos
+                    O badge Destaque passa a distinguir o negócio junto dos
                     visitantes.
                   </p>
                 </div>

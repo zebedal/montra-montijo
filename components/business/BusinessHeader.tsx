@@ -1,15 +1,15 @@
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BusinessCategorySummary } from "@/types/business";
+import { BusinessCategorySummary, BusinessPlan } from "@/types/business";
 
 import FavoriteButton from "./FavoriteButton";
-import { Crown, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import ShareButton from "./ShareButton";
 import { BusinessSpecialtyChips } from "./BusinessSpecialtyChips";
+import { BusinessPlanBadge } from "./BusinessPlanBadge";
 
 type BusinessHeaderProps = {
   business: {
@@ -18,7 +18,7 @@ type BusinessHeaderProps = {
     slug: string;
     description: string | null;
     logo_url: string | null;
-    plan: string;
+    plan: BusinessPlan;
     category: BusinessCategorySummary | null;
   };
   businessUrl: string;
@@ -101,12 +101,9 @@ export function BusinessHeader({
               </div>
             </div>
 
-            {business.plan === "premium" && (
+            {business.plan !== "free" && (
               <div>
-                <Badge className="bg-yellow-600 px-3 py-1 text-white">
-                  <Crown className="h-3 w-3" />
-                  Premium
-                </Badge>
+                <BusinessPlanBadge plan={business.plan} className="px-3 py-1" />
               </div>
             )}
 

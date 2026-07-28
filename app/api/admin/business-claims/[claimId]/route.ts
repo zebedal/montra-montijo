@@ -218,7 +218,7 @@ export async function PATCH(request: Request, { params }: Props) {
   }
 
   const hasBlockedPremiumSubscription =
-    business.plan === "premium" &&
+    business.plan !== "free" &&
     Boolean(business.stripe_subscription_id) &&
     Boolean(business.subscription_status) &&
     BLOCKED_SUBSCRIPTION_STATUSES.has(business.subscription_status);

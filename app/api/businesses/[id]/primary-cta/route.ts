@@ -90,7 +90,7 @@ export async function PUT(request: Request, { params }: Props) {
     return NextResponse.json({ error: "Negócio não encontrado." }, { status: 404 });
   }
 
-  if (business.plan !== "premium") {
+  if (business.plan === "free") {
     return NextResponse.json(
       { error: "A ação principal está disponível no Plano Destaque." },
       { status: 403 }
