@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-import { Gem } from "lucide-react";
+import { Crown } from "lucide-react";
 import UpgradeModal from "./UpgradeModal";
 
 export default function PremiumCard() {
@@ -10,7 +10,7 @@ export default function PremiumCard() {
       <CardContent className="space-y-6 py-8">
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-amber-100 p-2">
-            <Gem className="h-5 w-5 text-amber-600" />
+            <Crown className="h-5 w-5 text-amber-700" />
           </div>
 
           <div>
@@ -24,7 +24,7 @@ export default function PremiumCard() {
 
         <ul className="space-y-2 text-sm">
           <li>✔ Aparece no topo dos resultados</li>
-          <li>✔ Badge Premium</li>
+          <li>✔ Badge Destaque</li>
           <li>✔ Maior exposição aos clientes</li>
         </ul>
 
@@ -32,7 +32,7 @@ export default function PremiumCard() {
           <p className="text-sm text-muted-foreground">Desde</p>
 
           <p className="text-3xl font-bold">
-            5€
+            4,99 €
             <span className="text-base font-normal">/mês</span>
           </p>
         </div>

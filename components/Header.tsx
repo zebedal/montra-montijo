@@ -161,7 +161,7 @@ export function Header() {
           </Button>
 
           <Button asChild variant="ghost">
-            <Link href="/plano-destaque">Plano Destaque</Link>
+            <Link href="/plano-destaque">Planos</Link>
           </Button>
         </nav>
 
@@ -332,7 +332,7 @@ export function Header() {
                       </MobileNavLink>
 
                       <MobileNavLink href="/plano-destaque" icon={Crown}>
-                        Plano Destaque
+                        Planos
                       </MobileNavLink>
                     </div>
                   </section>

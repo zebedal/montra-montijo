@@ -7,7 +7,7 @@ import { BadgeCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 
 import { useCreateBusiness } from "@/contexts/CreateBusinessContext";
@@ -15,11 +15,13 @@ import { supabase } from "@/lib/supabase/client";
 
 type Props = {
   initialDraftId: string | null;
+  initialSelectedPlan?: "featured" | "premium" | null;
   canPublishTestBusiness?: boolean;
 };
 
 export default function BusinessPlanContent({
   initialDraftId,
+  initialSelectedPlan = null,
   canPublishTestBusiness = false
 }: Props) {
   const router = useRouter();
@@ -30,6 +32,7 @@ export default function BusinessPlanContent({
   const [isPublishingFree, setIsPublishingFree] = useState(false);
 
   const [isStartingPremium, setIsStartingPremium] = useState(false);
+  const [selectedPaidPlan, setSelectedPaidPlan] = useState<"featured" | "premium" | null>(initialSelectedPlan);
   const [isPublishingTest, setIsPublishingTest] = useState(false);
 
   const isSubmitting =
@@ -136,13 +139,14 @@ export default function BusinessPlanContent({
     }
   }
 
-  async function choosePremium() {
+  async function choosePaidPlan(plan: "featured" | "premium") {
     if (!draftId || isSubmitting) {
       return;
     }
 
     try {
       setIsStartingPremium(true);
+      setSelectedPaidPlan(plan);
 
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
@@ -151,7 +155,7 @@ export default function BusinessPlanContent({
         },
         body: JSON.stringify({
           draftId,
-          isFeatured: true
+          plan
         })
       });
 
@@ -183,6 +187,7 @@ export default function BusinessPlanContent({
       );
 
       setIsStartingPremium(false);
+      setSelectedPaidPlan(null);
     }
   }
 
@@ -245,22 +250,28 @@ export default function BusinessPlanContent({
         </h1>
 
         <p className="mt-3 text-muted-foreground">
-          Podes publicar gratuitamente ou escolher o Plano Destaque para obter
-          mais visibilidade desde o primeiro dia.
+          Podes publicar gratuitamente, ganhar mais visibilidade com o Plano
+          Destaque ou promover campanhas com o Plano Premium.
         </p>
       </div>
 
-      <div className="grid w-full gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
+      <div className="grid w-full gap-6 lg:grid-cols-3">
+        <Card className="flex h-full flex-col">
+          <CardHeader className="space-y-4">
             <CardTitle>Plano Gratuito</CardTitle>
 
-            <p className="text-sm text-muted-foreground">
-              Ideal para começares.
-            </p>
+            <div>
+              <div className="flex items-end gap-2">
+                <span className="text-4xl font-bold">0 €</span>
+                <span className="pb-1 text-muted-foreground">para sempre</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Ideal para criar uma presença local completa.
+              </p>
+            </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="flex-1">
             <ul className="space-y-3">
               <li className="flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
@@ -281,8 +292,21 @@ export default function BusinessPlanContent({
                 <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
                 Horário de funcionamento
               </li>
+
+              <li className="flex items-center gap-2">
+                <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
+                Presença nas categorias e pesquisas
+              </li>
+
+              <li className="flex items-center gap-2">
+                <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
+                Serviços, especialidades e perguntas frequentes
+              </li>
             </ul>
 
+          </CardContent>
+
+          <CardFooter className="mt-auto">
             <Button
               type="button"
               onClick={publishFree}
@@ -298,12 +322,17 @@ export default function BusinessPlanContent({
                 "Publicar gratuitamente"
               )}
             </Button>
-          </CardContent>
+          </CardFooter>
         </Card>
 
-        <Card className="border-primary-green shadow-lg">
+        <Card className={`relative flex h-full flex-col border-primary-green shadow-lg ${selectedPaidPlan === "featured" ? "ring-2 ring-amber-400 ring-offset-2" : ""}`}>
+          {selectedPaidPlan === "featured" && !isStartingPremium && (
+            <span className="absolute right-4 top-4 z-10 whitespace-nowrap rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900 shadow-sm">
+              Pré-selecionado
+            </span>
+          )}
           <CardHeader className="space-y-4">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${selectedPaidPlan === "featured" ? "pr-28" : ""}`}>
               <Sparkles className="h-5 w-5 text-primary-green" />
               Plano Destaque
             </CardTitle>
@@ -321,7 +350,7 @@ export default function BusinessPlanContent({
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="flex flex-1 flex-col gap-6">
             <ul className="space-y-3">
               <li className="flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
@@ -345,11 +374,6 @@ export default function BusinessPlanContent({
 
               <li className="flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
-                Campanha promocional ativa
-              </li>
-
-              <li className="flex items-center gap-2">
-                <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
                 Acesso a estatísticas do negócio
               </li>
 
@@ -361,39 +385,51 @@ export default function BusinessPlanContent({
               </li>
             </ul>
 
-            <div className="rounded-lg border border-primary-green/20 bg-primary-green/5 p-4">
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4 shrink-0 text-primary-green" />
-                  Sem fidelização
-                </li>
-
-                <li className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4 shrink-0 text-primary-green" />
-                  Cancela quando quiseres
-                </li>
-
-                <li className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4 shrink-0 text-primary-green" />
-                  Renovação mensal
-                </li>
-              </ul>
-            </div>
-
             <Button
               type="button"
-              onClick={choosePremium}
-              className="w-full bg-primary-green hover:bg-primary-green/90"
+              onClick={() => choosePaidPlan("featured")}
+              className="mt-auto w-full bg-primary-green hover:bg-primary-green/90"
               size="lg"
               disabled={!draftId || isSubmitting}
             >
-              {isStartingPremium ? (
+              {isStartingPremium && selectedPaidPlan === "featured" ? (
                 <span className="flex items-center gap-2">
                   <Spinner />A preparar pagamento...
                 </span>
               ) : (
                 "Ativar Plano Destaque"
               )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className={`relative flex h-full flex-col border-emerald-800 bg-emerald-950 text-white shadow-xl ${selectedPaidPlan === "premium" ? "ring-2 ring-emerald-400 ring-offset-2" : ""}`}>
+          {selectedPaidPlan === "premium" && !isStartingPremium && (
+            <span className="absolute right-4 top-4 z-10 whitespace-nowrap rounded-full bg-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-950 shadow-sm">
+              Pré-selecionado
+            </span>
+          )}
+          <CardHeader className="space-y-4">
+            <CardTitle className={`flex items-center gap-2 ${selectedPaidPlan === "premium" ? "pr-28" : ""}`}>
+              <Sparkles className="h-5 w-5 text-emerald-300" />
+              Plano Premium
+            </CardTitle>
+            <div>
+              <div className="flex items-end gap-2"><span className="text-4xl font-bold">9,99€</span><span className="pb-1 text-white/60">/ mês</span></div>
+              <p className="mt-2 text-sm text-white/65">Promova ofertas, eventos e novidades através de campanhas.</p>
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col gap-6">
+            <ul className="space-y-3">
+              <li className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 shrink-0 text-emerald-300" />Tudo incluído no Plano Destaque</li>
+              <li className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 shrink-0 text-emerald-300" />Criação de campanhas visuais</li>
+              <li className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 shrink-0 text-emerald-300" />Exposição no carrossel da homepage</li>
+              <li className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 shrink-0 text-emerald-300" />Campanha na página do negócio</li>
+              <li className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 shrink-0 text-emerald-300" />Métricas de visualizações e cliques</li>
+              <li className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 shrink-0 text-emerald-300" />Badge Premium no perfil do negócio</li>
+            </ul>
+            <Button type="button" onClick={() => choosePaidPlan("premium")} className="mt-auto w-full bg-white text-emerald-950 hover:bg-emerald-50" size="lg" disabled={!draftId || isSubmitting}>
+              {isStartingPremium && selectedPaidPlan === "premium" ? <span className="flex items-center gap-2"><Spinner />A preparar pagamento...</span> : "Ativar Plano Premium"}
             </Button>
           </CardContent>
         </Card>

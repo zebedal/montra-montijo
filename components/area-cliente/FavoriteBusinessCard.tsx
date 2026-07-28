@@ -3,15 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Crown, Heart, MapPin, Store } from "lucide-react";
+import { Heart, MapPin, Store } from "lucide-react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { supabase } from "@/lib/supabase/client";
 
 import type { PublicBusiness } from "@/types/business";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 
 type Props = {
   business: PublicBusiness;
@@ -84,11 +84,8 @@ export default function FavoriteBusinessCard({ business, onRemove }: Props) {
               </p>
             )}
 
-            {business.plan === "premium" && (
-              <Badge className="shrink-0 gap-1 border-0 bg-yellow-600 text-white hover:bg-yellow-600">
-                <Crown className="h-3 w-3" />
-                Premium
-              </Badge>
+            {business.plan !== "free" && (
+              <BusinessPlanBadge plan={business.plan} className="shrink-0" />
             )}
           </div>
 

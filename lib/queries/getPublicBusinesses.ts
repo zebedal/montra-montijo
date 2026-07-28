@@ -2,6 +2,7 @@ import { getPublicStorageUrl } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/server";
 
 import type { PublicBusiness } from "@/types/business";
+import type { BusinessPlan } from "@/lib/business-plan";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
 export const BUSINESSES_PER_PAGE = 12;
@@ -30,7 +31,7 @@ type BusinessRow = {
   description: string | null;
   logo_url: string | null;
   city: string | null;
-  plan: string;
+  plan: BusinessPlan;
   images: {
     url: string;
     position: number | null;
@@ -160,7 +161,7 @@ export async function getPublicBusinesses({
         )
         .filter((item): item is NonNullable<typeof item> => Boolean(item)),
       city: business.city,
-      plan: business.plan === "premium" ? "premium" : "free",
+      plan: business.plan,
       hasActiveCampaign: campaignBusinessIds.has(business.id),
       category: normalizeCategory(business.category)
     };

@@ -4,7 +4,7 @@ type SendBusinessPublishedEmailParams = {
   email: string;
   businessName: string;
   businessSlug: string;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
 };
 
 export async function sendBusinessPublishedEmail({

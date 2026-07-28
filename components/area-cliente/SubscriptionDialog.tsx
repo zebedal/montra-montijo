@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,8 +27,10 @@ import type { SubscriptionBusiness } from "@/types/business";
 import { cancelBusinessSubscription } from "@/lib/queries/cancelBusinessSubscription";
 import {
   activateBusinessPremium,
-  reactivateBusinessSubscription
+  reactivateBusinessSubscription,
+  upgradeBusinessToPremium
 } from "@/lib/helpers";
+import { getBusinessPlanLabel } from "@/lib/business-plan";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,7 +71,8 @@ export default function SubscriptionDialog({
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
-  const isPremium = business.plan === "premium";
+  const isPaid = business.plan !== "free";
+  const isFeatured = business.plan === "featured";
   const cancellationScheduled = business.cancel_at_period_end === true;
 
   async function handleCancelSubscription() {
@@ -79,7 +82,7 @@ export default function SubscriptionDialog({
       await cancelBusinessSubscription(business.id);
 
       toast.success(
-        "A renovação foi cancelada. O Premium permanecerá ativo até ao fim do período pago.",
+        `A renovação foi cancelada. O plano ${getBusinessPlanLabel(business.plan)} permanecerá ativo até ao fim do período pago.`,
         {
           position: "top-center"
         }
@@ -135,7 +138,7 @@ export default function SubscriptionDialog({
     try {
       setIsUpdating(true);
 
-      await activateBusinessPremium(business.id);
+      await activateBusinessPremium(business.id, "featured");
     } catch (error) {
       console.error(error);
 
@@ -148,6 +151,20 @@ export default function SubscriptionDialog({
         }
       );
 
+      setIsUpdating(false);
+    }
+  }
+
+  async function handleUpgradePremium() {
+    try {
+      setIsUpdating(true);
+      await upgradeBusinessToPremium(business.id);
+      toast.success("Plano Premium ativado. Já pode criar campanhas.", { position: "top-center" });
+      onOpenChange(false);
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível atualizar para Premium.", { position: "top-center" });
+    } finally {
       setIsUpdating(false);
     }
   }
@@ -167,7 +184,7 @@ export default function SubscriptionDialog({
           <div className="space-y-4 py-2">
             {!business.is_visible && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-                Este é um negócio de teste oculto. A ativação do Premium não o
+                Este é um negócio de teste oculto. A ativação de um plano pago não o
                 tornará público.
               </div>
             )}
@@ -182,24 +199,15 @@ export default function SubscriptionDialog({
                   <p className="text-sm text-muted-foreground">Plano</p>
 
                   <p className="font-medium">
-                    {isPremium ? "Montra Premium" : "Plano gratuito"}
+                    {getBusinessPlanLabel(business.plan)}
                   </p>
                 </div>
               </div>
 
-              <Badge
-                variant={isPremium ? "default" : "secondary"}
-                className={
-                  isPremium
-                    ? "bg-yellow-600 text-white hover:bg-yellow-600"
-                    : undefined
-                }
-              >
-                {isPremium ? "Premium" : "Gratuito"}
-              </Badge>
+              <BusinessPlanBadge plan={business.plan} showFree />
             </div>
 
-            {isPremium && (
+            {isPaid && (
               <>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-lg border p-4">
@@ -222,7 +230,7 @@ export default function SubscriptionDialog({
                       <CalendarDays className="h-4 w-4" />
 
                       {cancellationScheduled
-                        ? "Premium disponível até"
+                        ? `${getBusinessPlanLabel(business.plan)} disponível até`
                         : "Próxima renovação"}
                     </div>
 
@@ -239,7 +247,7 @@ export default function SubscriptionDialog({
                     </p>
 
                     <p className="mt-1">
-                      O negócio permanece Premium até ao fim do período pago.
+                      O negócio permanece no plano {getBusinessPlanLabel(business.plan)} até ao fim do período pago.
                       Pode reativar a renovação antes dessa data.
                     </p>
                   </div>
@@ -247,7 +255,7 @@ export default function SubscriptionDialog({
               </>
             )}
 
-            {!isPremium &&
+            {!isPaid &&
               (variant === "statistics" ? (
                 <div className="rounded-lg border border-green-200 bg-green-50 p-5">
                   <div className="flex items-start gap-3">
@@ -257,7 +265,7 @@ export default function SubscriptionDialog({
 
                     <div>
                       <h3 className="font-semibold text-green-900">
-                        Estatísticas Premium
+                        Estatísticas do Plano Destaque
                       </h3>
 
                       <p className="mt-1 text-sm text-green-800">
@@ -277,11 +285,11 @@ export default function SubscriptionDialog({
               ) : (
                 <div className="rounded-lg border bg-muted/30 p-4">
                   <p className="font-medium">
-                    Este negócio ainda não tem uma subscrição Premium.
+                    Este negócio ainda não tem uma subscrição paga.
                   </p>
 
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Ative o Premium para destacar este negócio e aceder a
+                    Ative o Destaque para promover este negócio e aceder a
                     funcionalidades adicionais.
                   </p>
                 </div>
@@ -298,7 +306,14 @@ export default function SubscriptionDialog({
               Fechar
             </Button>
 
-            {isPremium ? (
+            {isFeatured && !cancellationScheduled && (
+              <Button type="button" onClick={() => void handleUpgradePremium()} disabled={isUpdating} className="bg-emerald-950 text-white hover:bg-emerald-900">
+                <BadgeCheck className="mr-2 h-4 w-4" />
+                {isUpdating ? "A atualizar..." : "Atualizar para Premium"}
+              </Button>
+            )}
+
+            {isPaid ? (
               cancellationScheduled ? (
                 <Button
                   type="button"
@@ -330,7 +345,7 @@ export default function SubscriptionDialog({
               >
                 <BadgeCheck className="mr-2 h-4 w-4" />
 
-                {isUpdating ? "A preparar..." : "Ativar Premium"}
+                {isUpdating ? "A preparar..." : "Ativar Destaque"}
               </Button>
             )}
           </DialogFooter>
@@ -344,7 +359,7 @@ export default function SubscriptionDialog({
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              O negócio continuará Premium até{" "}
+              O negócio continuará no plano {getBusinessPlanLabel(business.plan)} até{" "}
               {formatDate(business.current_period_end)}. Depois dessa data, a
               subscrição termina e o negócio volta ao plano gratuito.
             </AlertDialogDescription>

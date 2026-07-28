@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Crown, MapPin, Megaphone, Phone, Store } from "lucide-react";
+import { MapPin, Megaphone, Phone, Store } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BusinessSpecialtyChips } from "@/components/business/BusinessSpecialtyChips";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 
 import type { BusinessSummary } from "@/types/business";
 
@@ -46,11 +47,8 @@ export default function BusinessCard({ business }: Props) {
                   {business.name}
                 </h3>
 
-                {business.plan === "premium" && (
-                  <Badge className="gap-1 bg-yellow-600 p-3">
-                    <Crown className="h-3 w-3" />
-                    Premium
-                  </Badge>
+                {business.plan !== "free" && (
+                  <BusinessPlanBadge plan={business.plan} className="shrink-0 px-3 py-2" />
                 )}
               </div>
 

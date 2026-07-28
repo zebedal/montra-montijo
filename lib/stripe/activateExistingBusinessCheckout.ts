@@ -4,12 +4,14 @@ import type Stripe from "stripe";
 
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import type { PaidBusinessPlan } from "@/lib/business-plan";
 
 export async function activateExistingBusinessCheckout(
   session: Stripe.Checkout.Session
 ) {
   const businessId = session.metadata?.businessId;
   const userId = session.metadata?.userId;
+  const plan: PaidBusinessPlan = session.metadata?.plan === "premium" ? "premium" : "featured";
 
   if (
     session.metadata?.flow !== "activate_existing_business" ||
@@ -52,7 +54,7 @@ export async function activateExistingBusinessCheckout(
   if (!currentBusiness) throw new Error("Negócio da ativação não encontrado.");
 
   if (
-    currentBusiness.plan === "premium" &&
+    currentBusiness.plan === plan &&
     currentBusiness.stripe_subscription_id === subscription.id
   ) {
     return currentBusiness;
@@ -61,7 +63,7 @@ export async function activateExistingBusinessCheckout(
   const { data: activatedBusiness, error: updateError } = await supabaseAdmin
     .from("businesses")
     .update({
-      plan: "premium",
+      plan,
       stripe_subscription_id: subscription.id,
       subscription_status: subscription.status,
       cancel_at_period_end: subscription.cancel_at_period_end,

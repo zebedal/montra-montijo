@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getPublicStorageUrl } from "@/lib/helpers";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
+import type { BusinessPlan } from "@/lib/business-plan";
 
 export type SearchMatchType =
   | "business_name"
@@ -17,7 +18,7 @@ type SearchBusinessRow = {
   description: string | null;
   logo_url: string | null;
   city: string | null;
-  plan: string;
+  plan: BusinessPlan;
   category_id: string | null;
   category_name: string | null;
   category_slug: string | null;
@@ -32,7 +33,7 @@ export type SearchBusinessResult = {
   description: string | null;
   logoUrl: string | null;
   city: string | null;
-  plan: string;
+  plan: BusinessPlan;
 
   category: {
     id: string;

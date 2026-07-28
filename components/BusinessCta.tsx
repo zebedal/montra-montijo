@@ -90,7 +90,7 @@ export default function BusinessCta() {
 
               <Button asChild size="lg" variant="primary" className="min-w-48">
                 <Link href={Routes.PLANO_DESTAQUE}>
-                  Descobrir o plano destaque
+                  Descobrir planos
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

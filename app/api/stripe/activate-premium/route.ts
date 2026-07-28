@@ -6,14 +6,18 @@ import { createClient } from "@/lib/supabase/server";
 
 type RequestBody = {
   businessId: string;
+  plan?: "featured" | "premium";
 };
 
 export async function POST(request: Request) {
   try {
-    const { businessId } = (await request.json()) as RequestBody;
+    const { businessId, plan = "featured" } = (await request.json()) as RequestBody;
 
     if (!businessId) {
       return NextResponse.json({ error: "Negócio inválido." }, { status: 400 });
+    }
+    if (plan !== "featured" && plan !== "premium") {
+      return NextResponse.json({ error: "Plano inválido." }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -65,7 +69,7 @@ export async function POST(request: Request) {
     /**
      * Evitar uma segunda subscrição para o mesmo negócio.
      */
-    if (business.plan === "premium" || business.stripe_subscription_id) {
+    if (business.plan !== "free" || business.stripe_subscription_id) {
       return NextResponse.json(
         { error: "Este negócio já tem uma subscrição Premium." },
         { status: 409 }
@@ -73,13 +77,19 @@ export async function POST(request: Request) {
     }
 
     const origin = request.headers.get("origin") ?? getSiteUrl();
+    const price = plan === "premium"
+      ? process.env.STRIPE_PRICE_PREMIUM_CAMPAIGNS
+      : process.env.STRIPE_PRICE_DESTAQUE ?? process.env.STRIPE_PRICE_PREMIUM;
+    if (!price) {
+      return NextResponse.json({ error: "O preço deste plano não está configurado." }, { status: 503 });
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
 
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_PREMIUM!,
+          price,
           quantity: 1
         }
       ],
@@ -91,13 +101,15 @@ export async function POST(request: Request) {
       metadata: {
         flow: "activate_existing_business",
         businessId: business.id,
-        userId: user.id
+        userId: user.id,
+        plan
       },
 
       subscription_data: {
         metadata: {
           businessId: business.id,
-          userId: user.id
+          userId: user.id,
+          plan
         }
       },
 

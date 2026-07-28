@@ -27,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   businessId: string;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
   categorySlug?: string | null;
   whatsappPhone?: string | null;
   initialValue: {
@@ -80,7 +80,7 @@ export function BusinessPrimaryCtaEditor({
 
   useEffect(() => {
     onSaveReady?.(async () => {
-      if (plan !== "premium" || !isDirty) return;
+      if (plan === "free" || !isDirty) return;
 
       const response = await fetch(`/api/businesses/${businessId}/primary-cta`, {
         method: "PUT",
@@ -105,7 +105,7 @@ export function BusinessPrimaryCtaEditor({
     plan
   ]);
 
-  if (plan !== "premium") {
+  if (plan === "free") {
     return (
       <Card id="acao-principal" className="mx-auto max-w-4xl border-dashed">
         <CardHeader>

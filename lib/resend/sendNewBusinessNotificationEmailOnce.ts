@@ -10,7 +10,7 @@ type Params = {
   businessName: string;
   businessSlug: string;
   creatorEmail?: string;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
 };
 
 const EMAIL_TYPE = "admin_new_business";

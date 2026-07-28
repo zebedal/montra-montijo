@@ -42,7 +42,7 @@ export type BusinessCard = {
 
   description: string | null;
 
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
 
   categories: {
     name: string;

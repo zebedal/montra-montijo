@@ -7,7 +7,6 @@ import {
   Building2,
   Check,
   Clock,
-  Crown,
   ExternalLink,
   Mail,
   Phone,
@@ -27,6 +26,7 @@ import {
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -223,11 +223,8 @@ export default function BusinessClaimsList({ initialClaims }: Props) {
                         {claim.businessName}
                       </CardTitle>
 
-                      {claim.businessPlan === "premium" && (
-                        <Badge className="gap-1 bg-yellow-600 text-white hover:bg-yellow-600">
-                          <Crown className="h-3 w-3" />
-                          Premium
-                        </Badge>
+                      {claim.businessPlan !== "free" && (
+                        <BusinessPlanBadge plan={claim.businessPlan} />
                       )}
 
                       <Badge variant="outline">Pendente</Badge>

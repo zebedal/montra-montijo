@@ -22,7 +22,7 @@ type SendMonthlyFreeBusinessReportEmailOnceParams = {
   pageViews: number;
   interactions: number;
   directionsClicks: number;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
   insights: MonthlyReportInsights;
   recommendations: MonthlyReportRecommendation[];
 };

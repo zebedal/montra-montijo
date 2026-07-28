@@ -1,11 +1,13 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
+import type { BusinessPlan } from "@/lib/business-plan";
+
 export type PendingBusinessClaim = {
   id: string;
   businessId: string;
   businessName: string;
   businessSlug: string;
-  businessPlan: string;
+  businessPlan: BusinessPlan;
   claimantUserId: string;
   claimantEmail: string | null;
   currentOwnerUserId: string | null;

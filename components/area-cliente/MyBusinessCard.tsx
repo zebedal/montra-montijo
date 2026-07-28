@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -60,7 +61,7 @@ export default function MyBusinessCard({
   function handleStatisticsClick() {
     setDropdownOpen(false);
 
-    if (business.plan === "premium") {
+    if (business.plan !== "free") {
       router.push(`/area-cliente/negocio/${business.slug}/estatisticas`);
       return;
     }
@@ -141,18 +142,7 @@ export default function MyBusinessCard({
                   {business.name}
                 </h2>
 
-                <Badge
-                  variant={
-                    business.plan === "premium" ? "default" : "secondary"
-                  }
-                  className={
-                    business.plan === "premium"
-                      ? "bg-yellow-600 text-white hover:bg-yellow-600"
-                      : undefined
-                  }
-                >
-                  {business.plan === "premium" ? "Premium" : "Gratuito"}
-                </Badge>
+                <BusinessPlanBadge plan={business.plan} showFree />
 
                 {!business.is_visible && (
                   <Badge
@@ -170,7 +160,7 @@ export default function MyBusinessCard({
                 </p>
               )}
 
-              {business.plan === "premium" && business.cancel_at_period_end && (
+              {business.plan !== "free" && business.cancel_at_period_end && (
                 <p className="mt-1 flex items-center gap-1 text-sm font-medium text-amber-700">
                   <TriangleAlert className="h-4 w-4 shrink-0" />
                   Renovação cancelada
@@ -270,9 +260,9 @@ export default function MyBusinessCard({
                       className="cursor-pointer"
                     >
                       <BadgeCheck className="mr-2 h-4 w-4" />
-                      {business.plan === "premium"
+                      {business.plan !== "free"
                         ? "Gerir subscrição"
-                        : "Ativar Premium"}
+                        : "Ativar Destaque"}
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
@@ -290,7 +280,7 @@ export default function MyBusinessCard({
                   </>
                 )}
 
-                {business.plan === "premium" && (
+                {business.plan !== "free" && (
                   <DropdownMenuItem asChild>
                     <Link
                       href={`/area-cliente/negocio/${business.id}/editar#acao-principal`}

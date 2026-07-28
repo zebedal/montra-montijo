@@ -104,14 +104,14 @@ export default function Footer() {
 
             <div className="mt-8 flex gap-3">
               <Link
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61591976767278"
                 className="flex h-10 w-10 items-center justify-center rounded-full border bg-background transition-colors hover:border-primary hover:text-primary"
               >
                 <SiFacebook className="h-4 w-4" />
               </Link>
 
               <Link
-                href="#"
+                href="https://www.instagram.com/montramontijo/"
                 className="flex h-10 w-10 items-center justify-center rounded-full border bg-background transition-colors hover:border-primary hover:text-primary"
               >
                 <SiInstagram className="h-4 w-4" />
