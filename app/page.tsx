@@ -17,13 +17,15 @@ import UpcomingEventsSection from "@/components/UpcomingEvents";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 
+const homeDescription =
+  "Explore o comércio local do Montijo num só lugar. Encontre restaurantes, lojas, empresas e serviços com contactos, moradas e horários.";
+
 export const metadata: Metadata = {
   title: {
     absolute: "Comércio local no Montijo | Montra Montijo"
   },
 
-  description:
-    "Descubra o comércio local do Montijo. Encontre restaurantes, lojas, empresas e serviços locais na Montra Montijo.",
+  description: homeDescription,
 
   alternates: {
     canonical: "/"
@@ -31,8 +33,7 @@ export const metadata: Metadata = {
 
   openGraph: {
     title: "Comércio local no Montijo",
-    description:
-      "Descubra restaurantes, lojas, empresas e serviços do comércio local no Montijo.",
+    description: homeDescription,
     url: "/",
     type: "website",
     locale: "pt_PT",
@@ -50,8 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Comércio local no Montijo",
-    description:
-      "Descubra restaurantes, lojas, empresas e serviços locais na Montra Montijo.",
+    description: homeDescription,
     images: ["/images/default-og-image.jpg"]
   },
 

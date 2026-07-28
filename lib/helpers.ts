@@ -590,21 +590,74 @@ const weekDays = [
   "Sábado"
 ];
 
-export function getBusinessStatus(hours: BusinessHour[]) {
-  const now = new Date();
+const englishWeekDays: Record<string, string> = {
+  Sunday: "Domingo",
+  Monday: "Segunda",
+  Tuesday: "Terça",
+  Wednesday: "Quarta",
+  Thursday: "Quinta",
+  Friday: "Sexta",
+  Saturday: "Sábado"
+};
 
-  const today = weekDays[now.getDay()];
+function getLisbonDateParts(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Lisbon",
+    weekday: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
 
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  return {
+    day: englishWeekDays[values.weekday],
+    minutes: Number(values.hour) * 60 + Number(values.minute)
+  };
+}
 
-  const todayHours = hours
-    .filter((hour) => hour.day === today)
+function getHourPeriods(hours: BusinessHour[], day: string) {
+  return hours
     .filter(
-      (hour) => !hour.is_closed && hour.open_time && hour.close_time
+      (hour) =>
+        hour.day === day &&
+        !hour.is_closed &&
+        hour.open_time &&
+        hour.close_time
     )
-    .sort((a, b) =>
-      (a.open_time ?? "").localeCompare(b.open_time ?? "")
-    );
+    .map((hour) => ({
+      open: hour.open_time!,
+      close: hour.close_time!,
+      openMinutes: timeToMinutes(hour.open_time!),
+      closeMinutes: timeToMinutes(hour.close_time!)
+    }))
+    .sort((a, b) => a.openMinutes - b.openMinutes);
+}
+
+function timeToMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+export function getBusinessStatus(hours: BusinessHour[]) {
+  const { day: today, minutes: currentMinutes } = getLisbonDateParts(new Date());
+  const todayIndex = weekDays.indexOf(today);
+  const previousDay = weekDays[(todayIndex + weekDays.length - 1) % weekDays.length];
+  const previousDayHours = getHourPeriods(hours, previousDay);
+  const todayHours = getHourPeriods(hours, today);
+
+  const previousOvernightPeriod = previousDayHours.find(
+    (period) =>
+      period.closeMinutes <= period.openMinutes &&
+      currentMinutes < period.closeMinutes
+  );
+
+  if (previousOvernightPeriod) {
+    return {
+      open: true,
+      message: `Fecha às ${previousOvernightPeriod.close.slice(0, 5)}`
+    };
+  }
 
   if (todayHours.length === 0) {
     return {
@@ -614,22 +667,25 @@ export function getBusinessStatus(hours: BusinessHour[]) {
   }
 
   for (const [index, period] of todayHours.entries()) {
-    const [openHour, openMinute] = period.open_time!.split(":").map(Number);
-    const [closeHour, closeMinute] = period.close_time!.split(":").map(Number);
-    const openMinutes = openHour * 60 + openMinute;
-    const closeMinutes = closeHour * 60 + closeMinute;
+    const closeMinutes =
+      period.closeMinutes <= period.openMinutes
+        ? period.closeMinutes + 24 * 60
+        : period.closeMinutes;
 
-    if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+    if (
+      currentMinutes >= period.openMinutes &&
+      currentMinutes < closeMinutes
+    ) {
       return {
         open: true,
-        message: `Fecha às ${period.close_time!.slice(0, 5)}`
+        message: `Fecha às ${period.close.slice(0, 5)}`
       };
     }
 
-    if (currentMinutes < openMinutes) {
+    if (currentMinutes < period.openMinutes) {
       return {
         open: false,
-        message: `${index > 0 ? "Reabre" : "Abre"} às ${period.open_time!.slice(0, 5)}`
+        message: `${index > 0 ? "Reabre" : "Abre"} às ${period.open.slice(0, 5)}`
       };
     }
   }

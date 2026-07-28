@@ -142,7 +142,12 @@ export function OpeningHours({ control, setValue }: Props) {
                       const isClosed = checked === true;
                       field.onChange(isClosed);
 
-                      if (!isClosed && hour.periods.length === 0) {
+                      if (isClosed) {
+                        setValue(`openingHours.${index}.periods`, [], {
+                          shouldDirty: true,
+                          shouldValidate: true
+                        });
+                      } else if (hour.periods.length === 0) {
                         setValue(
                           `openingHours.${index}.periods`,
                           [{ open: "", close: "" }],

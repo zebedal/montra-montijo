@@ -16,7 +16,7 @@ export default function WebsiteJsonLd({ url }: Props) {
     url: siteUrl,
 
     description:
-      "Diretório de empresas, comércio e serviços do concelho do Montijo.",
+      "Diretório do comércio local do Montijo com restaurantes, lojas, empresas, serviços, contactos, moradas e horários.",
 
     inLanguage: "pt-PT",
 
