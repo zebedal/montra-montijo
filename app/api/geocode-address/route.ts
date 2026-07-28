@@ -1,5 +1,6 @@
 import {
-  geocodeAddress,
+  geocodeFirstMatchingAddress,
+  getPlaceNameForGeocoding,
   getStreetForGeocoding,
   getStreetNumberForGeocoding
 } from "@/lib/geocoding";
@@ -40,7 +41,8 @@ export async function POST(request: Request) {
   try {
     const streetNumber = number ? getStreetNumberForGeocoding(number) : "";
     const searchableStreet = getStreetForGeocoding(street);
-    const result = await geocodeAddress(
+    const placeName = getPlaceNameForGeocoding(street);
+    const result = await geocodeFirstMatchingAddress([
       [
         [searchableStreet, streetNumber].filter(Boolean).join(" "),
         postalCode,
@@ -48,8 +50,10 @@ export async function POST(request: Request) {
         "Portugal"
       ]
         .filter(Boolean)
-        .join(", ")
-    );
+        .join(", "),
+      [placeName, postalCode, city, "Portugal"].filter(Boolean).join(", "),
+      [placeName, city, "Portugal"].filter(Boolean).join(", ")
+    ]);
 
     if (!result) {
       return Response.json(

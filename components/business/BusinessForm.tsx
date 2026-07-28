@@ -994,10 +994,10 @@ export default function BusinessForm({
                   <Input
                     {...form.register("number")}
                     inputMode="text"
-                    placeholder="Número / Fração (opcional)"
+                    placeholder="Número / Loja / Fração (opcional)"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Ex.: 12, 1.º Esq.
+                    Ex.: 12, Loja 4, 1.º Esq.
                   </p>
                   {errors.number && (
                     <p className="text-sm text-red-500">
