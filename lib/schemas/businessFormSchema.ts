@@ -5,27 +5,15 @@ import { MARGEM_SUL_SERVICE_AREA_SLUGS } from "@/lib/service-areas";
 /**
  * OPENING HOURS
  */
-export const openingPeriodSchema = z
-  .object({
-    open: z.string(),
-    close: z.string()
-  })
-  .superRefine((period, context) => {
-    if (!period.open || !period.close) {
-      context.addIssue({
-        code: "custom",
-        message: "Indica a hora de abertura e de fecho."
-      });
-      return;
-    }
+export const openingPeriodSchema = z.object({
+  open: z.string(),
+  close: z.string()
+});
 
-    if (period.open >= period.close) {
-      context.addIssue({
-        code: "custom",
-        message: "A hora de fecho deve ser posterior à hora de abertura."
-      });
-    }
-  });
+function timeToMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
 
 export const openingHourSchema = z
   .object({
@@ -45,12 +33,55 @@ export const openingHourSchema = z
       return;
     }
 
+    day.periods.forEach((period, index) => {
+      if (!period.open) {
+        context.addIssue({
+          code: "custom",
+          path: ["periods", index, "open"],
+          message: "Indica a hora de abertura."
+        });
+      }
+
+      if (!period.close) {
+        context.addIssue({
+          code: "custom",
+          path: ["periods", index, "close"],
+          message: "Indica a hora de fecho."
+        });
+      }
+
+      if (period.open && period.close && period.open === period.close) {
+        context.addIssue({
+          code: "custom",
+          path: ["periods", index, "close"],
+          message: "A abertura e o fecho não podem ter a mesma hora."
+        });
+      }
+    });
+
+    if (
+      day.periods.some(
+        (period) =>
+          !period.open || !period.close || period.open === period.close
+      )
+    ) {
+      return;
+    }
+
     const sortedPeriods = [...day.periods].sort((a, b) =>
       a.open.localeCompare(b.open)
     );
 
     for (let index = 1; index < sortedPeriods.length; index += 1) {
-      if (sortedPeriods[index].open < sortedPeriods[index - 1].close) {
+      const previousOpen = timeToMinutes(sortedPeriods[index - 1].open);
+      const previousCloseValue = timeToMinutes(sortedPeriods[index - 1].close);
+      const previousClose =
+        previousCloseValue <= previousOpen
+          ? previousCloseValue + 24 * 60
+          : previousCloseValue;
+      const currentOpen = timeToMinutes(sortedPeriods[index].open);
+
+      if (currentOpen < previousClose) {
         context.addIssue({
           code: "custom",
           path: ["periods"],

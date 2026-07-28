@@ -676,6 +676,24 @@ export default function BusinessForm({
 
     if (!firstError) return;
 
+    if (errors.openingHours) {
+      const hoursSection = document.getElementById("horario-funcionamento");
+
+      if (!hoursSection) return;
+
+      hoursSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      const invalidField = hoursSection.querySelector(
+        '[aria-invalid="true"]'
+      ) as HTMLElement | null;
+
+      invalidField?.focus({ preventScroll: true });
+      return;
+    }
+
     const element = document.querySelector(
       `[name="${firstError}"]`
     ) as HTMLElement | null;
@@ -705,12 +723,7 @@ export default function BusinessForm({
         </CardHeader>
 
         <CardContent>
-          <form
-            onSubmit={handleSubmit(onSubmit, (errors) => {
-              console.log("FORM ERRORS:", errors);
-            })}
-            className="space-y-10"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
             {/* INFORMACOES */}
             <section className="space-y-4">
               <h2 className="text-lg font-semibold">Informações</h2>
@@ -1381,7 +1394,10 @@ export default function BusinessForm({
             )}
 
             {/* HORARIO */}
-            <section className="space-y-4">
+            <section
+              id="horario-funcionamento"
+              className="scroll-mt-24 space-y-4"
+            >
               <h2 className="text-lg font-semibold">
                 Horário de funcionamento (opcional)
               </h2>
