@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getPrimaryCtaLabel } from "@/lib/business-primary-cta";
 
 export type BusinessEventType =
   | "page_view"
@@ -7,7 +8,8 @@ export type BusinessEventType =
   | "website_click"
   | "instagram_click"
   | "facebook_click"
-  | "directions_click";
+  | "directions_click"
+  | "primary_cta_click";
 
 type BusinessEvent = {
   event_type: BusinessEventType;
@@ -21,6 +23,7 @@ export type BusinessStatistics = {
     slug: string;
     plan: string;
     subscriptionStatus: string | null;
+    primaryCtaLabel: string | null;
   };
 
   period: {
@@ -37,6 +40,7 @@ export type BusinessStatistics = {
     instagramClicks: number;
     facebookClicks: number;
     directionsClicks: number;
+    primaryCtaClicks: number;
     interactions: number;
   };
 
@@ -71,13 +75,15 @@ const EVENT_TO_TOTAL_KEY: Record<
   | "instagramClicks"
   | "facebookClicks"
   | "directionsClicks"
+  | "primaryCtaClicks"
 > = {
   phone_click: "phoneClicks",
   email_click: "emailClicks",
   website_click: "websiteClicks",
   instagram_click: "instagramClicks",
   facebook_click: "facebookClicks",
-  directions_click: "directionsClicks"
+  directions_click: "directionsClicks",
+  primary_cta_click: "primaryCtaClicks"
 };
 
 function getDateKey(date: Date) {
@@ -145,7 +151,8 @@ export async function getBusinessStatistics(
     slug,
     user_id,
     plan,
-    subscription_status
+    subscription_status,
+    primary_cta_type
   `
     )
     .eq("slug", businessSlug)
@@ -213,6 +220,7 @@ export async function getBusinessStatistics(
     instagramClicks: 0,
     facebookClicks: 0,
     directionsClicks: 0,
+    primaryCtaClicks: 0,
     interactions: 0
   };
 
@@ -246,6 +254,15 @@ export async function getBusinessStatistics(
   });
 
   const channels = [
+    ...(business.primary_cta_type
+      ? [
+          {
+            channel:
+              getPrimaryCtaLabel(business.primary_cta_type) ?? "Ação principal",
+            value: totals.primaryCtaClicks
+          }
+        ]
+      : []),
     {
       channel: "Telefone",
       value: totals.phoneClicks
@@ -280,7 +297,8 @@ export async function getBusinessStatistics(
         name: business.name,
         slug: business.slug,
         plan: business.plan,
-        subscriptionStatus: business.subscription_status
+        subscriptionStatus: business.subscription_status,
+        primaryCtaLabel: getPrimaryCtaLabel(business.primary_cta_type)
       },
 
       period: {

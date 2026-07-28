@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Mail,
   MapPin,
+  MousePointerClick,
   Pencil,
   Trash2,
   TriangleAlert
@@ -287,6 +288,18 @@ export default function MyBusinessCard({
                       Estatísticas
                     </DropdownMenuItem>
                   </>
+                )}
+
+                {business.plan === "premium" && (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/area-cliente/negocio/${business.id}/editar#acao-principal`}
+                      className="cursor-pointer"
+                    >
+                      <MousePointerClick className="mr-2 h-4 w-4" />
+                      Configurar ação principal
+                    </Link>
+                  </DropdownMenuItem>
                 )}
 
                 <DropdownMenuSeparator />

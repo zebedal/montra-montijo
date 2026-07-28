@@ -5,7 +5,8 @@ export type BusinessEventType =
   | "website_click"
   | "instagram_click"
   | "facebook_click"
-  | "directions_click";
+  | "directions_click"
+  | "primary_cta_click";
 
 export function trackBusinessEvent(
   businessId: string,

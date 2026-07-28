@@ -10,7 +10,8 @@ const allowedEvents = [
   "website_click",
   "instagram_click",
   "facebook_click",
-  "directions_click"
+  "directions_click",
+  "primary_cta_click"
 ] as const;
 
 type BusinessEventType = (typeof allowedEvents)[number];
@@ -40,7 +41,9 @@ export async function POST(request: Request) {
      */
     const { data: business, error: businessError } = await supabaseAdmin
       .from("businesses")
-      .select("id, user_id")
+      .select(
+        "id, user_id, plan, primary_cta_enabled, primary_cta_type"
+      )
       .eq("id", businessId)
       .maybeSingle();
 
@@ -65,6 +68,16 @@ export async function POST(request: Request) {
         {
           status: 404
         }
+      );
+    }
+
+    if (
+      eventType === "primary_cta_click" &&
+      (business.plan !== "premium" || !business.primary_cta_enabled)
+    ) {
+      return NextResponse.json(
+        { error: "A ação principal não está disponível." },
+        { status: 400 }
       );
     }
 
@@ -102,7 +115,11 @@ export async function POST(request: Request) {
       .from("business_events")
       .insert({
         business_id: businessId,
-        event_type: eventType
+        event_type: eventType,
+        metadata:
+          eventType === "primary_cta_click"
+            ? { ctaType: business.primary_cta_type }
+            : {}
       });
 
     if (insertError) {

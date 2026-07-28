@@ -14,6 +14,7 @@ import { BusinessOwnerCompletion } from "@/components/business/BusinessOwnerComp
 import { BusinessMap } from "@/components/business/BusinessMap";
 import { BusinessServiceAreas } from "@/components/business/BusinessServiceAreas";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
+import { BusinessPrimaryCta } from "@/components/business/BusinessPrimaryCta";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
@@ -258,6 +259,7 @@ export default async function BusinessPage({ params }: Props) {
             businessUrl={businessUrl}
             isBusinessOwner={isBusinessOwner}
           />
+          <BusinessPrimaryCta business={business} />
           {isClaimable && (
             <BusinessClaimButton
               businessId={business.id}

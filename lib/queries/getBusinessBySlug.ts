@@ -79,6 +79,11 @@ type BusinessRow = {
   website: string | null;
   facebook: string | null;
   instagram: string | null;
+  primary_cta_enabled: boolean;
+  primary_cta_type: string | null;
+  primary_cta_destination: string | null;
+  primary_cta_url: string | null;
+  primary_cta_message: string | null;
   street: string | null;
   number: string | null;
   postal_code: string | null;
@@ -164,7 +169,22 @@ export async function getBusinessBySlug({
     throw new Error("Negócio não encontrado.");
   }
 
-  const business = data as unknown as BusinessRow;
+  const { data: primaryCta } = await supabase
+    .from("businesses")
+    .select(
+      "primary_cta_enabled, primary_cta_type, primary_cta_destination, primary_cta_url, primary_cta_message"
+    )
+    .eq("id", data.id)
+    .maybeSingle();
+
+  const business = {
+    ...data,
+    primary_cta_enabled: primaryCta?.primary_cta_enabled ?? false,
+    primary_cta_type: primaryCta?.primary_cta_type ?? null,
+    primary_cta_destination: primaryCta?.primary_cta_destination ?? null,
+    primary_cta_url: primaryCta?.primary_cta_url ?? null,
+    primary_cta_message: primaryCta?.primary_cta_message ?? null
+  } as unknown as BusinessRow;
 
   const logoUrl = business.logo_url
     ? supabase.storage.from("business-media").getPublicUrl(business.logo_url)
@@ -306,6 +326,11 @@ export async function getBusinessBySlug({
       website: business.website,
       facebook: business.facebook,
       instagram: business.instagram,
+      primary_cta_enabled: business.primary_cta_enabled ?? false,
+      primary_cta_type: business.primary_cta_type,
+      primary_cta_destination: business.primary_cta_destination,
+      primary_cta_url: business.primary_cta_url,
+      primary_cta_message: business.primary_cta_message,
       street: business.street,
       number: business.number,
       postal_code: business.postal_code,

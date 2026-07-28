@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   useForm,
@@ -74,6 +74,13 @@ import {
   getSpecialtiesForCategory,
   type Specialty
 } from "@/lib/queries/getSpecialties";
+import {
+  BusinessPrimaryCtaEditor
+} from "@/components/business/BusinessPrimaryCtaEditor";
+import type {
+  PrimaryCtaDestination,
+  PrimaryCtaType
+} from "@/lib/business-primary-cta";
 
 const PENDING_BUSINESS_FORM_KEY = "montra-pending-business-form";
 const PENDING_BUSINESS_FORM_NOTICE_KEY =
@@ -98,6 +105,15 @@ type Props = {
   businessId?: string;
   initialImages?: UploadImage[];
   shouldRestoreDraft?: boolean;
+  businessPlan?: "free" | "premium";
+  categorySlug?: string | null;
+  primaryCta?: {
+    enabled: boolean;
+    type: PrimaryCtaType | null;
+    destination: PrimaryCtaDestination | null;
+    url: string | null;
+    message: string | null;
+  };
 };
 
 type ValidatedAddress = {
@@ -121,7 +137,10 @@ export default function BusinessForm({
   initialData,
   businessId,
   initialImages,
-  shouldRestoreDraft = false
+  shouldRestoreDraft = false,
+  businessPlan = "free",
+  categorySlug,
+  primaryCta
 }: Props) {
   const [showHours, setShowHours] = useState(
     mode === "edit" &&
@@ -148,6 +167,14 @@ export default function BusinessForm({
   const [validatedAddressKey, setValidatedAddressKey] = useState("");
   const [addressError, setAddressError] = useState("");
   const [addressErrorKey, setAddressErrorKey] = useState("");
+  const [primaryCtaChanged, setPrimaryCtaChanged] = useState(false);
+  const [savePrimaryCta, setSavePrimaryCta] = useState<
+    (() => Promise<void>) | null
+  >(null);
+  const handlePrimaryCtaSaveReady = useCallback(
+    (save: () => Promise<void>) => setSavePrimaryCta(() => save),
+    []
+  );
 
   const router = useRouter();
 
@@ -226,6 +253,10 @@ export default function BusinessForm({
     control,
     name: "allowWhatsApp"
   });
+  const whatsappPhone = useWatch({
+    control,
+    name: "whatsappPhone"
+  });
   const services = useWatch({
     control,
     name: "services"
@@ -257,7 +288,8 @@ export default function BusinessForm({
     mode === "edit" &&
     (Boolean(logoFile) ||
       (Boolean(initialData?.logo) && logoPreview === null));
-  const hasEditChanges = isDirty || imagesChanged || logoChanged;
+  const hasEditChanges =
+    isDirty || imagesChanged || logoChanged || primaryCtaChanged;
 
   function getAddressKey(
     data: Pick<
@@ -425,6 +457,7 @@ export default function BusinessForm({
         }
 
         await updateBusinessImages(businessId, images);
+        await savePrimaryCta?.();
 
         toast.success("Negócio atualizado com sucesso.", {
           position: "top-center"
@@ -1006,7 +1039,19 @@ export default function BusinessForm({
 
               <Input placeholder="Email" {...register("email")} />
               <Input placeholder="Website" {...register("website")} />
-                </section>
+            </section>
+
+            {mode === "edit" && businessId && primaryCta && (
+              <BusinessPrimaryCtaEditor
+                businessId={businessId}
+                plan={businessPlan}
+                categorySlug={categorySlug}
+                whatsappPhone={allowWhatsApp ? whatsappPhone : null}
+                initialValue={primaryCta}
+                onDirtyChange={setPrimaryCtaChanged}
+                onSaveReady={handlePrimaryCtaSaveReady}
+              />
+            )}
 
             <section className="space-y-4">
               <h2 className="text-lg font-semibold">

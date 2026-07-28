@@ -9,6 +9,7 @@ import {
 import { sendMonthlyFreeBusinessReportEmailOnce } from "@/lib/resend/sendMonthlyFreeBusinessReportEmailOnce";
 import { hasUnsubscribedFromMonthlyReports } from "@/lib/resend/monthlyReportPreferences";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getPrimaryCtaLabel } from "@/lib/business-primary-cta";
 
 const BUSINESS_BATCH_SIZE = 100;
 const SEND_CONCURRENCY = 3;
@@ -25,6 +26,7 @@ type FreeBusiness = {
   website: string | null;
   is_24_hours: boolean;
   plan: "free" | "premium";
+  primary_cta_type: string | null;
 };
 
 type TrackedEvent = {
@@ -38,7 +40,8 @@ const ACTION_LABELS: Record<string, string> = {
   website_click: "Website",
   instagram_click: "Instagram",
   facebook_click: "Facebook",
-  directions_click: "Morada e indicações"
+  directions_click: "Morada e indicações",
+  primary_cta_click: "Ação principal"
 };
 
 type MonthlyPeriod = {
@@ -120,7 +123,7 @@ async function getAllEligibleBusinesses(): Promise<FreeBusiness[]> {
     const { data, error } = await supabaseAdmin
       .from("businesses")
       .select(
-        "id, user_id, name, slug, description, logo_url, phone, email, website, is_24_hours, plan"
+        "id, user_id, name, slug, description, logo_url, phone, email, website, is_24_hours, plan, primary_cta_type"
       )
       .eq("is_visible", true)
       .not("user_id", "is", null)
@@ -149,7 +152,8 @@ async function getAllEligibleBusinesses(): Promise<FreeBusiness[]> {
 
 async function getBusinessActivity(
   businessId: string,
-  period: MonthlyPeriod
+  period: MonthlyPeriod,
+  primaryCtaLabel?: string | null
 ) {
   const { data, error } = await supabaseAdmin
     .from("business_events")
@@ -169,8 +173,12 @@ async function getBusinessActivity(
   }
 
   const events = (data ?? []) as TrackedEvent[];
+  const actionLabels: Record<string, string> = {
+    ...ACTION_LABELS,
+    primary_cta_click: primaryCtaLabel ?? ACTION_LABELS.primary_cta_click
+  };
   const breakdown: Record<string, number> = Object.fromEntries(
-    Object.keys(ACTION_LABELS).map((eventType) => [eventType, 0])
+    Object.keys(actionLabels).map((eventType) => [eventType, 0])
   );
   const weekdayTotals = new Map<string, number>();
   const weeklyPageViews = [0, 0, 0, 0, 0];
@@ -219,7 +227,7 @@ async function getBusinessActivity(
     topAction:
       topAction && topAction[1] > 0
         ? {
-            label: ACTION_LABELS[topAction[0]] ?? topAction[0],
+            label: actionLabels[topAction[0]] ?? topAction[0],
             count: topAction[1]
           }
         : null,
@@ -231,7 +239,8 @@ async function getBusinessActivity(
             count: busiestDay[1]
           }
         : null,
-    weeklyPageViews
+    weeklyPageViews,
+    actionLabels
   };
 }
 
@@ -299,7 +308,7 @@ function buildInsights(
       activity.pageViews > 0
         ? Math.round((activity.interactions / activity.pageViews) * 1000) / 10
         : 0,
-    breakdown: Object.entries(ACTION_LABELS).map(([eventType, label]) => ({
+    breakdown: Object.entries(activity.actionLabels).map(([eventType, label]) => ({
       label,
       count: activity.breakdown[eventType] ?? 0
     })),
@@ -440,8 +449,16 @@ async function processBusinessReport({
   dryRun: boolean;
 }): Promise<BusinessReportResult> {
   const [activity, previousActivity] = await Promise.all([
-    getBusinessActivity(business.id, period),
-    getBusinessActivity(business.id, getPreviousPeriod(period))
+    getBusinessActivity(
+      business.id,
+      period,
+      getPrimaryCtaLabel(business.primary_cta_type)
+    ),
+    getBusinessActivity(
+      business.id,
+      getPreviousPeriod(period),
+      getPrimaryCtaLabel(business.primary_cta_type)
+    )
   ]);
 
   if (activity.pageViews === 0 && activity.interactions === 0) {
@@ -636,7 +653,7 @@ export async function POST(request: NextRequest) {
     const { data: business, error: businessError } = await supabaseAdmin
       .from("businesses")
       .select(
-        "id, user_id, name, slug, plan, is_visible, description, logo_url, phone, email, website, is_24_hours"
+        "id, user_id, name, slug, plan, is_visible, description, logo_url, phone, email, website, is_24_hours, primary_cta_type"
       )
       .eq("id", businessId)
       .maybeSingle();
@@ -685,9 +702,14 @@ export async function POST(request: NextRequest) {
     // O teste deve permitir validar interações acabadas de realizar. O envio
     // mensal automático continua a usar o mês anterior, já encerrado.
     const period = getCurrentMonthToDatePeriod();
+    const primaryCtaLabel = getPrimaryCtaLabel(business.primary_cta_type);
     const [activity, previousActivity] = await Promise.all([
-      getBusinessActivity(business.id, period),
-      getBusinessActivity(business.id, getPreviousPeriod(period))
+      getBusinessActivity(business.id, period, primaryCtaLabel),
+      getBusinessActivity(
+        business.id,
+        getPreviousPeriod(period),
+        primaryCtaLabel
+      )
     ]);
     const recommendations = await getBusinessProfileRecommendations(
       business as FreeBusiness,

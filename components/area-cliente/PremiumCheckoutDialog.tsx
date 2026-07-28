@@ -173,6 +173,18 @@ export default function PremiumCheckoutDialog() {
     router.push(`/negocio/${businessSlug}`);
   }
 
+  function handleConfigurePrimaryCta() {
+    if (!businessId) {
+      handleClose();
+      return;
+    }
+
+    clearCheckoutParams();
+    router.push(
+      `/area-cliente/negocio/${businessId}/editar#acao-principal`
+    );
+  }
+
   const isOpen = dialogState !== "closed";
 
   return (
@@ -285,12 +297,16 @@ export default function PremiumCheckoutDialog() {
               </div>
 
               <DialogFooter className="pt-2 sm:justify-between">
-                <Button type="button" variant="outline" onClick={handleClose}>
-                  Continuar na área de cliente
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleViewBusiness}
+                >
+                  Ver o meu negócio
                 </Button>
 
-                <Button type="button" onClick={handleViewBusiness}>
-                  Ver o meu negócio
+                <Button type="button" onClick={handleConfigurePrimaryCta}>
+                  Configurar ação principal
                 </Button>
               </DialogFooter>
             </div>

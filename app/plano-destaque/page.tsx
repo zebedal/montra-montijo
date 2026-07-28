@@ -8,6 +8,7 @@ import {
   BarChart3,
   Check,
   Crown,
+  MousePointerClick,
   Search,
   Sparkles,
   Star,
@@ -88,6 +89,12 @@ const premiumBenefits = [
     icon: Crown
   },
   {
+    title: "Botão de ação personalizado",
+    description:
+      "Destaque reservas, marcações, pedidos de orçamento ou compras e acompanhe cada clique.",
+    icon: MousePointerClick
+  },
+  {
     title: "Acesso a estatísticas",
     description:
       "Consulte dados sobre visualizações e acompanhe o desempenho da página do seu negócio.",
@@ -128,6 +135,11 @@ const comparisonRows = [
   },
   {
     label: "Badge de negócio em destaque",
+    free: false,
+    premium: true
+  },
+  {
+    label: "Botão de ação personalizado",
     free: false,
     premium: true
   },
@@ -361,7 +373,13 @@ export default function FeaturedPlanPage() {
 
                   <li className="flex items-start gap-3">
                     <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
-                    Acesso a estatísticas
+                    Botão de ação personalizado para reservas, marcações,
+                    orçamentos ou compras
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
+                    Acesso a estatísticas, incluindo cliques na ação principal
                   </li>
                 </ul>
 

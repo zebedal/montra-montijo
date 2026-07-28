@@ -79,6 +79,11 @@ export type PublicBusinessDetails = {
   is_24_hours: boolean;
   is_visible: boolean;
   plan: "free" | "premium";
+  primary_cta_enabled: boolean;
+  primary_cta_type: string | null;
+  primary_cta_destination: string | null;
+  primary_cta_url: string | null;
+  primary_cta_message: string | null;
   category: BusinessCategorySummary | null;
 };
 

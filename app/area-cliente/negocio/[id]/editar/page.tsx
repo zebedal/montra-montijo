@@ -11,6 +11,7 @@ import { getBusinessServices } from "@/lib/queries/getBusinessServices";
 import { Metadata } from "next";
 import { getBusinessLocality } from "@/lib/business-localities";
 import { getBusinessServiceAreas } from "@/lib/queries/getBusinessServiceAreas";
+import type { PrimaryCtaDestination, PrimaryCtaType } from "@/lib/business-primary-cta";
 
 type Props = {
   params: Promise<{
@@ -50,7 +51,9 @@ export default async function EditBusinessPage({ params }: Props) {
       number,
       postal_code,
       city,
-      is_24_hours
+      is_24_hours,
+      plan,
+      category:categories(slug)
     `
     )
     .eq("id", id)
@@ -60,6 +63,15 @@ export default async function EditBusinessPage({ params }: Props) {
   if (error || !business) {
     notFound();
   }
+
+  const { data: primaryCta } = await supabase
+    .from("businesses")
+    .select(
+      "primary_cta_enabled, primary_cta_type, primary_cta_destination, primary_cta_url, primary_cta_message"
+    )
+    .eq("id", business.id)
+    .eq("user_id", user!.id)
+    .maybeSingle();
 
   const businessImages = await getBusinessImages(id);
 
@@ -107,6 +119,10 @@ export default async function EditBusinessPage({ params }: Props) {
     };
   });
 
+  const category = Array.isArray(business.category)
+    ? business.category[0]
+    : business.category;
+
   return (
     <BusinessForm
       mode="edit"
@@ -146,6 +162,16 @@ export default async function EditBusinessPage({ params }: Props) {
       }}
       businessId={business?.id}
       initialImages={initialImages}
+      businessPlan={business.plan}
+      categorySlug={category?.slug ?? null}
+      primaryCta={{
+        enabled: primaryCta?.primary_cta_enabled ?? false,
+        type: primaryCta?.primary_cta_type as PrimaryCtaType | null,
+        destination:
+          primaryCta?.primary_cta_destination as PrimaryCtaDestination | null,
+        url: primaryCta?.primary_cta_url ?? null,
+        message: primaryCta?.primary_cta_message ?? null
+      }}
     />
   );
 }

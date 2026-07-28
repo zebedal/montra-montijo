@@ -120,6 +120,15 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
       description: "Cliques em relação às visualizações",
       icon: BarChart3,
       iconClass: "bg-emerald-100 text-emerald-700"
+    },
+    {
+      label: business.primaryCtaLabel ?? "Ação principal",
+      value: totals.primaryCtaClicks.toLocaleString("pt-PT"),
+      description: business.primaryCtaLabel
+        ? `Cliques em “${business.primaryCtaLabel}”`
+        : "Cliques no botão principal",
+      icon: MousePointerClick,
+      iconClass: "bg-green-100 text-green-700"
     }
   ];
 
