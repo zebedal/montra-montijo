@@ -1,6 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 import CategoryBreadcrumb from "./CategoryBreadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getCategoryCoverUrl } from "@/lib/helpers";
 
 type Props = {
@@ -10,6 +14,8 @@ type Props = {
 };
 
 export default function CategoryHero({ title, slug, businessCount }: Props) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const imageUrl =
     slug === "agencias-viagem"
       ? "/images/categorias/agencias-viagem.jpg"
@@ -17,13 +23,23 @@ export default function CategoryHero({ title, slug, businessCount }: Props) {
 
   return (
     <section className="relative h-72 overflow-hidden sm:h-80">
+      <Skeleton
+        aria-hidden="true"
+        className={`absolute inset-0 h-full w-full rounded-none transition-opacity duration-200 ${
+          imageLoaded ? "opacity-0" : "opacity-100"
+        }`}
+      />
+
       <Image
         src={imageUrl}
         alt={title}
         fill
         sizes="100vw"
-        className="object-cover"
-        priority
+        className={`object-cover transition-opacity duration-200 ${
+          imageLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        preload
+        onLoad={() => setImageLoaded(true)}
       />
 
       <div className="absolute inset-0 bg-black/60" />

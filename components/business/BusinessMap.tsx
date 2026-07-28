@@ -1,11 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { MapPin } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { trackBusinessEvent } from "@/lib/analytics/trackBusinessEvent";
 
 type Props = {
+  businessId: string;
   businessName: string;
   latitude: number | null;
   longitude: number | null;
@@ -40,7 +43,12 @@ function hasValidCoordinates(
   );
 }
 
-export function BusinessMap({ businessName, latitude, longitude }: Props) {
+export function BusinessMap({
+  businessId,
+  businessName,
+  latitude,
+  longitude
+}: Props) {
   if (!hasValidCoordinates(latitude, longitude)) {
     return (
       <Card id="mapa" tabIndex={-1} className="scroll-mt-24 outline-none">
@@ -70,6 +78,7 @@ export function BusinessMap({ businessName, latitude, longitude }: Props) {
 
   const safeLatitude = latitude as number;
   const safeLongitude = longitude as number;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${safeLatitude},${safeLongitude}`;
 
   return (
     <Card
@@ -92,6 +101,20 @@ export function BusinessMap({ businessName, latitude, longitude }: Props) {
             longitude={safeLongitude}
           />
         </div>
+
+        <Button asChild className="w-full sm:w-auto">
+          <a
+            href={directionsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              trackBusinessEvent(businessId, "directions_click")
+            }
+          >
+            <Navigation />
+            Como chegar
+          </a>
+        </Button>
       </CardContent>
     </Card>
   );

@@ -74,6 +74,10 @@ export default async function EditBusinessPage({ params }: Props) {
   const businessFaqs = await getBusinessFaqs(id);
   const businessServices = await getBusinessServices(id);
   const businessServiceAreas = await getBusinessServiceAreas(id);
+  const { data: businessSpecialties } = await supabase
+    .from("business_specialties")
+    .select("specialty_id")
+    .eq("business_id", id);
 
   const orderedDays = [
     "Segunda",
@@ -109,6 +113,9 @@ export default async function EditBusinessPage({ params }: Props) {
       initialData={{
         name: business.name,
         category_id: business.category_id,
+        specialtyIds: (businessSpecialties ?? []).map(
+          (item) => item.specialty_id
+        ),
         description: business.description,
         phone: business.phone,
         allowWhatsApp: Boolean(business.whatsapp_phone),

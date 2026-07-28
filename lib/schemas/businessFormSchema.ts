@@ -142,6 +142,9 @@ export const businessSchema = z
     name: z.string().min(2, "Indica o nome do negócio."),
 
     category_id: z.string().min(1, "Selecione uma categoria válida."),
+    specialtyIds: z
+      .array(z.string().uuid())
+      .max(4, "Seleciona no máximo 4 especialidades."),
 
     description: z
       .string()

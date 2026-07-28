@@ -5,6 +5,7 @@ import { Crown, MapPin, Phone, Store } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { BusinessSpecialtyChips } from "@/components/business/BusinessSpecialtyChips";
 
 import type { BusinessSummary } from "@/types/business";
 
@@ -58,6 +59,8 @@ export default function BusinessCard({ business }: Props) {
                   {business.category.name}
                 </p>
               )}
+
+              <BusinessSpecialtyChips specialties={business.specialties} />
             </div>
           </div>
 

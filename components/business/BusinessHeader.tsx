@@ -9,6 +9,7 @@ import { BusinessCategorySummary } from "@/types/business";
 import FavoriteButton from "./FavoriteButton";
 import { Crown, Pencil } from "lucide-react";
 import ShareButton from "./ShareButton";
+import { BusinessSpecialtyChips } from "./BusinessSpecialtyChips";
 
 type BusinessHeaderProps = {
   business: {
@@ -21,12 +22,14 @@ type BusinessHeaderProps = {
     category: BusinessCategorySummary | null;
   };
   businessUrl: string;
+  specialties?: { id: string; name: string; slug: string }[];
   isBusinessOwner?: boolean;
 };
 
 export function BusinessHeader({
   business,
   businessUrl,
+  specialties = [],
   isBusinessOwner = false
 }: BusinessHeaderProps) {
   return (
@@ -56,6 +59,11 @@ export function BusinessHeader({
                     {business.category.name}
                   </p>
                 )}
+
+                <BusinessSpecialtyChips
+                  specialties={specialties}
+                  limit={4}
+                />
               </div>
 
               <div className="absolute right-0 top-0 flex items-center gap-2">

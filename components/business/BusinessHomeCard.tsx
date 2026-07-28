@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Building2, Crown, MapPin } from "lucide-react";
 
 import FavoriteButton from "@/components/business/FavoriteButton";
+import { BusinessSpecialtyChips } from "@/components/business/BusinessSpecialtyChips";
 import { Badge } from "@/components/ui/badge";
 
 import type { PublicBusiness } from "@/types/business";
@@ -62,6 +63,8 @@ export default function BusinessHomeCard({
           <h2 className="mt-1 line-clamp-1 text-lg font-semibold transition-colors group-hover:text-primary">
             {business.name}
           </h2>
+
+          <BusinessSpecialtyChips specialties={business.specialties} />
 
           {business.description && (
             <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">

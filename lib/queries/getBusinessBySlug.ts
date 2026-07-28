@@ -50,6 +50,12 @@ export type BusinessServiceArea = {
   name: string;
 };
 
+export type BusinessSpecialty = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 export type GetBusinessBySlugResult = {
   business: PublicBusinessDetails;
   images: BusinessImage[];
@@ -57,6 +63,7 @@ export type GetBusinessBySlugResult = {
   faqs: BusinessFaq[];
   services: BusinessService[];
   serviceAreas: BusinessServiceArea[];
+  specialties: BusinessSpecialty[];
 };
 
 type BusinessRow = {
@@ -167,9 +174,9 @@ export async function getBusinessBySlug({
     hoursResult,
     faqsResult,
     servicesResult,
-    serviceAreasResult
-  ] =
-    await Promise.all([
+    serviceAreasResult,
+    specialtiesResult
+  ] = await Promise.all([
     supabase
       .from("business_images")
       .select("id, url, position")
@@ -201,6 +208,11 @@ export async function getBusinessBySlug({
     supabase
       .from("business_service_areas")
       .select("area_slug")
+      .eq("business_id", business.id),
+
+    supabase
+      .from("business_specialties")
+      .select("specialty:specialties(id, name, slug)")
       .eq("business_id", business.id)
     ]);
 
@@ -225,6 +237,10 @@ export async function getBusinessBySlug({
       "Erro ao obter as áreas de atuação:",
       serviceAreasResult.error
     );
+  }
+
+  if (specialtiesResult.error) {
+    console.error("Erro ao obter as especialidades:", specialtiesResult.error);
   }
 
   const images: BusinessImage[] = (imagesResult.data ?? []).map((image) => ({
@@ -266,6 +282,13 @@ export async function getBusinessBySlug({
   const serviceAreas: BusinessServiceArea[] = MARGEM_SUL_SERVICE_AREAS.filter(
     (area) => selectedAreaSlugs.has(area.slug)
   ).map((area) => ({ ...area }));
+  const specialties: BusinessSpecialty[] = (specialtiesResult.data ?? [])
+    .map((item) =>
+      Array.isArray(item.specialty)
+        ? (item.specialty[0] ?? null)
+        : item.specialty
+    )
+    .filter((item): item is BusinessSpecialty => Boolean(item));
 
   return {
     business: {
@@ -295,6 +318,7 @@ export async function getBusinessBySlug({
     hours,
     faqs,
     services,
-    serviceAreas
+    serviceAreas,
+    specialties
   };
 }

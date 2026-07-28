@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import type { PublicBusiness } from "@/types/business";
 import { Routes } from "@/types";
+import { BusinessSpecialtyChips } from "@/components/business/BusinessSpecialtyChips";
 
 type Props = {
   businesses: PublicBusiness[];
@@ -82,6 +83,11 @@ export default function NewBusinesses({ businesses }: Props) {
                   <h3 className="mt-1 truncate text-lg font-semibold transition-colors group-hover:text-primary">
                     {business.name}
                   </h3>
+
+                  <BusinessSpecialtyChips
+                    specialties={business.specialties}
+                    className="mt-2 flex flex-wrap gap-1.5"
+                  />
 
                   {business.description && (
                     <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">

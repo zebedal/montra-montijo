@@ -107,10 +107,14 @@ export default function CategoryBusinessesView({
           )}
 
           <section className="mt-16 border-t pt-12">
-            <h2 className="text-2xl font-bold">Outros {categoryName}</h2>
+            <h2 className="text-2xl font-bold">
+              {premiumBusinesses.length > 0
+                ? "Mais negócios nesta categoria"
+                : "Negócios nesta categoria"}
+            </h2>
 
             <p className="text-muted-foreground">
-              Conheça outros negócios nesta categoria.
+              Explore as opções disponíveis na Montra Montijo.
             </p>
 
             <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-3">

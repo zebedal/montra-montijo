@@ -43,12 +43,14 @@ export async function generateMetadata({
   const page = parsePage(pageParam);
 
   const title =
-    page > 1 ? `Negócios no Montijo — Página ${page}` : "Negócios no Montijo";
+    page > 1
+      ? `Diretório de negócios no Montijo — Página ${page}`
+      : "Diretório de negócios locais no Montijo";
 
   const description =
     page > 1
       ? `Descubra empresas, lojas, restaurantes e serviços locais no Montijo. Consulte a página ${page} do diretório Montra Montijo.`
-      : "Descubra empresas, lojas, restaurantes e serviços locais no Montijo. Encontre negócios perto de si na Montra Montijo.";
+      : "Explore o diretório de negócios locais do Montijo. Encontre restaurantes, lojas, empresas e serviços com contactos, moradas e horários.";
 
   const canonical = page > 1 ? `/negocios?page=${page}` : "/negocios";
 
@@ -98,7 +100,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
   return (
     <>
       <CollectionPageJsonLd
-        name="Negócios no Montijo"
+        name="Diretório de negócios locais no Montijo"
         description="Diretório de empresas, serviços e comércio local do concelho do Montijo."
         url={`${siteUrl}/negocios`}
         items={businesses.map((business) => ({
@@ -123,17 +125,17 @@ export default async function BusinessesPage({ searchParams }: Props) {
           <PageContainer className="relative flex min-h-85 items-center py-16">
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
-                Comércio Local
+                Diretório local
               </p>
 
               <h1 className="mt-3 text-4xl font-bold tracking-tight text-white lg:text-5xl">
-                Negócios no Montijo
+                Diretório de negócios no Montijo
               </h1>
 
               <p className="mt-5 max-w-2xl text-md leading-7 text-white/90">
-                Descubra o comércio local do Montijo através de um diretório com
-                empresas, negócios e serviços da região. Encontre contactos,
-                localização e informação útil num só lugar.
+                Descubra restaurantes, lojas, empresas e serviços do comércio
+                local. Consulte contactos, moradas, horários e informação útil
+                num só lugar.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -164,7 +166,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
                 id="businesses-heading"
                 className="text-2xl font-bold tracking-tight sm:text-3xl"
               >
-                Explorar negócios
+                Explorar o diretório
               </h2>
 
               <p className="mt-2 text-sm text-muted-foreground">
