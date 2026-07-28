@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import {
   sendMonthlyFreeBusinessReportEmail,
+  type MonthlyReportInsights,
   type MonthlyReportRecommendation
 } from "@/lib/resend/sendMonthlyFreeBusinessReportEmail";
 import { sendMonthlyFreeBusinessReportEmailOnce } from "@/lib/resend/sendMonthlyFreeBusinessReportEmailOnce";
@@ -23,6 +24,21 @@ type FreeBusiness = {
   email: string | null;
   website: string | null;
   is_24_hours: boolean;
+  plan: "free" | "premium";
+};
+
+type TrackedEvent = {
+  event_type: string;
+  created_at: string;
+};
+
+const ACTION_LABELS: Record<string, string> = {
+  phone_click: "Telefone e WhatsApp",
+  email_click: "Email",
+  website_click: "Website",
+  instagram_click: "Instagram",
+  facebook_click: "Facebook",
+  directions_click: "Morada e indicações"
 };
 
 type MonthlyPeriod = {
@@ -72,6 +88,28 @@ function getPreviousMonthPeriod(referenceDate = new Date()): MonthlyPeriod {
   };
 }
 
+function getCurrentMonthToDatePeriod(
+  referenceDate = new Date()
+): MonthlyPeriod {
+  const start = new Date(
+    Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), 1)
+  );
+
+  return {
+    key: `${start.getUTCFullYear()}-${String(start.getUTCMonth() + 1).padStart(
+      2,
+      "0"
+    )}`,
+    label: `${new Intl.DateTimeFormat("pt-PT", {
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC"
+    }).format(start)} (até ao momento)`,
+    start,
+    end: referenceDate
+  };
+}
+
 async function getAllEligibleBusinesses(): Promise<FreeBusiness[]> {
   const businesses: FreeBusiness[] = [];
   let from = 0;
@@ -82,9 +120,8 @@ async function getAllEligibleBusinesses(): Promise<FreeBusiness[]> {
     const { data, error } = await supabaseAdmin
       .from("businesses")
       .select(
-        "id, user_id, name, slug, description, logo_url, phone, email, website, is_24_hours"
+        "id, user_id, name, slug, description, logo_url, phone, email, website, is_24_hours, plan"
       )
-      .eq("plan", "free")
       .eq("is_visible", true)
       .not("user_id", "is", null)
       .order("id", {
@@ -114,48 +151,171 @@ async function getBusinessActivity(
   businessId: string,
   period: MonthlyPeriod
 ) {
-  const baseQuery = () =>
-    supabaseAdmin
-      .from("business_events")
-      .select("id", {
-        count: "exact",
-        head: true
-      })
-      .eq("business_id", businessId)
-      .gte("created_at", period.start.toISOString())
-      .lt("created_at", period.end.toISOString());
+  const { data, error } = await supabaseAdmin
+    .from("business_events")
+    .select("event_type, created_at")
+    .eq("business_id", businessId)
+    .gte("created_at", period.start.toISOString())
+    .lt("created_at", period.end.toISOString())
+    .order("created_at", { ascending: true });
 
-  const [pageViewsResult, interactionsResult, directionsClicksResult] =
-    await Promise.all([
-      baseQuery().eq("event_type", "page_view"),
-      baseQuery().neq("event_type", "page_view"),
-      baseQuery().eq("event_type", "directions_click")
-    ]);
-
-  if (
-    pageViewsResult.error ||
-    interactionsResult.error ||
-    directionsClicksResult.error
-  ) {
+  if (error) {
     console.error("Erro ao calcular atividade mensal:", {
       businessId,
-      pageViewsError: pageViewsResult.error,
-      interactionsError: interactionsResult.error,
-      directionsClicksError: directionsClicksResult.error
+      error
     });
 
     throw new Error("Não foi possível calcular a atividade mensal.");
   }
 
+  const events = (data ?? []) as TrackedEvent[];
+  const breakdown: Record<string, number> = Object.fromEntries(
+    Object.keys(ACTION_LABELS).map((eventType) => [eventType, 0])
+  );
+  const weekdayTotals = new Map<string, number>();
+  const weeklyPageViews = [0, 0, 0, 0, 0];
+  let pageViews = 0;
+  let interactions = 0;
+
+  events.forEach((event) => {
+    const date = new Date(event.created_at);
+    const localParts = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      timeZone: "Europe/Lisbon"
+    }).formatToParts(date);
+    const dayOfMonth = Number(
+      localParts.find((part) => part.type === "day")?.value ?? 1
+    );
+    const weekday = new Intl.DateTimeFormat("pt-PT", {
+      weekday: "long",
+      timeZone: "Europe/Lisbon"
+    }).format(date);
+
+    weekdayTotals.set(weekday, (weekdayTotals.get(weekday) ?? 0) + 1);
+
+    if (event.event_type === "page_view") {
+      pageViews += 1;
+      const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 4);
+      weeklyPageViews[weekIndex] += 1;
+      return;
+    }
+
+    interactions += 1;
+    breakdown[event.event_type] = (breakdown[event.event_type] ?? 0) + 1;
+  });
+
+  const topAction = Object.entries(breakdown).sort(
+    ([, countA], [, countB]) => countB - countA
+  )[0];
+  const busiestDay = [...weekdayTotals.entries()].sort(
+    ([, countA], [, countB]) => countB - countA
+  )[0];
+
   return {
-    pageViews: pageViewsResult.count ?? 0,
-    interactions: interactionsResult.count ?? 0,
-    directionsClicks: directionsClicksResult.count ?? 0
+    pageViews,
+    interactions,
+    directionsClicks: breakdown.directions_click ?? 0,
+    breakdown,
+    topAction:
+      topAction && topAction[1] > 0
+        ? {
+            label: ACTION_LABELS[topAction[0]] ?? topAction[0],
+            count: topAction[1]
+          }
+        : null,
+    busiestDay:
+      busiestDay && busiestDay[1] > 0
+        ? {
+            label:
+              busiestDay[0].charAt(0).toUpperCase() + busiestDay[0].slice(1),
+            count: busiestDay[1]
+          }
+        : null,
+    weeklyPageViews
+  };
+}
+
+function getPreviousPeriod(period: MonthlyPeriod): MonthlyPeriod {
+  const start = new Date(
+    Date.UTC(period.start.getUTCFullYear(), period.start.getUTCMonth() - 1, 1)
+  );
+  const isCompleteCalendarMonth =
+    period.end.getUTCDate() === 1 &&
+    period.end.getUTCHours() === 0 &&
+    period.end.getUTCMinutes() === 0;
+  const elapsedTime = period.end.getTime() - period.start.getTime();
+  const fullPreviousMonthEnd = period.start.getTime();
+  const end = isCompleteCalendarMonth
+    ? new Date(fullPreviousMonthEnd)
+    : new Date(Math.min(start.getTime() + elapsedTime, fullPreviousMonthEnd));
+
+  return {
+    key: `${start.getUTCFullYear()}-${String(start.getUTCMonth() + 1).padStart(
+      2,
+      "0"
+    )}`,
+    label: new Intl.DateTimeFormat("pt-PT", {
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC"
+    }).format(start),
+    start,
+    end
+  };
+}
+
+function getChangePercent(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : null;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function buildInsights(
+  activity: Awaited<ReturnType<typeof getBusinessActivity>>,
+  previousActivity: Awaited<ReturnType<typeof getBusinessActivity>>
+): MonthlyReportInsights {
+  const milestone =
+    activity.pageViews >= 500
+      ? "Mais de 500 visualizações neste período"
+      : activity.pageViews >= 100
+        ? "Mais de 100 visualizações neste período"
+        : activity.interactions >= 25
+          ? "Mais de 25 ações de potenciais clientes"
+          : activity.directionsClicks >= 10
+            ? "10 ou mais consultas à localização"
+            : null;
+
+  return {
+    previousPageViews: previousActivity.pageViews,
+    previousInteractions: previousActivity.interactions,
+    pageViewsChangePercent: getChangePercent(
+      activity.pageViews,
+      previousActivity.pageViews
+    ),
+    interactionsChangePercent: getChangePercent(
+      activity.interactions,
+      previousActivity.interactions
+    ),
+    engagementRate:
+      activity.pageViews > 0
+        ? Math.round((activity.interactions / activity.pageViews) * 1000) / 10
+        : 0,
+    breakdown: Object.entries(ACTION_LABELS).map(([eventType, label]) => ({
+      label,
+      count: activity.breakdown[eventType] ?? 0
+    })),
+    topAction: activity.topAction,
+    busiestDay: activity.busiestDay,
+    weeklyPageViews: activity.weeklyPageViews.map((count, index) => ({
+      label: `Semana ${index + 1}`,
+      count
+    })),
+    milestone
   };
 }
 
 async function getBusinessProfileRecommendations(
-  business: FreeBusiness
+  business: FreeBusiness,
+  activity?: Awaited<ReturnType<typeof getBusinessActivity>>
 ): Promise<MonthlyReportRecommendation[]> {
   const [imagesResult, hoursResult] = await Promise.all([
     supabaseAdmin
@@ -186,11 +346,47 @@ async function getBusinessProfileRecommendations(
 
   const recommendations: MonthlyReportRecommendation[] = [];
 
+  if (
+    activity &&
+    activity.pageViews >= 5 &&
+    activity.interactions === 0
+  ) {
+    recommendations.push({
+      title: "Facilite o próximo passo",
+      description:
+        "A página recebeu visualizações, mas ainda não gerou ações. Confirme os contactos e apresente claramente como o cliente pode falar consigo.",
+      ctaLabel: "Rever contactos"
+    });
+  }
+
+  if (
+    activity?.topAction?.label === "Morada e indicações" &&
+    (imagesResult.count ?? 0) < 2
+  ) {
+    recommendations.push({
+      title: "Ajude os clientes a reconhecer o local",
+      description:
+        "A localização foi a ação mais procurada. Adicione uma fotografia da fachada ou da entrada do negócio.",
+      ctaLabel: "Adicionar fotografia"
+    });
+  }
+
+  if (
+    activity?.topAction?.label === "Instagram" ||
+    activity?.topAction?.label === "Facebook"
+  ) {
+    recommendations.push({
+      title: "Aproveite o interesse nas redes sociais",
+      description: `${activity.topAction.label} foi o canal mais procurado. Confirme que o endereço está atualizado e que o perfil apresenta informação recente.`,
+      ctaLabel: "Rever redes sociais"
+    });
+  }
+
   if ((imagesResult.count ?? 0) === 0) {
     recommendations.push({
       title: "Adicione fotografias",
       description:
-        "O negócio está a receber visualizações, mas ainda não apresenta fotografias do espaço, produtos ou serviços.",
+        "Mostre o espaço, os produtos ou os serviços para tornar a página mais apelativa a potenciais clientes.",
       ctaLabel: "Adicionar fotografias"
     });
   }
@@ -243,13 +439,19 @@ async function processBusinessReport({
   period: MonthlyPeriod;
   dryRun: boolean;
 }): Promise<BusinessReportResult> {
-  const activity = await getBusinessActivity(business.id, period);
+  const [activity, previousActivity] = await Promise.all([
+    getBusinessActivity(business.id, period),
+    getBusinessActivity(business.id, getPreviousPeriod(period))
+  ]);
 
   if (activity.pageViews === 0 && activity.interactions === 0) {
     return "no_activity";
   }
 
-  const recommendations = await getBusinessProfileRecommendations(business);
+  const recommendations = await getBusinessProfileRecommendations(
+    business,
+    activity
+  );
 
   const {
     data: { user },
@@ -288,6 +490,8 @@ async function processBusinessReport({
     pageViews: activity.pageViews,
     interactions: activity.interactions,
     directionsClicks: activity.directionsClicks,
+    plan: business.plan,
+    insights: buildInsights(activity, previousActivity),
     recommendations
   });
 
@@ -478,10 +682,16 @@ export async function POST(request: NextRequest) {
       recipientEmail = adminUser.email;
     }
 
-    const period = getPreviousMonthPeriod();
-    const activity = await getBusinessActivity(business.id, period);
+    // O teste deve permitir validar interações acabadas de realizar. O envio
+    // mensal automático continua a usar o mês anterior, já encerrado.
+    const period = getCurrentMonthToDatePeriod();
+    const [activity, previousActivity] = await Promise.all([
+      getBusinessActivity(business.id, period),
+      getBusinessActivity(business.id, getPreviousPeriod(period))
+    ]);
     const recommendations = await getBusinessProfileRecommendations(
-      business as FreeBusiness
+      business as FreeBusiness,
+      activity
     );
 
     await sendMonthlyFreeBusinessReportEmail({
@@ -493,6 +703,8 @@ export async function POST(request: NextRequest) {
       interactions: activity.interactions,
       directionsClicks: activity.directionsClicks,
       businessId: business.id,
+      plan: business.plan,
+      insights: buildInsights(activity, previousActivity),
       recommendations,
       isTest: true
     });

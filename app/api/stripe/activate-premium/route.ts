@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         id,
         name,
         plan,
+        is_visible,
         stripe_subscription_id
       `
       )
@@ -48,6 +49,16 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Negócio não encontrado." },
         { status: 404 }
+      );
+    }
+
+    if (
+      !business.is_visible &&
+      (!process.env.ADMIN_USER_ID || user.id !== process.env.ADMIN_USER_ID)
+    ) {
+      return NextResponse.json(
+        { error: "Apenas o administrador pode ativar Premium num negócio oculto." },
+        { status: 403 }
       );
     }
 

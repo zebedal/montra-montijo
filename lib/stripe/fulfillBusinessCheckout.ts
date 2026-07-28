@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 
 import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
+import { sendNewBusinessNotificationEmailOnce } from "@/lib/resend/sendNewBusinessNotificationEmailOnce";
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -224,6 +225,15 @@ async function trySendBusinessPublishedEmail(businessId: string) {
         userId: business.user_id
       }
     );
+
+    await sendNewBusinessNotificationEmailOnce({
+      userId: business.user_id,
+      businessId: business.id,
+      businessName: business.name,
+      businessSlug: business.slug,
+      creatorEmail: user.email,
+      plan: business.plan
+    });
   } catch (emailError) {
     /*
      * O negócio já foi publicado.

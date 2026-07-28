@@ -54,6 +54,7 @@ export default function MyBusinessCard({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isSendingTestReport, setIsSendingTestReport] = useState(false);
   const router = useRouter();
+  const canManagePremium = business.is_visible || canSendTestReport;
 
   function handleStatisticsClick() {
     setDropdownOpen(false);
@@ -253,7 +254,7 @@ export default function MyBusinessCard({
                   </Link>
                 </DropdownMenuItem>
 
-                {business.is_visible && (
+                {canManagePremium && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

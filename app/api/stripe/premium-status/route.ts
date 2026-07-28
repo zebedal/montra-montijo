@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { activateExistingBusinessCheckout } from "@/lib/stripe/activateExistingBusinessCheckout";
+import { stripe } from "@/lib/stripe/server";
 
 export async function GET(request: NextRequest) {
   const businessId = request.nextUrl.searchParams.get("business_id");
+  const sessionId = request.nextUrl.searchParams.get("session_id");
 
   if (!businessId) {
     return NextResponse.json(
@@ -76,6 +79,36 @@ export async function GET(request: NextRequest) {
     business.plan !== "premium" ||
     business.subscription_status !== "active"
   ) {
+    if (sessionId) {
+      try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+        if (
+          session.metadata?.businessId !== businessId ||
+          session.metadata?.userId !== user.id
+        ) {
+          return NextResponse.json(
+            { error: "A sessão de pagamento não corresponde a este negócio." },
+            { status: 403 }
+          );
+        }
+
+        const activatedBusiness =
+          await activateExistingBusinessCheckout(session);
+
+        return NextResponse.json({
+          status: "completed",
+          businessId: activatedBusiness.id,
+          businessSlug: activatedBusiness.slug
+        });
+      } catch (reconciliationError) {
+        console.error(
+          "A ativação Premium ainda não pôde ser reconciliada:",
+          reconciliationError
+        );
+      }
+    }
+
     return NextResponse.json({
       status: "processing"
     });

@@ -77,6 +77,7 @@ export type PublicBusinessDetails = {
   latitude: number | null;
   longitude: number | null;
   is_24_hours: boolean;
+  is_visible: boolean;
   plan: "free" | "premium";
   category: BusinessCategorySummary | null;
 };
@@ -85,6 +86,7 @@ export type SubscriptionBusiness = {
   id: string;
   name: string;
   plan: "free" | "premium";
+  is_visible: boolean;
   stripe_subscription_id?: string | null;
   subscription_status?: string | null;
   cancel_at_period_end?: boolean | null;

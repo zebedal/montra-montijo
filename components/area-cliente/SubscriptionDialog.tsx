@@ -165,6 +165,13 @@ export default function SubscriptionDialog({
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            {!business.is_visible && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                Este é um negócio de teste oculto. A ativação do Premium não o
+                tornará público.
+              </div>
+            )}
+
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-primary/10 p-2">

@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   sendMonthlyFreeBusinessReportEmail,
+  type MonthlyReportInsights,
   type MonthlyReportRecommendation
 } from "@/lib/resend/sendMonthlyFreeBusinessReportEmail";
 import {
@@ -21,6 +22,8 @@ type SendMonthlyFreeBusinessReportEmailOnceParams = {
   pageViews: number;
   interactions: number;
   directionsClicks: number;
+  plan: "free" | "premium";
+  insights: MonthlyReportInsights;
   recommendations: MonthlyReportRecommendation[];
 };
 
@@ -40,6 +43,8 @@ export async function sendMonthlyFreeBusinessReportEmailOnce({
   pageViews,
   interactions,
   directionsClicks,
+  plan,
+  insights,
   recommendations
 }: SendMonthlyFreeBusinessReportEmailOnceParams): Promise<SendMonthlyFreeBusinessReportEmailOnceResult> {
   const emailType = `monthly_free_business_report:${periodKey}`;
@@ -72,6 +77,8 @@ export async function sendMonthlyFreeBusinessReportEmailOnce({
     interactions,
     directionsClicks,
     businessId,
+    plan,
+    insights,
     recommendations,
     unsubscribeUrl: `${getMonthlyReportSiteUrl()}/cancelar-relatorios?token=${encodeURIComponent(
       createMonthlyReportUnsubscribeToken(userId)

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { moveDraftAssets, publishBusiness } from "@/lib/helpers";
 import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
+import { sendNewBusinessNotificationEmailOnce } from "@/lib/resend/sendNewBusinessNotificationEmailOnce";
 import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -112,6 +113,24 @@ export async function POST(req: Request) {
       } catch (emailError) {
         console.error(
           "Negócio publicado, mas falhou o email de publicação:",
+          emailError
+        );
+      }
+    }
+
+    if (!isHiddenTestBusiness) {
+      try {
+        await sendNewBusinessNotificationEmailOnce({
+          userId: user.id,
+          businessId: publishedBusiness.id,
+          businessName: draft.data.form.name,
+          businessSlug: publishedBusiness.slug,
+          creatorEmail: user.email,
+          plan: isFeatured ? "premium" : "free"
+        });
+      } catch (emailError) {
+        console.error(
+          "Negócio publicado, mas falhou a notificação administrativa:",
           emailError
         );
       }

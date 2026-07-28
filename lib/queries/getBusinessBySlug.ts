@@ -86,6 +86,7 @@ type BusinessRow = {
   latitude: number | null;
   longitude: number | null;
   is_24_hours: boolean;
+  is_visible: boolean;
   plan: string;
   categories: BusinessCategory | BusinessCategory[] | null;
 };
@@ -132,6 +133,7 @@ export async function getBusinessBySlug({
         latitude,
         longitude,
         is_24_hours,
+        is_visible,
         plan,
         categories (
           id,
@@ -311,6 +313,7 @@ export async function getBusinessBySlug({
       latitude: business.latitude,
       longitude: business.longitude,
       is_24_hours: business.is_24_hours,
+      is_visible: business.is_visible,
       plan: business.plan === "premium" ? "premium" : "free",
       category: normalizeCategory(business.categories)
     },

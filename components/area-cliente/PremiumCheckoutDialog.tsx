@@ -46,6 +46,7 @@ export default function PremiumCheckoutDialog() {
 
   const premiumStatus = searchParams.get("premium");
   const businessId = searchParams.get("business_id");
+  const sessionId = searchParams.get("session_id");
 
   const [dialogState, setDialogState] = useState<DialogState>("closed");
 
@@ -79,7 +80,7 @@ export default function PremiumCheckoutDialog() {
         const response = await fetch(
           `/api/stripe/premium-status?business_id=${encodeURIComponent(
             businessId!
-          )}`,
+          )}${sessionId ? `&session_id=${encodeURIComponent(sessionId)}` : ""}`,
           {
             cache: "no-store"
           }
@@ -141,7 +142,7 @@ export default function PremiumCheckoutDialog() {
         clearTimeout(timeoutId);
       }
     };
-  }, [businessId, premiumStatus, router]);
+  }, [businessId, premiumStatus, router, sessionId]);
 
   function clearCheckoutParams() {
     const params = new URLSearchParams(searchParams.toString());
