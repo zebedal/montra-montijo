@@ -933,7 +933,8 @@ type ActivatePremiumResponse = {
 };
 
 export async function activateBusinessPremium(
-  businessId: string
+  businessId: string,
+  plan: "featured" | "premium" = "featured"
 ): Promise<void> {
   const response = await fetch("/api/stripe/activate-premium", {
     method: "POST",
@@ -941,7 +942,8 @@ export async function activateBusinessPremium(
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      businessId
+      businessId,
+      plan
     })
   });
 
@@ -952,6 +954,16 @@ export async function activateBusinessPremium(
   }
 
   window.location.assign(result.url);
+}
+
+export async function upgradeBusinessToPremium(businessId: string) {
+  const response = await fetch("/api/stripe/upgrade-premium", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ businessId })
+  });
+  const result = (await response.json()) as { error?: string };
+  if (!response.ok) throw new Error(result.error ?? "Não foi possível atualizar para Premium.");
 }
 
 function normalizeSlug(value: string) {

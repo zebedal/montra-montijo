@@ -10,7 +10,7 @@ type FavoriteBusinessRow = {
   description: string | null;
   logo_url: string | null;
   city: string | null;
-  plan: "free" | "premium";
+  plan: "free" | "featured" | "premium";
 
   category: {
     name: string;

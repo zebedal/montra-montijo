@@ -1,10 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
-import { ChevronRight, Shapes } from "lucide-react";
-import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Shapes } from "lucide-react";
+
+import PageContainer from "@/components/PageContainer";
 import { categoryIcons } from "@/lib/category-icons";
-import PageContainer from "../PageContainer";
 
 type Category = {
   id: string;
@@ -20,93 +22,93 @@ type PopularCategoriesProps = {
 export default function PopularCategories({
   categories
 }: PopularCategoriesProps) {
+  const reduceMotion = useReducedMotion();
+  const viewportAnimation = reduceMotion
+    ? { initial: false as const }
+    : {
+        initial: { opacity: 0.65, y: 16 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.2 }
+      };
+
   return (
-    <section className="mt-14">
+    <section className="py-14 sm:py-16">
       <PageContainer>
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">
-              Categorias Populares
-            </h2>
+        <motion.div
+          className="mb-7"
+          {...viewportAnimation}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Categorias populares
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            Explore negócios e serviços por categoria.
+          </p>
+        </motion.div>
 
-            <p className="mt-2 text-muted-foreground">
-              Explora negócios e serviços por categoria.
-            </p>
-          </div>
-
-          <Link
-            href="/categorias"
-            className="hidden items-center gap-1 text-sm font-medium text-primary transition hover:underline md:flex"
-          >
-            Ver todas
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {categories.map((category) => {
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {categories.map((category, index) => {
             const Icon = categoryIcons[category.slug] ?? Shapes;
 
             return (
-              <Link key={category.id} href={`/categorias/${category.slug}`}>
-                <Card className="group relative h-full overflow-hidden border-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                  <Image
-                    src={`/images/categorias/${category.slug}.jpg`}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
+              <motion.div
+                key={category.id}
+                {...viewportAnimation}
+                transition={{
+                  delay: reduceMotion ? 0 : Math.min(index * 0.045, 0.27),
+                  duration: 0.45,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
+              >
+                <Link
+                  href={`/categorias/${category.slug}`}
+                  className="group flex min-h-22 h-full items-center gap-3 rounded-2xl border border-foreground/10 bg-card p-4 transition-colors hover:border-green-300 hover:bg-green-50/70"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf3ee] text-green-800 transition-colors group-hover:bg-green-200/70">
+                    <Icon className="h-5 w-5" />
+                  </span>
 
-                  <div className="absolute inset-0 bg-linear-to-t from-[#0e1f17] via-[#111111]/80 to-black/40" />
-
-                  <CardContent className="relative z-10 flex h-full min-h-56 flex-col items-center justify-center gap-4 p-6 text-center">
-                    <div className="rounded-full border border-white/20 bg-white/10 p-4 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/15">
-                      <Icon className="h-7 w-7 text-primary-green transition-transform duration-300 group-hover:scale-110" />
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold leading-tight text-white drop-shadow-md">
-                        {category.name}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-white/80 drop-shadow">
-                        {category.businessCount} negócio
-                        {category.businessCount !== 1 && "s"}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  <span className="min-w-0">
+                    <span className="block line-clamp-2 text-sm font-semibold leading-5">
+                      {category.name}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {category.businessCount} negócio
+                      {category.businessCount !== 1 && "s"}
+                    </span>
+                  </span>
+                </Link>
+              </motion.div>
             );
           })}
 
-          <Link href="/categorias">
-            <Card className="h-full border-dashed transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-              <CardContent className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
-                <div className="rounded-full bg-muted p-4">
-                  <ChevronRight className="h-7 w-7" />
-                </div>
-
-                <div>
-                  <h3 className="font-semibold">Ver todas</h3>
-
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Explorar categorias
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+          <motion.div
+            {...viewportAnimation}
+            transition={{
+              delay: reduceMotion
+                ? 0
+                : Math.min(categories.length * 0.045, 0.27),
+              duration: 0.45,
+              ease: [0.22, 1, 0.36, 1]
+            }}
+          >
+            <Link
+              href="/categorias"
+              className="group flex min-h-22 h-full items-center gap-3 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-950 transition-colors hover:border-green-400 hover:bg-green-100"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold">Ver todas</span>
+                <span className="mt-0.5 block text-xs text-green-800/70">
+                  Explorar categorias
+                </span>
+              </span>
+            </Link>
+          </motion.div>
         </div>
-
-        <Link
-          href="/categorias"
-          className="mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary md:hidden"
-        >
-          Ver todas as categorias
-          <ChevronRight className="h-4 w-4" />
-        </Link>
       </PageContainer>
     </section>
   );

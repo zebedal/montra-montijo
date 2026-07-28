@@ -18,7 +18,7 @@ export default async function BusinessSuccessPage({ searchParams }: Props) {
     redirect(Routes.AREA_CLIENTE);
   }
 
-  let plan: "free" | "premium" = "free";
+  let plan: "free" | "featured" | "premium" = "free";
 
   if (businessId) {
     const supabase = await createClient();
@@ -34,8 +34,8 @@ export default async function BusinessSuccessPage({ searchParams }: Props) {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (business?.plan === "premium") {
-        plan = "premium";
+      if (business?.plan === "featured" || business?.plan === "premium") {
+        plan = business.plan;
       }
     }
   }

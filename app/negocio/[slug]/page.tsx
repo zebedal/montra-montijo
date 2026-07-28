@@ -187,7 +187,7 @@ export default async function BusinessPage({ params }: Props) {
     !business.user_id || business.user_id === process.env.ADMIN_USER_ID;
   const adminPreviewUserId = await getAdminPreviewUserId();
 
-  const canActivatePremium = isBusinessOwner && business.plan !== "premium";
+  const canActivatePremium = isBusinessOwner && business.plan === "free";
 
   const completedProfileItems = [
     (business.description?.trim().length ?? 0) >= 80,

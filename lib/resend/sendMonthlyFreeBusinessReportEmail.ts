@@ -31,7 +31,7 @@ type SendMonthlyFreeBusinessReportEmailParams = {
   interactions: number;
   directionsClicks: number;
   businessId: string;
-  plan?: "free" | "premium";
+  plan?: "free" | "featured" | "premium";
   insights?: MonthlyReportInsights;
   recommendations?: MonthlyReportRecommendation[];
   isTest?: boolean;

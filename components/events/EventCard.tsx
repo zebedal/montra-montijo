@@ -85,7 +85,7 @@ export default function EventCard({ event }: Props) {
           {event.title}
         </h2>
 
-        <div className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+        {/* <div className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
           <CalendarDays className="mt-0.5 h-4 w-4 shrink-0" />
 
           <span>{formatEventDate(event.eventDate)}</span>
@@ -94,7 +94,7 @@ export default function EventCard({ event }: Props) {
         <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4 shrink-0" />
           <span>Concelho do Montijo</span>
-        </div>
+        </div> */}
 
         {event.description && (
           <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted-foreground">
@@ -109,10 +109,6 @@ export default function EventCard({ event }: Props) {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-
-          <p className="mt-3 text-center text-xs text-muted-foreground">
-            Fonte: {event.sourceName}
-          </p>
         </div>
       </div>
     </article>

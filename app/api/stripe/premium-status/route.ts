@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (
-    business.plan !== "premium" ||
+    business.plan === "free" ||
     business.subscription_status !== "active"
   ) {
     if (sessionId) {

@@ -189,7 +189,7 @@ export async function getBusinessStatistics(
    * O campo plan permanece premium até ao fim do período pago,
    * mesmo que cancel_at_period_end seja true.
    */
-  if (business.plan !== "premium") {
+  if (business.plan === "free") {
     return {
       success: false,
       reason: "premium_required"

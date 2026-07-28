@@ -3,9 +3,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Building2, Crown, MapPin, Search, Tags } from "lucide-react";
+import { Building2, MapPin, Search, Tags } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -13,6 +12,7 @@ import {
   type SearchBusinessResult
 } from "@/lib/queries/searchBusinesses";
 import SearchAutocomplete from "@/components/search/SearchAutoComplete";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 
 type Props = {
   searchParams: Promise<{
@@ -257,11 +257,8 @@ export default async function SearchPage({ searchParams }: Props) {
                     </div>
                   )}
 
-                  {business.plan === "premium" && (
-                    <Badge className="absolute left-3 top-3 bg-yellow-600 text-white hover:bg-yellow-600">
-                      <Crown className="mr-1 h-3.5 w-3.5" />
-                      Premium
-                    </Badge>
+                  {business.plan !== "free" && (
+                    <BusinessPlanBadge plan={business.plan} className="absolute left-3 top-3" />
                   )}
                 </div>
 

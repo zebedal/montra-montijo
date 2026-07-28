@@ -75,7 +75,8 @@ export async function GET(req: NextRequest) {
     .select(
       `
         id,
-        slug
+        slug,
+        plan
       `
     )
     .eq("id", checkout.business_id)
@@ -111,6 +112,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     status: "completed",
     businessId: business.id,
-    businessSlug: business.slug
+    businessSlug: business.slug,
+    plan: business.plan
   });
 }

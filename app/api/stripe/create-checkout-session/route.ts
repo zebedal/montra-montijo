@@ -1,16 +1,32 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
+import type { PaidBusinessPlan } from "@/lib/business-plan";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
   const origin = new URL(req.url).origin;
 
   try {
-    const { draftId } = await req.json();
+    const { draftId, plan = "featured" } = (await req.json()) as {
+      draftId?: string;
+      plan?: PaidBusinessPlan;
+    };
 
     if (!draftId) {
       return NextResponse.json({ error: "Draft em falta." }, { status: 400 });
+    }
+
+    if (plan !== "featured" && plan !== "premium") {
+      return NextResponse.json({ error: "Plano inválido." }, { status: 400 });
+    }
+
+    const price =
+      plan === "premium"
+        ? process.env.STRIPE_PRICE_PREMIUM_CAMPAIGNS
+        : process.env.STRIPE_PRICE_DESTAQUE ?? process.env.STRIPE_PRICE_PREMIUM;
+    if (!price) {
+      return NextResponse.json({ error: "O preço deste plano não está configurado." }, { status: 503 });
     }
 
     const {
@@ -44,13 +60,14 @@ export async function POST(req: Request) {
 
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_PREMIUM!,
+          price,
           quantity: 1
         }
       ],
 
       metadata: {
-        draftId
+        draftId,
+        plan
       },
 
       success_url: `${origin}/criar-negocio/publicacao?session_id={CHECKOUT_SESSION_ID}`,

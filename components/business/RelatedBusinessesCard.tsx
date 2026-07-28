@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Crown, Store } from "lucide-react";
+import { Store } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 
 type Props = {
   business: {
@@ -13,7 +13,7 @@ type Props = {
     name: string;
     description: string | null;
     logoUrl: string | null;
-    plan: "free" | "premium";
+    plan: "free" | "featured" | "premium";
     category: {
       name: string;
       slug: string;
@@ -57,11 +57,8 @@ export default function RelatedBusinessCard({ business }: Props) {
                   </h3>
                 </div>
 
-                {business.plan === "premium" && (
-                  <Badge className="shrink-0 bg-yellow-600 text-white hover:bg-yellow-600">
-                    <Crown className="mr-1 h-3 w-3" />
-                    Premium
-                  </Badge>
+                {business.plan !== "free" && (
+                  <BusinessPlanBadge plan={business.plan} className="shrink-0" />
                 )}
               </div>
 

@@ -38,11 +38,13 @@ export const metadata: Metadata = {
 type Props = {
   searchParams: Promise<{
     restoreDraft?: string;
+    plan?: string;
   }>;
 };
 
 export default async function CriarNegocioPage({ searchParams }: Props) {
-  const { restoreDraft } = await searchParams;
+  const { restoreDraft, plan } = await searchParams;
+  const preferredPlan = plan === "featured" || plan === "premium" ? plan : null;
   return (
     <main className="min-h-screen bg-background px-4 py-10">
       <section className="mx-auto mb-10 max-w-3xl text-center">
@@ -60,7 +62,10 @@ export default async function CriarNegocioPage({ searchParams }: Props) {
         </p>
       </section>
 
-      <BusinessForm shouldRestoreDraft={restoreDraft === "true"} />
+      <BusinessForm
+        shouldRestoreDraft={restoreDraft === "true"}
+        preferredPlan={preferredPlan}
+      />
     </main>
   );
 }
