@@ -35,6 +35,12 @@ type BusinessRow = {
     url: string;
     position: number | null;
   }[];
+  specialties: {
+    specialty:
+      | { id: string; name: string; slug: string }
+      | { id: string; name: string; slug: string }[]
+      | null;
+  }[];
   category: CategoryRelation | CategoryRelation[] | null;
 };
 
@@ -79,6 +85,9 @@ export async function getPublicBusinesses({
         images:business_images (
           url,
           position
+        ),
+        specialties:business_specialties (
+          specialty:specialties (id, name, slug)
         ),
         category:categories (
           name,
@@ -131,6 +140,13 @@ export async function getPublicBusinesses({
       description: business.description,
       logoUrl: getPublicStorageUrl(business.logo_url),
       imageUrl: getPublicStorageUrl(firstImage?.url),
+      specialties: (business.specialties ?? [])
+        .map((item) =>
+          Array.isArray(item.specialty)
+            ? (item.specialty[0] ?? null)
+            : item.specialty
+        )
+        .filter((item): item is NonNullable<typeof item> => Boolean(item)),
       city: business.city,
       plan: business.plan === "premium" ? "premium" : "free",
       category: normalizeCategory(business.category)

@@ -1,5 +1,11 @@
 export type BusinessPlan = "free" | "premium";
 
+export type BusinessSpecialtySummary = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 export type BusinessCategorySummary = {
   id: string;
   name: string;
@@ -26,6 +32,7 @@ export type PublicBusinessSummary = {
 
 export type BusinessSummary = PublicBusinessSummary & {
   image_url?: string | null;
+  specialties?: BusinessSpecialtySummary[];
   is_visible: boolean;
   stripe_subscription_id: string | null;
   subscription_status: string | null;
@@ -41,6 +48,7 @@ export type PublicBusiness = {
   description: string | null;
   logoUrl: string | null;
   imageUrl?: string | null;
+  specialties?: BusinessSpecialtySummary[];
   city: string | null;
   plan: "free" | "premium";
   category: {

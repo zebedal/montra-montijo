@@ -46,6 +46,9 @@ export async function getBusinessesByCategory(
       images:business_images (
         url,
         position
+      ),
+      specialties:business_specialties (
+        specialty:specialties (id, name, slug)
       )
     `
     )
@@ -77,6 +80,13 @@ export async function getBusinessesByCategory(
       ...business,
       logo_url: getPublicStorageUrl(business.logo_url),
       image_url: getPublicStorageUrl(firstImage?.url),
+      specialties: (business.specialties ?? [])
+        .map((item) =>
+          Array.isArray(item.specialty)
+            ? (item.specialty[0] ?? null)
+            : item.specialty
+        )
+        .filter((item): item is NonNullable<typeof item> => Boolean(item)),
       category,
       stripe_subscription_id: business.stripe_subscription_id ?? null,
       subscription_status: business.subscription_status ?? null,

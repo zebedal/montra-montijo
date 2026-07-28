@@ -61,6 +61,38 @@ export async function updateMyBusiness(
     return null;
   }
 
+  const { error: deleteSpecialtiesError } = await supabase
+    .from("business_specialties")
+    .delete()
+    .eq("business_id", businessId);
+
+  if (deleteSpecialtiesError) {
+    console.error(
+      "Erro ao remover especialidades:",
+      deleteSpecialtiesError
+    );
+    return null;
+  }
+
+  if (data.specialtyIds.length > 0) {
+    const { error: insertSpecialtiesError } = await supabase
+      .from("business_specialties")
+      .insert(
+        data.specialtyIds.map((specialtyId) => ({
+          business_id: businessId,
+          specialty_id: specialtyId
+        }))
+      );
+
+    if (insertSpecialtiesError) {
+      console.error(
+        "Erro ao guardar especialidades:",
+        insertSpecialtiesError
+      );
+      return null;
+    }
+  }
+
   const { error: deleteHoursError } = await supabase
     .from("business_hours")
     .delete()

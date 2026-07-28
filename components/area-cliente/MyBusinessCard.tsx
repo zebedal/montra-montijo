@@ -118,7 +118,7 @@ export default function MyBusinessCard({
     <>
       <div className="rounded-2xl border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
         <div className="flex flex-col gap-6 md:flex-row md:items-center">
-          <div className="flex min-w-0 items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4 md:flex-1">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-muted">
               {business.logo_url ? (
                 <Image
@@ -133,9 +133,9 @@ export default function MyBusinessCard({
               )}
             </div>
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="truncate text-xl font-semibold">
+                <h2 className="min-w-0 max-w-full break-words text-xl font-semibold">
                   {business.name}
                 </h2>
 

@@ -163,7 +163,15 @@ export default async function BusinessPage({ params }: Props) {
     notFound();
   }
 
-  const { business, images, hours, faqs, services, serviceAreas } = result;
+  const {
+    business,
+    images,
+    hours,
+    faqs,
+    services,
+    serviceAreas,
+    specialties
+  } = result;
 
   const supabase = await createClient();
 
@@ -246,6 +254,7 @@ export default async function BusinessPage({ params }: Props) {
 
           <BusinessHeader
             business={business}
+            specialties={specialties}
             businessUrl={businessUrl}
             isBusinessOwner={isBusinessOwner}
           />
@@ -275,6 +284,7 @@ export default async function BusinessPage({ params }: Props) {
             isClaimable={isClaimable}
           />
           <BusinessMap
+            businessId={business.id}
             businessName={business.name}
             latitude={business.latitude}
             longitude={business.longitude}

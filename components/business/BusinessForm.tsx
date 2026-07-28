@@ -70,6 +70,10 @@ import { uploadBusinessLogo } from "@/lib/queries/updateBusinessLogo";
 import { supabase } from "@/lib/supabase/client";
 import { BUSINESS_LOCALITIES } from "@/lib/business-localities";
 import { MARGEM_SUL_SERVICE_AREAS } from "@/lib/service-areas";
+import {
+  getSpecialtiesForCategory,
+  type Specialty
+} from "@/lib/queries/getSpecialties";
 
 const PENDING_BUSINESS_FORM_KEY = "montra-pending-business-form";
 const PENDING_BUSINESS_FORM_NOTICE_KEY =
@@ -125,6 +129,7 @@ export default function BusinessForm({
         (initialData?.openingHours?.length ?? 0) > 0)
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [images, setImages] = useState<UploadImage[]>(
     mode === "edit" ? (initialImages ?? []) : []
   );
@@ -151,6 +156,7 @@ export default function BusinessForm({
     defaultValues: {
       name: initialData?.name ?? "",
       category_id: initialData?.category_id ?? "",
+      specialtyIds: initialData?.specialtyIds ?? [],
       description: initialData?.description ?? "",
       phone: initialData?.phone ?? "",
       allowWhatsApp: initialData?.allowWhatsApp ?? false,
@@ -211,6 +217,10 @@ export default function BusinessForm({
   const selectedCategoryId = useWatch({
     control,
     name: "category_id"
+  });
+  const selectedSpecialtyIds = useWatch({
+    control,
+    name: "specialtyIds"
   });
   const allowWhatsApp = useWatch({
     control,
@@ -536,6 +546,7 @@ export default function BusinessForm({
     reset({
       name: initialData.name ?? "",
       category_id: initialData.category_id ?? "",
+      specialtyIds: initialData.specialtyIds ?? [],
       description: initialData.description ?? "",
       phone: initialData.phone ?? "",
       allowWhatsApp: initialData.allowWhatsApp ?? false,
@@ -601,6 +612,7 @@ export default function BusinessForm({
         whatsappPhone: parsed.form.whatsappPhone ?? "",
         faqs: parsed.form.faqs ?? [],
         services: parsed.form.services ?? [],
+        specialtyIds: parsed.form.specialtyIds ?? [],
         is24Hours: parsed.form.is24Hours ?? false,
         servesAtCustomerLocation:
           parsed.form.servesAtCustomerLocation ?? false,
@@ -646,6 +658,34 @@ export default function BusinessForm({
       router.replace(CREATE_BUSINESS_ROUTE);
     }
   }, [mode, reset, router, shouldRestoreDraft]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!selectedCategoryId) {
+      return;
+    }
+
+    void getSpecialtiesForCategory(selectedCategoryId).then((items) => {
+      if (cancelled) return;
+
+      setSpecialties(items);
+      const allowedIds = new Set(items.map((item) => item.id));
+      const currentIds = getValues("specialtyIds");
+      const compatibleIds = currentIds.filter((id) => allowedIds.has(id));
+
+      if (compatibleIds.length !== currentIds.length) {
+        setValue("specialtyIds", compatibleIds, {
+          shouldDirty: true,
+          shouldValidate: true
+        });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getValues, selectedCategoryId, setValue]);
 
   useEffect(() => {
     if (!selectedCategoryId || categorias.length === 0) {
@@ -832,6 +872,63 @@ export default function BusinessForm({
                   )}
                 />
               </div>
+
+              {selectedCategoryId && specialties.length > 0 && (
+                <div className="space-y-3 rounded-xl border p-4">
+                  <div>
+                    <p className="text-sm font-medium">
+                      Especialidades (opcional)
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Seleciona até 4 para ajudar as pessoas a perceber o que
+                      distingue o negócio.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {specialties.map((specialty) => {
+                      const checked = selectedSpecialtyIds.includes(
+                        specialty.id
+                      );
+                      const limitReached =
+                        selectedSpecialtyIds.length >= 4 && !checked;
+
+                      return (
+                        <label
+                          key={specialty.id}
+                          className="flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors hover:bg-muted/50 has-checked:border-primary has-checked:bg-primary/5"
+                        >
+                          <Checkbox
+                            checked={checked}
+                            disabled={limitReached}
+                            onCheckedChange={(nextChecked) => {
+                              setValue(
+                                "specialtyIds",
+                                nextChecked === true
+                                  ? [...selectedSpecialtyIds, specialty.id]
+                                  : selectedSpecialtyIds.filter(
+                                      (id) => id !== specialty.id
+                                    ),
+                                {
+                                  shouldDirty: true,
+                                  shouldValidate: true
+                                }
+                              );
+                            }}
+                          />
+                          <span>{specialty.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {errors.specialtyIds && (
+                    <p className="text-sm text-red-500">
+                      {errors.specialtyIds.message}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <Textarea
                 placeholder="Descrição *"

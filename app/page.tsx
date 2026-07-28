@@ -81,6 +81,12 @@ type BusinessRow = {
     url: string;
     position: number | null;
   }[];
+  specialties: {
+    specialty:
+      | { id: string; name: string; slug: string }
+      | { id: string; name: string; slug: string }[]
+      | null;
+  }[];
   category: {
     name: string;
     slug: string;
@@ -99,6 +105,13 @@ function mapBusiness(business: BusinessRow): PublicBusiness {
     description: business.description,
     logoUrl: getPublicStorageUrl(business.logo_url),
     imageUrl: getPublicStorageUrl(firstImage?.url),
+    specialties: (business.specialties ?? [])
+      .map((item) =>
+        Array.isArray(item.specialty)
+          ? (item.specialty[0] ?? null)
+          : item.specialty
+      )
+      .filter((item): item is NonNullable<typeof item> => Boolean(item)),
     city: business.city,
     plan: business.plan,
     category: business.category
@@ -118,13 +131,13 @@ export default async function Home() {
   let featuredQuery = supabase
     .from("businesses")
     .select(
-      `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),category:categories(name,slug)`
+      `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),specialties:business_specialties(specialty:specialties(id,name,slug)),category:categories(name,slug)`
     )
     .eq("plan", "premium");
   let newestQuery = supabase
     .from("businesses")
     .select(
-      `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),category:categories(name,slug)`
+      `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),specialties:business_specialties(specialty:specialties(id,name,slug)),category:categories(name,slug)`
     );
 
   if (adminPreviewUserId) {

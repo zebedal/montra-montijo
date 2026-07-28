@@ -209,6 +209,21 @@ export async function publishBusiness({
     console.log("Insert error:", insertError);
     if (insertError) throw insertError;
 
+    const specialtyIds = form.specialtyIds ?? [];
+
+    if (specialtyIds.length > 0) {
+      const { error: specialtiesError } = await supabaseAdmin
+        .from("business_specialties")
+        .insert(
+          specialtyIds.map((specialtyId) => ({
+            business_id: businessId,
+            specialty_id: specialtyId
+          }))
+        );
+
+      if (specialtiesError) throw specialtiesError;
+    }
+
     /**
      * IMAGES
      */
