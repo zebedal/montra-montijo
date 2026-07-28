@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Crown, MapPin, Phone, Store } from "lucide-react";
+import { Crown, MapPin, Megaphone, Phone, Store } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,6 +58,13 @@ export default function BusinessCard({ business }: Props) {
                 <p className="mt-1 text-sm text-primary-green">
                   {business.category.name}
                 </p>
+              )}
+
+              {business.hasActiveCampaign && (
+                <Badge variant="secondary" className="mt-2 gap-1 text-primary">
+                  <Megaphone className="h-3 w-3" />
+                  Campanha disponível
+                </Badge>
               )}
 
               <BusinessSpecialtyChips specialties={business.specialties} />

@@ -125,6 +125,18 @@ export async function getPublicBusinesses({
   }
 
   const rows = (data ?? []) as BusinessRow[];
+  const { data: activeCampaigns } = rows.length
+    ? await supabase
+        .from("business_campaigns")
+        .select("business_id")
+        .in("business_id", rows.map((business) => business.id))
+        .eq("is_active", true)
+        .lte("starts_on", new Date().toISOString().slice(0, 10))
+        .gte("ends_on", new Date().toISOString().slice(0, 10))
+    : { data: [] };
+  const campaignBusinessIds = new Set(
+    (activeCampaigns ?? []).map((campaign) => campaign.business_id)
+  );
   const total = count ?? 0;
   const totalPages = Math.ceil(total / safeLimit);
 
@@ -149,6 +161,7 @@ export async function getPublicBusinesses({
         .filter((item): item is NonNullable<typeof item> => Boolean(item)),
       city: business.city,
       plan: business.plan === "premium" ? "premium" : "free",
+      hasActiveCampaign: campaignBusinessIds.has(business.id),
       category: normalizeCategory(business.category)
     };
   });

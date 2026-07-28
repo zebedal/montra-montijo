@@ -39,6 +39,7 @@ export type BusinessSummary = PublicBusinessSummary & {
   cancel_at_period_end: boolean;
   current_period_end: string | null;
   profile_completion?: number;
+  hasActiveCampaign?: boolean;
 };
 
 export type PublicBusiness = {
@@ -51,6 +52,7 @@ export type PublicBusiness = {
   specialties?: BusinessSpecialtySummary[];
   city: string | null;
   plan: "free" | "premium";
+  hasActiveCampaign?: boolean;
   category: {
     name: string;
     slug: string;

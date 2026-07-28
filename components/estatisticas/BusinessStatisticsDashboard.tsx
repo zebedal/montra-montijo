@@ -8,6 +8,7 @@ import {
   Eye,
   Globe,
   MapPinned,
+  Megaphone,
   MousePointerClick,
   Phone
 } from "lucide-react";
@@ -129,6 +130,13 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
         : "Cliques no botão principal",
       icon: MousePointerClick,
       iconClass: "bg-green-100 text-green-700"
+    },
+    {
+      label: "Campanha",
+      value: totals.campaignCtaClicks.toLocaleString("pt-PT"),
+      description: `${totals.campaignViews.toLocaleString("pt-PT")} visualizações · ${totals.campaignClicks.toLocaleString("pt-PT")} aberturas`,
+      icon: Megaphone,
+      iconClass: "bg-orange-100 text-orange-700"
     }
   ];
 

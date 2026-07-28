@@ -71,6 +71,17 @@ export async function getBusinessesByCategory(
     return [];
   }
 
+  const { data: activeCampaigns } = await supabase
+    .from("business_campaigns")
+    .select("business_id")
+    .in("business_id", businesses.map((business) => business.id))
+    .eq("is_active", true)
+    .lte("starts_on", new Date().toISOString().slice(0, 10))
+    .gte("ends_on", new Date().toISOString().slice(0, 10));
+  const campaignBusinessIds = new Set(
+    (activeCampaigns ?? []).map((campaign) => campaign.business_id)
+  );
+
   const result: BusinessSummary[] = businesses.map((business) => {
     const firstImage = [...(business.images ?? [])].sort(
       (a, b) => (a.position ?? 0) - (b.position ?? 0)
@@ -91,7 +102,8 @@ export async function getBusinessesByCategory(
       stripe_subscription_id: business.stripe_subscription_id ?? null,
       subscription_status: business.subscription_status ?? null,
       cancel_at_period_end: business.cancel_at_period_end ?? false,
-      current_period_end: business.current_period_end ?? null
+      current_period_end: business.current_period_end ?? null,
+      hasActiveCampaign: campaignBusinessIds.has(business.id)
     };
   });
 

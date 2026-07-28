@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight, Building2, MapPin } from "lucide-react";
+import { ArrowRight, Building2, MapPin, Megaphone } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,12 @@ export default function NewBusinesses({ businesses }: Props) {
                   {business.category && (
                     <p className="inline-flex rounded-full bg-[#EAF3EE] px-2.5 py-1 text-xs font-semibold text-primary-light">
                       {business.category.name}
+                    </p>
+                  )}
+
+                  {business.hasActiveCampaign && (
+                    <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-primary">
+                      <Megaphone className="h-3.5 w-3.5" /> Campanha disponível
                     </p>
                   )}
 

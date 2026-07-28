@@ -143,33 +143,43 @@ export function BusinessGallery({
     );
   }
 
+  const visibleImages = images.slice(0, 4);
+  const remainingImages = images.length - visibleImages.length;
+
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {images.map((image, index) => (
+      <div className="grid grid-cols-2 gap-3 md:h-[420px] md:grid-cols-4 md:grid-rows-3">
+        {visibleImages.map((image, index) => (
           <button
             key={image.id}
             type="button"
             onClick={() => setSelectedIndex(index)}
             className={[
-              "overflow-hidden rounded-xl",
+              "relative min-h-0 overflow-hidden rounded-xl",
               "transition hover:opacity-90",
               "focus:outline-none",
               "cursor-pointer",
               index === 0
-                ? "col-span-2 aspect-16/10 md:col-span-3 md:row-span-3 md:aspect-auto"
+                ? "col-span-2 aspect-16/10 md:col-span-3 md:row-span-3 md:h-full md:aspect-auto"
+                : images.length === 2
+                  ? "aspect-square md:row-span-3 md:h-full md:aspect-auto"
                 : images.length === 3 && index === 2
-                  ? "aspect-square md:row-span-2 md:aspect-auto"
-                  : "aspect-square"
+                  ? "aspect-square md:row-span-2 md:h-full md:aspect-auto"
+                  : "aspect-square md:h-full md:aspect-auto"
             ].join(" ")}
           >
             <Image
               src={image.url}
               alt=""
-              width={800}
-              height={800}
-              className="h-full w-full object-cover"
+              fill
+              sizes={index === 0 ? "(min-width: 768px) 56vw, 100vw" : "(min-width: 768px) 18vw, 50vw"}
+              className="object-cover"
             />
+            {remainingImages > 0 && index === visibleImages.length - 1 && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/55 px-3 text-center text-sm font-semibold text-white backdrop-blur-[1px]">
+                +{remainingImages} {remainingImages === 1 ? "fotografia" : "fotografias"}
+              </span>
+            )}
           </button>
         ))}
       </div>

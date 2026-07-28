@@ -9,7 +9,10 @@ export type BusinessEventType =
   | "instagram_click"
   | "facebook_click"
   | "directions_click"
-  | "primary_cta_click";
+  | "primary_cta_click"
+  | "campaign_view"
+  | "campaign_click"
+  | "campaign_cta_click";
 
 type BusinessEvent = {
   event_type: BusinessEventType;
@@ -41,6 +44,9 @@ export type BusinessStatistics = {
     facebookClicks: number;
     directionsClicks: number;
     primaryCtaClicks: number;
+    campaignCtaClicks: number;
+    campaignViews: number;
+    campaignClicks: number;
     interactions: number;
   };
 
@@ -68,7 +74,7 @@ type GetBusinessStatisticsResult =
     };
 
 const EVENT_TO_TOTAL_KEY: Record<
-  Exclude<BusinessEventType, "page_view">,
+  Exclude<BusinessEventType, "page_view" | "campaign_view">,
   | "phoneClicks"
   | "emailClicks"
   | "websiteClicks"
@@ -76,6 +82,8 @@ const EVENT_TO_TOTAL_KEY: Record<
   | "facebookClicks"
   | "directionsClicks"
   | "primaryCtaClicks"
+  | "campaignClicks"
+  | "campaignCtaClicks"
 > = {
   phone_click: "phoneClicks",
   email_click: "emailClicks",
@@ -83,7 +91,9 @@ const EVENT_TO_TOTAL_KEY: Record<
   instagram_click: "instagramClicks",
   facebook_click: "facebookClicks",
   directions_click: "directionsClicks",
-  primary_cta_click: "primaryCtaClicks"
+  primary_cta_click: "primaryCtaClicks",
+  campaign_click: "campaignClicks",
+  campaign_cta_click: "campaignCtaClicks"
 };
 
 function getDateKey(date: Date) {
@@ -221,6 +231,9 @@ export async function getBusinessStatistics(
     facebookClicks: 0,
     directionsClicks: 0,
     primaryCtaClicks: 0,
+    campaignCtaClicks: 0,
+    campaignViews: 0,
+    campaignClicks: 0,
     interactions: 0
   };
 
@@ -240,6 +253,11 @@ export async function getBusinessStatistics(
         dailyItem.pageViews += 1;
       }
 
+      return;
+    }
+
+    if (event.event_type === "campaign_view") {
+      totals.campaignViews += 1;
       return;
     }
 
@@ -263,6 +281,14 @@ export async function getBusinessStatistics(
           }
         ]
       : []),
+    {
+      channel: "Abrir campanha",
+      value: totals.campaignClicks
+    },
+    {
+      channel: "Ação da campanha",
+      value: totals.campaignCtaClicks
+    },
     {
       channel: "Telefone",
       value: totals.phoneClicks

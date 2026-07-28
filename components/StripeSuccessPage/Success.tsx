@@ -1,13 +1,27 @@
 import Link from "next/link";
-import { CheckCircle, CircleHelp, ListPlus } from "lucide-react";
+import {
+  CheckCircle,
+  CircleHelp,
+  ListPlus,
+  Megaphone,
+  MousePointerClick,
+  Sparkles
+} from "lucide-react";
 import { Button } from "../ui/button";
 import { Routes } from "@/types";
 interface SuccessProps {
   businessId?: string;
   slug: string;
+  plan?: "free" | "premium";
 }
 
-export default function Success({ slug, businessId }: SuccessProps) {
+export default function Success({
+  slug,
+  businessId,
+  plan = "free"
+}: SuccessProps) {
+  const isPremium = plan === "premium";
+
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 px-2.5 space-y-6">
       <CheckCircle className="h-14 w-14 text-green-600" />
@@ -18,20 +32,53 @@ export default function Success({ slug, businessId }: SuccessProps) {
         </h1>
 
         <p className="text-gray-500 max-w-md">
-          O teu negócio já está disponível e visível na plataforma.
+          {isPremium
+            ? "O teu negócio está publicado com o Plano Destaque e já beneficia de maior visibilidade."
+            : "O teu negócio já está disponível e visível na plataforma."}
         </p>
       </div>
 
       {businessId && (
         <div className="w-full max-w-xl rounded-2xl border bg-white p-6 text-left shadow-sm">
-          <h2 className="font-semibold text-gray-900">
-            Queres tornar a página ainda mais útil?
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-gray-500">
-            Estes passos são opcionais e podes completá-los agora ou mais tarde.
-          </p>
+          <div className="flex items-start gap-3">
+            {isPremium && (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50">
+                <Sparkles className="h-5 w-5 text-green-700" />
+              </div>
+            )}
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div>
+              <h2 className="font-semibold text-gray-900">
+                {isPremium
+                  ? "Começa a tirar partido do Plano Destaque"
+                  : "Queres tornar a página ainda mais útil?"}
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-gray-500">
+                {isPremium
+                  ? "Configura as funcionalidades que ajudam a transformar visitas em ações."
+                  : "Estes passos são opcionais e podes completá-los agora ou mais tarde."}
+              </p>
+            </div>
+          </div>
+
+          {isPremium && (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <Button asChild className="h-auto justify-start py-4">
+                <Link href={`/area-cliente/negocio/${businessId}/editar#acao-principal`}>
+                  <MousePointerClick className="mr-3 h-5 w-5" />
+                  <span className="text-left"><span className="block font-semibold">Configurar ação principal</span><span className="mt-0.5 block text-xs font-normal text-primary-foreground/80">Transforma visitas em ações.</span></span>
+                </Link>
+              </Button>
+              <Button asChild className="h-auto justify-start py-4">
+                <Link href={`/area-cliente/campanhas?business_id=${businessId}`}>
+                  <Megaphone className="mr-3 h-5 w-5" />
+                  <span className="text-left"><span className="block font-semibold">Criar campanha</span><span className="mt-0.5 block text-xs font-normal text-primary-foreground/80">Promove uma novidade ou oferta.</span></span>
+                </Link>
+              </Button>
+            </div>
+          )}
+
+          <div className={`${isPremium ? "mt-3" : "mt-4"} grid gap-3 sm:grid-cols-2`}>
             <Button
               asChild
               variant="outline"

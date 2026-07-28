@@ -4,7 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { Building2, Heart, Settings, User, FileQuestion } from "lucide-react";
+import {
+  Building2,
+  Heart,
+  Megaphone,
+  Settings,
+  User,
+  FileQuestion
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Routes } from "@/types";
@@ -15,6 +22,11 @@ const links = [
     label: "Os meus negócios",
     icon: Building2,
     exact: true
+  },
+  {
+    href: Routes.CAMPANHAS,
+    label: "Campanhas",
+    icon: Megaphone
   },
   {
     href: Routes.FAVORITOS,

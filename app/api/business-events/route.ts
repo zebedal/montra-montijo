@@ -11,7 +11,10 @@ const allowedEvents = [
   "instagram_click",
   "facebook_click",
   "directions_click",
-  "primary_cta_click"
+  "primary_cta_click",
+  "campaign_view",
+  "campaign_click",
+  "campaign_cta_click"
 ] as const;
 
 type BusinessEventType = (typeof allowedEvents)[number];
@@ -81,6 +84,33 @@ export async function POST(request: Request) {
       );
     }
 
+    let campaignMetadata: Record<string, string> = {};
+
+    if (eventType.startsWith("campaign_")) {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: campaign } = await supabaseAdmin
+        .from("business_campaigns")
+        .select("id, type, cta_type")
+        .eq("business_id", businessId)
+        .eq("is_active", true)
+        .lte("starts_on", today)
+        .gte("ends_on", today)
+        .maybeSingle();
+
+      if (!campaign || business.plan !== "premium") {
+        return NextResponse.json(
+          { error: "A campanha não está disponível." },
+          { status: 400 }
+        );
+      }
+
+      campaignMetadata = {
+        campaignId: campaign.id,
+        campaignType: campaign.type,
+        campaignCtaType: campaign.cta_type
+      };
+    }
+
     /**
      * Não contar page views do próprio proprietário.
      *
@@ -119,7 +149,7 @@ export async function POST(request: Request) {
         metadata:
           eventType === "primary_cta_click"
             ? { ctaType: business.primary_cta_type }
-            : {}
+            : campaignMetadata
       });
 
     if (insertError) {

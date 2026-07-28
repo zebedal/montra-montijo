@@ -8,6 +8,7 @@ import {
   BarChart3,
   Check,
   Crown,
+  Megaphone,
   MousePointerClick,
   Search,
   Sparkles,
@@ -95,6 +96,12 @@ const premiumBenefits = [
     icon: MousePointerClick
   },
   {
+    title: "Campanha promocional",
+    description:
+      "Promova uma oferta, novidade ou evento com imagem, mensagem e ação próprias.",
+    icon: Megaphone
+  },
+  {
     title: "Acesso a estatísticas",
     description:
       "Consulte dados sobre visualizações e acompanhe o desempenho da página do seu negócio.",
@@ -140,6 +147,11 @@ const comparisonRows = [
   },
   {
     label: "Botão de ação personalizado",
+    free: false,
+    premium: true
+  },
+  {
+    label: "Campanha promocional ativa",
     free: false,
     premium: true
   },
@@ -375,6 +387,11 @@ export default function FeaturedPlanPage() {
                     <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
                     Botão de ação personalizado para reservas, marcações,
                     orçamentos ou compras
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary-green" />
+                    Campanha promocional com imagem, mensagem e ação próprias
                   </li>
 
                   <li className="flex items-start gap-3">

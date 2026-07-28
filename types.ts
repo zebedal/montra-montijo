@@ -15,6 +15,7 @@ export const Routes = {
   RECUPERAR_PASSWORD: "/recuperar-password",
   SEARCH: "/search",
   FAVORITOS: "/area-cliente/favoritos",
+  CAMPANHAS: "/area-cliente/campanhas",
   PLANO_DESTAQUE: "/plano-destaque",
   REIVINDICACOES: "/area-cliente/reivindicacoes",
   EVENTOS: "/eventos",

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import Success from "@/components/StripeSuccessPage/Success";
+import { createClient } from "@/lib/supabase/server";
 import { Routes } from "@/types";
 
 type Props = {
@@ -17,5 +18,27 @@ export default async function BusinessSuccessPage({ searchParams }: Props) {
     redirect(Routes.AREA_CLIENTE);
   }
 
-  return <Success slug={slug} businessId={businessId} />;
+  let plan: "free" | "premium" = "free";
+
+  if (businessId) {
+    const supabase = await createClient();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: business } = await supabase
+        .from("businesses")
+        .select("plan")
+        .eq("id", businessId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (business?.plan === "premium") {
+        plan = "premium";
+      }
+    }
+  }
+
+  return <Success slug={slug} businessId={businessId} plan={plan} />;
 }

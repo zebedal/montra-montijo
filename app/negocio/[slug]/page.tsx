@@ -15,6 +15,7 @@ import { BusinessMap } from "@/components/business/BusinessMap";
 import { BusinessServiceAreas } from "@/components/business/BusinessServiceAreas";
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 import { BusinessPrimaryCta } from "@/components/business/BusinessPrimaryCta";
+import { BusinessCampaign } from "@/components/business/BusinessCampaign";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
@@ -171,7 +172,8 @@ export default async function BusinessPage({ params }: Props) {
     faqs,
     services,
     serviceAreas,
-    specialties
+    specialties,
+    campaign
   } = result;
 
   const supabase = await createClient();
@@ -260,6 +262,11 @@ export default async function BusinessPage({ params }: Props) {
             isBusinessOwner={isBusinessOwner}
           />
           <BusinessPrimaryCta business={business} />
+          <BusinessCampaign
+            campaign={campaign}
+            businessId={business.id}
+            whatsappPhone={business.whatsapp_phone}
+          />
           {isClaimable && (
             <BusinessClaimButton
               businessId={business.id}

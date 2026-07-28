@@ -16,6 +16,8 @@ import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
 import UpcomingEventsSection from "@/components/UpcomingEvents";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
+import { CampaignCarouselSection, type CampaignCarouselItem } from "@/components/business/CampaignCarouselSection";
+import type { CampaignType } from "@/lib/business-campaign";
 
 const homeDescription =
   "Explore o comércio local do Montijo num só lugar. Encontre restaurantes, lojas, empresas e serviços com contactos, moradas e horários.";
@@ -93,7 +95,10 @@ type BusinessRow = {
   } | null;
 };
 
-function mapBusiness(business: BusinessRow): PublicBusiness {
+function mapBusiness(
+  business: BusinessRow,
+  campaignBusinessIds: Set<string>
+): PublicBusiness {
   const firstImage = [...(business.images ?? [])].sort(
     (a, b) => (a.position ?? 0) - (b.position ?? 0)
   )[0];
@@ -114,6 +119,7 @@ function mapBusiness(business: BusinessRow): PublicBusiness {
       .filter((item): item is NonNullable<typeof item> => Boolean(item)),
     city: business.city,
     plan: business.plan,
+    hasActiveCampaign: campaignBusinessIds.has(business.id),
     category: business.category
   };
 }
@@ -153,7 +159,8 @@ export default async function Home() {
   const [
     { data: categoriesData, error: categoriesError },
     { data: featuredData, error: featuredError },
-    { data: newestData, error: newestError }
+    { data: newestData, error: newestError },
+    { data: campaignsData, error: campaignsError }
   ] = await Promise.all([
     categoriesQuery,
 
@@ -167,7 +174,15 @@ export default async function Home() {
       .order("created_at", {
         ascending: false
       })
-      .limit(12)
+      .limit(12),
+
+    supabase
+      .from("business_campaigns")
+      .select("id,title,description,type,image_path,ends_on,business:businesses(id,name,slug)")
+      .eq("is_active", true)
+      .lte("starts_on", new Date().toISOString().slice(0, 10))
+      .gte("ends_on", new Date().toISOString().slice(0, 10))
+      .order("created_at", { ascending: false })
   ]);
 
   if (categoriesError) {
@@ -182,6 +197,10 @@ export default async function Home() {
     console.error("Erro ao obter novos negócios:", newestError);
   }
 
+  if (campaignsError) {
+    console.error("Erro ao obter campanhas:", campaignsError);
+  }
+
   const popularCategories =
     categoriesData
       ?.map((category) => ({
@@ -193,9 +212,18 @@ export default async function Home() {
       .sort((a, b) => b.businessCount - a.businessCount)
       .slice(0, 9) ?? [];
 
+  const campaignBusinessIds = new Set(
+    (campaignsData ?? []).flatMap((item) => {
+      const business = Array.isArray(item.business)
+        ? item.business[0]
+        : item.business;
+      return business?.id ? [business.id] : [];
+    })
+  );
+
   const featuredBusinesses = (
     (featuredData ?? []) as unknown as BusinessRow[]
-  ).map(mapBusiness);
+  ).map((business) => mapBusiness(business, campaignBusinessIds));
 
   /*
    * Evita apresentar os mesmos negócios Premium
@@ -208,9 +236,27 @@ export default async function Home() {
   const newBusinesses = ((newestData ?? []) as unknown as BusinessRow[])
     .filter((business) => !featuredIds.has(business.id))
     .slice(0, 6)
-    .map(mapBusiness);
+    .map((business) => mapBusiness(business, campaignBusinessIds));
 
   const siteUrl = getSiteUrl();
+  const campaigns: CampaignCarouselItem[] = (campaignsData ?? []).flatMap((item) => {
+    const business = Array.isArray(item.business)
+      ? item.business[0]
+      : item.business;
+    const imageUrl = getPublicStorageUrl(item.image_path);
+    if (!business || !imageUrl) return [];
+    return [{
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      type: item.type as CampaignType,
+      imageUrl,
+      endsOn: item.ends_on,
+      businessName: business.name,
+      businessSlug: business.slug,
+      businessId: business.id
+    }];
+  });
 
   return (
     <main>
@@ -222,6 +268,7 @@ export default async function Home() {
       <BusinessCategories categories={popularCategories} />
 
       <FeaturedBusinesses businesses={featuredBusinesses} />
+      <CampaignCarouselSection campaigns={campaigns} />
       <div className="h-2 bg-background" />
       <NewBusinesses businesses={newBusinesses} />
 

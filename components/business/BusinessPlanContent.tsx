@@ -345,6 +345,11 @@ export default function BusinessPlanContent({
 
               <li className="flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
+                Campanha promocional ativa
+              </li>
+
+              <li className="flex items-center gap-2">
+                <BadgeCheck className="h-5 w-5 shrink-0 text-green-600" />
                 Acesso a estatísticas do negócio
               </li>
 

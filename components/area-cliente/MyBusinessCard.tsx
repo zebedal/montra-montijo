@@ -211,7 +211,7 @@ export default function MyBusinessCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 md:ml-auto">
-            {business.is_visible && (
+            {(business.is_visible || canSendTestReport) && (
               <Button asChild variant="outline">
                 <Link href={`/negocio/${business.slug}`}>
                   <ExternalLink className="mr-2 h-4 w-4" />

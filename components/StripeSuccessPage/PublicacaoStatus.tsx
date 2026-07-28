@@ -257,6 +257,7 @@ export default function PublicacaoStatus({ initialSessionId }: Props) {
         <Success
           businessId={checkout.businessId}
           slug={checkout.businessSlug}
+          plan="premium"
         />
       );
 

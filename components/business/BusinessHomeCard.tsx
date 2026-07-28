@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Building2, Crown, MapPin } from "lucide-react";
+import { Building2, Crown, MapPin, Megaphone } from "lucide-react";
 
 import FavoriteButton from "@/components/business/FavoriteButton";
 import { BusinessSpecialtyChips } from "@/components/business/BusinessSpecialtyChips";
@@ -49,6 +49,11 @@ export default function BusinessHomeCard({
             <Badge className="absolute left-3 top-3 border-0 bg-yellow-600 py-3 text-white hover:bg-yellow-600">
               <Crown className="mr-1 h-3.5 w-3.5" />
               Premium
+            </Badge>
+          )}
+          {business.hasActiveCampaign && (
+            <Badge className="absolute bottom-3 left-3 gap-1 border-0 bg-primary text-primary-foreground">
+              <Megaphone className="h-3.5 w-3.5" /> Campanha disponível
             </Badge>
           )}
         </div>

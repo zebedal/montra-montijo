@@ -41,7 +41,9 @@ const ACTION_LABELS: Record<string, string> = {
   instagram_click: "Instagram",
   facebook_click: "Facebook",
   directions_click: "Morada e indicações",
-  primary_cta_click: "Ação principal"
+  primary_cta_click: "Ação principal",
+  campaign_click: "Aberturas da campanha",
+  campaign_cta_click: "Campanha promocional"
 };
 
 type MonthlyPeriod = {
@@ -205,6 +207,10 @@ async function getBusinessActivity(
       pageViews += 1;
       const weekIndex = Math.min(Math.floor((dayOfMonth - 1) / 7), 4);
       weeklyPageViews[weekIndex] += 1;
+      return;
+    }
+
+    if (event.event_type === "campaign_view") {
       return;
     }
 

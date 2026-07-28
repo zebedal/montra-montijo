@@ -2,6 +2,7 @@ import { PublicBusinessDetails } from "@/types/business";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 import { MARGEM_SUL_SERVICE_AREAS } from "@/lib/service-areas";
+import type { BusinessCampaign } from "@/lib/business-campaign";
 
 type GetBusinessBySlugOptions = {
   supabase: SupabaseClient;
@@ -64,6 +65,7 @@ export type GetBusinessBySlugResult = {
   services: BusinessService[];
   serviceAreas: BusinessServiceArea[];
   specialties: BusinessSpecialty[];
+  campaign: BusinessCampaign | null;
 };
 
 type BusinessRow = {
@@ -197,7 +199,8 @@ export async function getBusinessBySlug({
     faqsResult,
     servicesResult,
     serviceAreasResult,
-    specialtiesResult
+    specialtiesResult,
+    campaignResult
   ] = await Promise.all([
     supabase
       .from("business_images")
@@ -235,7 +238,18 @@ export async function getBusinessBySlug({
     supabase
       .from("business_specialties")
       .select("specialty:specialties(id, name, slug)")
+      .eq("business_id", business.id),
+
+    supabase
+      .from("business_campaigns")
+      .select("*")
       .eq("business_id", business.id)
+      .eq("is_active", true)
+      .lte("starts_on", new Date().toISOString().slice(0, 10))
+      .gte("ends_on", new Date().toISOString().slice(0, 10))
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
     ]);
 
   if (imagesResult.error) {
@@ -311,6 +325,14 @@ export async function getBusinessBySlug({
         : item.specialty
     )
     .filter((item): item is BusinessSpecialty => Boolean(item));
+  const campaign = campaignResult.data
+    ? ({
+        ...campaignResult.data,
+        image_path: supabase.storage
+          .from("business-media")
+          .getPublicUrl(campaignResult.data.image_path).data.publicUrl
+      } as BusinessCampaign)
+    : null;
 
   return {
     business: {
@@ -347,6 +369,7 @@ export async function getBusinessBySlug({
     faqs,
     services,
     serviceAreas,
-    specialties
+    specialties,
+    campaign
   };
 }
