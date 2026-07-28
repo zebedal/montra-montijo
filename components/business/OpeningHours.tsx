@@ -3,6 +3,7 @@
 import {
   Control,
   Controller,
+  UseFormClearErrors,
   UseFormSetValue,
   useFormState,
   useWatch
@@ -19,9 +20,14 @@ import type { BusinessFormData } from "@/lib/schemas/businessFormSchema";
 type Props = {
   control: Control<BusinessFormData>;
   setValue: UseFormSetValue<BusinessFormData>;
+  clearErrors: UseFormClearErrors<BusinessFormData>;
 };
 
-export function OpeningHours({ control, setValue }: Props) {
+export function OpeningHours({
+  control,
+  setValue,
+  clearErrors
+}: Props) {
   const { errors } = useFormState({ control });
   const hours = useWatch({
     control,
@@ -63,6 +69,11 @@ export function OpeningHours({ control, setValue }: Props) {
                           type="time"
                           aria-invalid={fieldState.invalid}
                           className="w-full sm:w-36"
+                          onChange={(event) => {
+                            field.onChange(event);
+                            clearErrors("openingHours");
+                          }}
+                          onInput={() => clearErrors("openingHours")}
                         />
                       )}
                     />
@@ -78,6 +89,11 @@ export function OpeningHours({ control, setValue }: Props) {
                           type="time"
                           aria-invalid={fieldState.invalid}
                           className="w-full sm:w-36"
+                          onChange={(event) => {
+                            field.onChange(event);
+                            clearErrors("openingHours");
+                          }}
+                          onInput={() => clearErrors("openingHours")}
                         />
                       )}
                     />
@@ -94,7 +110,10 @@ export function OpeningHours({ control, setValue }: Props) {
                             hour.periods.filter(
                               (_, itemIndex) => itemIndex !== periodIndex
                             ),
-                            { shouldDirty: true, shouldValidate: true }
+                            {
+                              shouldDirty: true,
+                              shouldValidate: hasError
+                            }
                           )
                         }
                       >
@@ -113,7 +132,7 @@ export function OpeningHours({ control, setValue }: Props) {
                     setValue(
                       `openingHours.${index}.periods`,
                       [...hour.periods, { open: "", close: "" }],
-                      { shouldDirty: true, shouldValidate: true }
+                      { shouldDirty: true }
                     )
                   }
                 >

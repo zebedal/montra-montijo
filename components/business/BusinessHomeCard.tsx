@@ -17,6 +17,8 @@ export default function BusinessHomeCard({
   business,
   showPremiumBadge = true
 }: Props) {
+  const cardImageUrl = business.logoUrl ?? business.imageUrl;
+
   return (
     <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
       <Link
@@ -24,10 +26,14 @@ export default function BusinessHomeCard({
         className="flex h-full min-w-0 flex-col"
       >
         <div className="relative aspect-16/10 overflow-hidden bg-muted">
-          {business.logoUrl ? (
+          {cardImageUrl ? (
             <Image
-              src={business.logoUrl}
-              alt={`Logótipo de ${business.name}`}
+              src={cardImageUrl}
+              alt={
+                business.logoUrl
+                  ? `Logótipo de ${business.name}`
+                  : `Fotografia de ${business.name}`
+              }
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"

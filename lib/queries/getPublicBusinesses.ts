@@ -31,6 +31,10 @@ type BusinessRow = {
   logo_url: string | null;
   city: string | null;
   plan: string;
+  images: {
+    url: string;
+    position: number | null;
+  }[];
   category: CategoryRelation | CategoryRelation[] | null;
 };
 
@@ -72,6 +76,10 @@ export async function getPublicBusinesses({
         logo_url,
         city,
         plan,
+        images:business_images (
+          url,
+          position
+        ),
         category:categories (
           name,
           slug
@@ -80,8 +88,7 @@ export async function getPublicBusinesses({
       {
         count: "exact"
       }
-    )
-    ;
+    );
 
   businessesQuery = adminPreviewUserId
     ? businessesQuery.or(
@@ -112,16 +119,23 @@ export async function getPublicBusinesses({
   const total = count ?? 0;
   const totalPages = Math.ceil(total / safeLimit);
 
-  const businesses: PublicBusiness[] = rows.map((business) => ({
-    id: business.id,
-    slug: business.slug,
-    name: business.name,
-    description: business.description,
-    logoUrl: getPublicStorageUrl(business.logo_url),
-    city: business.city,
-    plan: business.plan === "premium" ? "premium" : "free",
-    category: normalizeCategory(business.category)
-  }));
+  const businesses: PublicBusiness[] = rows.map((business) => {
+    const firstImage = [...(business.images ?? [])].sort(
+      (a, b) => (a.position ?? 0) - (b.position ?? 0)
+    )[0];
+
+    return {
+      id: business.id,
+      slug: business.slug,
+      name: business.name,
+      description: business.description,
+      logoUrl: getPublicStorageUrl(business.logo_url),
+      imageUrl: getPublicStorageUrl(firstImage?.url),
+      city: business.city,
+      plan: business.plan === "premium" ? "premium" : "free",
+      category: normalizeCategory(business.category)
+    };
+  });
 
   return {
     businesses,

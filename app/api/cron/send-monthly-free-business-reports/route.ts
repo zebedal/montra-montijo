@@ -125,16 +125,23 @@ async function getBusinessActivity(
       .gte("created_at", period.start.toISOString())
       .lt("created_at", period.end.toISOString());
 
-  const [pageViewsResult, interactionsResult] = await Promise.all([
-    baseQuery().eq("event_type", "page_view"),
-    baseQuery().neq("event_type", "page_view")
-  ]);
+  const [pageViewsResult, interactionsResult, directionsClicksResult] =
+    await Promise.all([
+      baseQuery().eq("event_type", "page_view"),
+      baseQuery().neq("event_type", "page_view"),
+      baseQuery().eq("event_type", "directions_click")
+    ]);
 
-  if (pageViewsResult.error || interactionsResult.error) {
+  if (
+    pageViewsResult.error ||
+    interactionsResult.error ||
+    directionsClicksResult.error
+  ) {
     console.error("Erro ao calcular atividade mensal:", {
       businessId,
       pageViewsError: pageViewsResult.error,
-      interactionsError: interactionsResult.error
+      interactionsError: interactionsResult.error,
+      directionsClicksError: directionsClicksResult.error
     });
 
     throw new Error("Não foi possível calcular a atividade mensal.");
@@ -142,7 +149,8 @@ async function getBusinessActivity(
 
   return {
     pageViews: pageViewsResult.count ?? 0,
-    interactions: interactionsResult.count ?? 0
+    interactions: interactionsResult.count ?? 0,
+    directionsClicks: directionsClicksResult.count ?? 0
   };
 }
 
@@ -279,6 +287,7 @@ async function processBusinessReport({
     periodLabel: period.label,
     pageViews: activity.pageViews,
     interactions: activity.interactions,
+    directionsClicks: activity.directionsClicks,
     recommendations
   });
 
@@ -482,6 +491,7 @@ export async function POST(request: NextRequest) {
       periodLabel: period.label,
       pageViews: activity.pageViews,
       interactions: activity.interactions,
+      directionsClicks: activity.directionsClicks,
       businessId: business.id,
       recommendations,
       isTest: true

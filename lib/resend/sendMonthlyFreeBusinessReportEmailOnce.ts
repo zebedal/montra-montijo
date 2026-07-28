@@ -20,6 +20,7 @@ type SendMonthlyFreeBusinessReportEmailOnceParams = {
   periodLabel: string;
   pageViews: number;
   interactions: number;
+  directionsClicks: number;
   recommendations: MonthlyReportRecommendation[];
 };
 
@@ -38,6 +39,7 @@ export async function sendMonthlyFreeBusinessReportEmailOnce({
   periodLabel,
   pageViews,
   interactions,
+  directionsClicks,
   recommendations
 }: SendMonthlyFreeBusinessReportEmailOnceParams): Promise<SendMonthlyFreeBusinessReportEmailOnceResult> {
   const emailType = `monthly_free_business_report:${periodKey}`;
@@ -68,6 +70,7 @@ export async function sendMonthlyFreeBusinessReportEmailOnce({
     periodLabel,
     pageViews,
     interactions,
+    directionsClicks,
     businessId,
     recommendations,
     unsubscribeUrl: `${getMonthlyReportSiteUrl()}/cancelar-relatorios?token=${encodeURIComponent(

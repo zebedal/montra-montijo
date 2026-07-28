@@ -43,7 +43,7 @@ function hasValidCoordinates(
 export function BusinessMap({ businessName, latitude, longitude }: Props) {
   if (!hasValidCoordinates(latitude, longitude)) {
     return (
-      <Card>
+      <Card id="mapa" tabIndex={-1} className="scroll-mt-24 outline-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
@@ -72,7 +72,11 @@ export function BusinessMap({ businessName, latitude, longitude }: Props) {
   const safeLongitude = longitude as number;
 
   return (
-    <Card className="overflow-hidden">
+    <Card
+      id="mapa"
+      tabIndex={-1}
+      className="scroll-mt-24 overflow-hidden outline-none"
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-primary" />

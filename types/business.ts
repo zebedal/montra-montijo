@@ -25,6 +25,7 @@ export type PublicBusinessSummary = {
 };
 
 export type BusinessSummary = PublicBusinessSummary & {
+  image_url?: string | null;
   is_visible: boolean;
   stripe_subscription_id: string | null;
   subscription_status: string | null;
@@ -39,6 +40,7 @@ export type PublicBusiness = {
   name: string;
   description: string | null;
   logoUrl: string | null;
+  imageUrl?: string | null;
   city: string | null;
   plan: "free" | "premium";
   category: {

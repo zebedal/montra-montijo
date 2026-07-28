@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Globe, Mail, MapPin, MapPinned, Phone } from "lucide-react";
+import { Globe, Mail, MapPin, Phone } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
@@ -77,13 +76,6 @@ export function BusinessContact({ business }: BusinessContactProps) {
         .join(", ")
     : "";
 
-  const mapsUrl =
-    business.latitude !== null && business.longitude !== null
-      ? `https://www.google.com/maps?q=${business.latitude},${business.longitude}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          address
-        )}`;
-
   const rows: ContactRow[] = [
     ...(address
       ? [
@@ -91,6 +83,8 @@ export function BusinessContact({ business }: BusinessContactProps) {
             label: "Morada",
             value: address,
             icon: MapPin,
+            href: "#mapa",
+            eventType: "directions_click" as const,
             iconClass: "bg-orange-100 text-orange-700"
           }
         ]
@@ -185,6 +179,22 @@ export function BusinessContact({ business }: BusinessContactProps) {
     trackBusinessEvent(business.id, eventType);
   }
 
+  function handleInternalLink(
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) {
+    if (!href.startsWith("#")) return;
+
+    const target = document.getElementById(href.slice(1));
+
+    if (!target) return;
+
+    event.preventDefault();
+    window.history.pushState(null, "", href);
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   if (rows.length === 0) {
     return null;
   }
@@ -259,7 +269,10 @@ export function BusinessContact({ business }: BusinessContactProps) {
               <a
                 key={label}
                 href={href}
-                onClick={() => handleTrack(eventType)}
+                onClick={(event) => {
+                  handleTrack(eventType);
+                  handleInternalLink(event, href);
+                }}
                 className="group flex items-start gap-4 rounded-xl border p-3 transition-all duration-200 hover:border-primary/40 hover:bg-muted/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {content}

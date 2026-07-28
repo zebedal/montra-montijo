@@ -77,6 +77,10 @@ type BusinessRow = {
   city: string | null;
   plan: "free" | "premium";
   created_at: string;
+  images: {
+    url: string;
+    position: number | null;
+  }[];
   category: {
     name: string;
     slug: string;
@@ -84,12 +88,17 @@ type BusinessRow = {
 };
 
 function mapBusiness(business: BusinessRow): PublicBusiness {
+  const firstImage = [...(business.images ?? [])].sort(
+    (a, b) => (a.position ?? 0) - (b.position ?? 0)
+  )[0];
+
   return {
     id: business.id,
     name: business.name,
     slug: business.slug,
     description: business.description,
     logoUrl: getPublicStorageUrl(business.logo_url),
+    imageUrl: getPublicStorageUrl(firstImage?.url),
     city: business.city,
     plan: business.plan,
     category: business.category
@@ -109,13 +118,13 @@ export default async function Home() {
   let featuredQuery = supabase
     .from("businesses")
     .select(
-      `id,name,slug,description,logo_url,city,plan,created_at,category:categories(name,slug)`
+      `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),category:categories(name,slug)`
     )
     .eq("plan", "premium");
   let newestQuery = supabase
     .from("businesses")
     .select(
-      `id,name,slug,description,logo_url,city,plan,created_at,category:categories(name,slug)`
+      `id,name,slug,description,logo_url,city,plan,created_at,images:business_images(url,position),category:categories(name,slug)`
     );
 
   if (adminPreviewUserId) {

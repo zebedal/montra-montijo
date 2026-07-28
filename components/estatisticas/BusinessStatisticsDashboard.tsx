@@ -382,6 +382,20 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
 
               <div className="mt-6 grid min-w-0 gap-3 sm:grid-cols-3">
                 <div className="flex min-w-0 items-center gap-3 rounded-lg border p-3">
+                  <MapPinned className="h-5 w-5 shrink-0 text-orange-700" />
+
+                  <div className="min-w-0">
+                    <p className="truncate text-xs text-muted-foreground">
+                      Morada
+                    </p>
+
+                    <p className="font-semibold">
+                      {totals.directionsClicks.toLocaleString("pt-PT")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex min-w-0 items-center gap-3 rounded-lg border p-3">
                   <Globe className="h-5 w-5 shrink-0 text-slate-600" />
 
                   <div className="min-w-0">

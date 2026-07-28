@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   useForm,
@@ -186,8 +186,9 @@ export default function BusinessForm({
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting, isDirty }
+    formState: { errors, isSubmitting, isDirty, submitCount }
   } = form;
+  const lastHandledSubmitCount = useRef(0);
 
   const {
     fields: faqFields,
@@ -672,9 +673,18 @@ export default function BusinessForm({
   }, [mode, initialImages]);
 
   useEffect(() => {
+    if (
+      submitCount === 0 ||
+      submitCount === lastHandledSubmitCount.current
+    ) {
+      return;
+    }
+
     const firstError = Object.keys(errors)[0];
 
     if (!firstError) return;
+
+    lastHandledSubmitCount.current = submitCount;
 
     if (errors.openingHours) {
       const hoursSection = document.getElementById("horario-funcionamento");
@@ -706,7 +716,7 @@ export default function BusinessForm({
     });
 
     element.focus();
-  }, [errors]);
+  }, [errors, submitCount]);
 
   return (
     <>
@@ -1471,6 +1481,7 @@ export default function BusinessForm({
                   <OpeningHours
                     control={form.control}
                     setValue={form.setValue}
+                    clearErrors={form.clearErrors}
                   />
                     </>
                   )}
