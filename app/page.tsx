@@ -194,7 +194,7 @@ export default async function Home() {
 
     supabase
       .from("business_campaigns")
-      .select("id,title,description,type,image_path,ends_on,cta_type,cta_destination,cta_url,cta_message,business:businesses(id,name,slug,whatsapp_phone)")
+      .select("id,title,description,type,image_path,ends_on,cta_type,cta_destination,cta_url,cta_message,business:businesses(id,name,slug,whatsapp_phone,user_id)")
       .eq("is_active", true)
       .lte("starts_on", new Date().toISOString().slice(0, 10))
       .gte("ends_on", new Date().toISOString().slice(0, 10))
@@ -220,6 +220,18 @@ export default async function Home() {
   if (campaignsError) {
     console.error("Erro ao obter campanhas:", campaignsError);
   }
+
+  const homepageCampaignsData = (campaignsData ?? []).filter((item) => {
+    const business = Array.isArray(item.business)
+      ? item.business[0]
+      : item.business;
+
+    const belongsToAdmin =
+      Boolean(process.env.ADMIN_USER_ID) &&
+      business?.user_id === process.env.ADMIN_USER_ID;
+
+    return !belongsToAdmin || Boolean(adminPreviewUserId);
+  });
 
   const popularCategories =
     categoriesData
@@ -256,7 +268,7 @@ export default async function Home() {
     .slice(0, 9);
 
   const campaignBusinessIds = new Set(
-    (campaignsData ?? []).flatMap((item) => {
+    homepageCampaignsData.flatMap((item) => {
       const business = Array.isArray(item.business)
         ? item.business[0]
         : item.business;
@@ -282,7 +294,7 @@ export default async function Home() {
     .map((business) => mapBusiness(business, campaignBusinessIds));
 
   const siteUrl = getSiteUrl();
-  const campaigns: CampaignCarouselItem[] = (campaignsData ?? []).flatMap((item) => {
+  const campaigns: CampaignCarouselItem[] = homepageCampaignsData.flatMap((item) => {
     const business = Array.isArray(item.business)
       ? item.business[0]
       : item.business;

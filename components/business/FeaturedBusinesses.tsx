@@ -73,10 +73,10 @@ export default function FeaturedBusinesses({ businesses }: Props) {
     <section className="mb-14 overflow-hidden bg-[#f4f7f5] sm:mb-20 lg:mb-24">
       <PageContainer className="py-12 sm:py-14 lg:py-16">
         <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0.65, y: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
@@ -157,13 +157,13 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                     initial={
                       prefersReducedMotion
                         ? false
-                        : { opacity: 0.55, y: 24, scale: 0.985 }
+                        : { opacity: 0, y: 48, scale: 0.94 }
                     }
                     whileInView={{ opacity: 1, y: 0, scale: 1 }}
                     viewport={{ once: true, amount: 0.18 }}
-                    whileHover={prefersReducedMotion ? undefined : { y: -5 }}
+                    whileHover={prefersReducedMotion ? undefined : { y: -9, scale: 1.012 }}
                     transition={{
-                      duration: 0.55,
+                      duration: 0.72,
                       delay: prefersReducedMotion
                         ? 0
                         : Math.min(index * 0.055, 0.22),
@@ -255,13 +255,13 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                   initial={
                     prefersReducedMotion
                       ? false
-                      : { opacity: 0.5, x: 22, scale: 0.985 }
+                      : { opacity: 0, x: 54, scale: 0.93 }
                   }
                   whileInView={{ opacity: 1, x: 0, scale: 1 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{
-                    duration: 0.6,
-                    delay: 0.08,
+                    duration: 0.78,
+                    delay: 0.16,
                     ease: [0.22, 1, 0.36, 1]
                   }}
                   className="relative flex h-[350px] flex-col overflow-hidden rounded-[1.75rem] border border-emerald-900/10 bg-[#e7f2eb] p-6 shadow-[0_22px_55px_rgba(22,65,47,0.1)] sm:h-[390px] sm:p-7"

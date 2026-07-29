@@ -32,12 +32,12 @@ export default function EventCard({ event }: Props) {
 
   return (
     <motion.article
-      initial={reduceMotion ? false : { opacity: 0.55, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 44, scale: 0.94 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
-      whileHover={reduceMotion ? undefined : { y: -5 }}
+      whileHover={reduceMotion ? undefined : { y: -9, scale: 1.012 }}
       transition={{
-        duration: 0.5,
+        duration: 0.7,
         ease: [0.22, 1, 0.36, 1],
         y: { type: "spring", stiffness: 280, damping: 24 }
       }}

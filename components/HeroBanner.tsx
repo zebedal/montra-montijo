@@ -65,20 +65,20 @@ export function Hero() {
       >
         <motion.h1
           className="text-4xl font-bold md:text-5xl"
-          initial={reduceMotion ? false : { opacity: 0.65, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          initial={reduceMotion ? false : { opacity: 0, y: 42, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
         >
           Descobre o comércio local no Montijo
         </motion.h1>
 
         <motion.p
           className="mt-4 text-white/80"
-          initial={reduceMotion ? false : { opacity: 0.65, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{
-            delay: reduceMotion ? 0 : 0.08,
-            duration: 0.5,
+            delay: reduceMotion ? 0 : 0.14,
+            duration: 0.7,
             ease: [0.22, 1, 0.36, 1]
           }}
         >
@@ -87,11 +87,11 @@ export function Hero() {
         </motion.p>
 
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0.65, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 34, scale: 0.94 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{
-            delay: reduceMotion ? 0 : 0.16,
-            duration: 0.5,
+            delay: reduceMotion ? 0 : 0.26,
+            duration: 0.72,
             ease: [0.22, 1, 0.36, 1]
           }}
         >

@@ -2,32 +2,35 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Building2, Check } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { ArrowRight, Building2, Check, TrendingUp } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
 import { Routes } from "@/types";
 
 const advantages = [
-  "Perfil público para o seu negócio",
-  "Contactos, localização e redes sociais",
-  "Presença nas pesquisas e categorias",
-  "Plano gratuito disponível"
+  "Maior destaque nos resultados",
+  "Estatísticas de desempenho",
+  "Ação principal personalizada",
+  "Campanhas no Plano Premium"
 ];
 
 export default function BusinessCta() {
+  const lottieRef = useRef<HTMLDivElement>(null);
+  const isLottieInView = useInView(lottieRef, { once: false, amount: 0.35 });
   const reduceMotion = useReducedMotion();
 
   return (
     <section className="bg-background">
       <PageContainer className="py-16 sm:py-20">
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0.55, y: 28, scale: 0.985 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 56, scale: 0.93 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
           className="group relative overflow-hidden rounded-3xl shadow-lg"
         >
           <Image
@@ -57,7 +60,7 @@ export default function BusinessCta() {
               </div>
 
               <p className="mt-6 text-sm font-semibold uppercase tracking-wider text-white/75">
-                Faça parte da Montra
+                Faça crescer a sua presença
               </p>
 
               <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -65,21 +68,21 @@ export default function BusinessCta() {
               </h2>
 
               <p className="mt-4 max-w-2xl text-base leading-7 text-white/85 sm:text-lg">
-                Adicione gratuitamente o seu negócio à Montra Montijo e aumente
-                a sua visibilidade junto de quem procura comércio, empresas e
-                serviços locais.
+                Compare os planos da Montra Montijo e escolha as ferramentas
+                certas para chegar a mais pessoas e transformar visitas em
+                oportunidades reais.
               </p>
 
               <ul className="mt-7 grid gap-3 sm:grid-cols-2">
                 {advantages.map((advantage, index) => (
                   <motion.li
                     key={advantage}
-                    initial={reduceMotion ? false : { opacity: 0.5, x: -12 }}
+                    initial={reduceMotion ? false : { opacity: 0, x: -34 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, amount: 0.5 }}
                     transition={{
-                      duration: 0.4,
-                      delay: reduceMotion ? 0 : 0.12 + index * 0.055,
+                      duration: 0.58,
+                      delay: reduceMotion ? 0 : 0.18 + index * 0.09,
                       ease: [0.22, 1, 0.36, 1]
                     }}
                     className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-white/90 backdrop-blur-sm"
@@ -94,26 +97,71 @@ export default function BusinessCta() {
               </ul>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-              <Button
-                asChild
-                size="lg"
-                variant="secondary"
-                className="min-w-48"
+            <motion.div
+              ref={lottieRef}
+              initial={reduceMotion ? false : { opacity: 0, x: 70, scale: 0.88, rotate: 2 }}
+              whileInView={{ opacity: 1, x: 0, scale: 1 }}
+              viewport={{ once: true, amount: 0.35 }}
+              transition={{
+                duration: 0.78,
+                delay: reduceMotion ? 0 : 0.3,
+                ease: [0.22, 1, 0.36, 1]
+              }}
+              className="w-full max-w-sm lg:w-[320px]"
+            >
+              <Link
+                href={Routes.PLANO_DESTAQUE}
+                aria-label="Conhecer os planos da Montra Montijo"
+                className="group block overflow-hidden rounded-[1.75rem] border border-white/80 bg-white p-3 text-emerald-950 shadow-[0_24px_60px_rgba(7,35,24,0.28)] transition-transform duration-300 hover:-translate-y-1"
               >
-                <Link href={Routes.CRIAR_NEGOCIO}>
-                  Adicionar gratuitamente
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+                <span className="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-[#eef7f1]">
+                  <span className="absolute -right-8 -top-10 size-32 rounded-full bg-amber-200/45 blur-2xl" />
+                  {reduceMotion ? (
+                    <TrendingUp className="size-14 text-emerald-800" />
+                  ) : (
+                    <motion.span
+                      animate={
+                        isLottieInView
+                          ? {
+                              y: [0, -7, 0],
+                              rotate: [0, -2, 0],
+                              scale: [1, 1.045, 1]
+                            }
+                          : undefined
+                      }
+                      transition={{
+                        duration: 2.2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="relative flex size-36 items-center justify-center"
+                    >
+                      <DotLottieReact
+                        src="/animations/growth-plans.json"
+                        autoplay={isLottieInView}
+                        loop
+                        className="size-full"
+                      />
+                    </motion.span>
+                  )}
+                </span>
 
-              <Button asChild size="lg" variant="primary" className="min-w-48">
-                <Link href={Routes.PLANO_DESTAQUE}>
-                  Descobrir planos
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
+                <span className="block p-4 pb-3">
+                  <span className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700/70">
+                    Publicar gratuitamente ou conhecer os planos
+                  </span>
+                  <span className="mt-2 flex items-center justify-between gap-4 text-lg font-bold">
+                    Conhecer os planos
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-emerald-950 text-white transition-transform duration-300 group-hover:translate-x-1">
+                      <ArrowRight className="size-4" />
+                    </span>
+                  </span>
+                  <span className="mt-1 block text-sm font-normal text-emerald-950/55">
+                    Encontre a opção certa para o seu negócio.
+                  </span>
+                </span>
+              </Link>
+            </motion.div>
           </div>
         </motion.div>
       </PageContainer>

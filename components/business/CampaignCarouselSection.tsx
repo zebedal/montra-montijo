@@ -120,10 +120,10 @@ export function CampaignCarouselSection({
     <section className="overflow-hidden border-y border-white/5 bg-[radial-gradient(circle_at_12%_0%,rgba(16,185,129,0.16),transparent_34%),linear-gradient(145deg,#071512_0%,#0b1715_48%,#07100f_100%)] text-white">
       <PageContainer className="py-16 sm:py-20">
         <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0.6, y: 20 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
           className="mb-8 flex items-end justify-between gap-6"
         >
           <div className="max-w-2xl">
@@ -152,12 +152,12 @@ export function CampaignCarouselSection({
 
         {singleCampaign ? (
           <motion.article
-            initial={prefersReducedMotion ? false : { opacity: 0.65, y: 18 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 48, scale: 0.95 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+            whileHover={prefersReducedMotion ? undefined : { y: -8, scale: 1.008 }}
             transition={{
-              duration: 0.5,
+              duration: 0.72,
               ease: [0.22, 1, 0.36, 1],
               y: { type: "spring", stiffness: 260, damping: 24 }
             }}
@@ -278,13 +278,13 @@ export function CampaignCarouselSection({
               {campaigns.map((campaign, index) => (
                 <CarouselItem key={campaign.id} className="basis-[88%] pl-4 sm:basis-[76%] lg:basis-[62%] xl:basis-[56%]">
                   <motion.article
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 46, scale: 0.94 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.2 }}
-                    whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+                    whileHover={prefersReducedMotion ? undefined : { y: -8, scale: 1.01 }}
                     transition={{
-                      duration: 0.45,
-                      delay: Math.min(index * 0.04, 0.16),
+                      duration: 0.68,
+                      delay: Math.min(index * 0.08, 0.32),
                       y: { type: "spring", stiffness: 260, damping: 24 }
                     }}
                     className="group h-full overflow-hidden rounded-3xl border border-white/10 bg-[#10201d] shadow-2xl shadow-black/25"

@@ -837,16 +837,14 @@ export default function BusinessForm({
   return (
     <>
       <Card className="mx-auto max-w-4xl">
-        <CardHeader>
-          <CardTitle>
-            {mode === "create" ? "Criar Negócio ou Serviço" : "Editar Negócio"}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {mode === "create"
-              ? "Preenche os dados para publicares o teu negócio na Montra Montijo."
-              : "Atualiza as informações do teu negócio."}
-          </p>
-        </CardHeader>
+        {mode === "edit" && (
+          <CardHeader>
+            <CardTitle>Editar Negócio</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Atualiza as informações do teu negócio.
+            </p>
+          </CardHeader>
+        )}
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">

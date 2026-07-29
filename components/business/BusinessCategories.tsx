@@ -28,8 +28,8 @@ export default function PopularCategories({
   const viewportAnimation = reduceMotion
     ? { initial: false as const }
     : {
-        initial: { opacity: 0.65, y: 16 },
-        whileInView: { opacity: 1, y: 0 },
+        initial: { opacity: 0, y: 34, scale: 0.96 },
+        whileInView: { opacity: 1, y: 0, scale: 1 },
         viewport: { once: true, amount: 0.2 }
       };
 
@@ -39,7 +39,7 @@ export default function PopularCategories({
         <motion.div
           className="mb-7"
           {...viewportAnimation}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
             {mode === "sectors" ? "Explorar por setor" : "Categorias populares"}
@@ -63,12 +63,12 @@ export default function PopularCategories({
                 whileHover={
                   reduceMotion
                     ? undefined
-                    : { y: -5, scale: 1.012 }
+                    : { y: -8, scale: 1.025 }
                 }
                 whileTap={reduceMotion ? undefined : { scale: 0.985 }}
                 transition={{
-                  delay: reduceMotion ? 0 : Math.min(index * 0.045, 0.27),
-                  duration: 0.45,
+                  delay: reduceMotion ? 0 : Math.min(index * 0.075, 0.45),
+                  duration: 0.62,
                   ease: [0.22, 1, 0.36, 1],
                   scale: { type: "spring", stiffness: 360, damping: 24 },
                   y: { type: "spring", stiffness: 300, damping: 24 }
@@ -81,7 +81,7 @@ export default function PopularCategories({
                   <motion.span
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf3ee] text-green-800 transition-colors group-hover:bg-green-200/70"
                     whileHover={
-                      reduceMotion ? undefined : { rotate: -7, scale: 1.08 }
+                      reduceMotion ? undefined : { rotate: -10, scale: 1.14 }
                     }
                     transition={{ type: "spring", stiffness: 380, damping: 18 }}
                   >
@@ -105,13 +105,13 @@ export default function PopularCategories({
           <motion.div
             className="min-w-0"
             {...viewportAnimation}
-            whileHover={reduceMotion ? undefined : { y: -5, scale: 1.012 }}
+            whileHover={reduceMotion ? undefined : { y: -8, scale: 1.025 }}
             whileTap={reduceMotion ? undefined : { scale: 0.985 }}
             transition={{
               delay: reduceMotion
                 ? 0
-                : Math.min(categories.length * 0.045, 0.27),
-              duration: 0.45,
+                : Math.min(categories.length * 0.075, 0.45),
+              duration: 0.62,
               ease: [0.22, 1, 0.36, 1],
               scale: { type: "spring", stiffness: 360, damping: 24 },
               y: { type: "spring", stiffness: 300, damping: 24 }

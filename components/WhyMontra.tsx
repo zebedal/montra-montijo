@@ -54,10 +54,10 @@ export default function WhyMontra() {
       <PageContainer className="relative py-20 sm:py-24 lg:py-28">
         <div className="grid items-center gap-16 lg:grid-cols-[1.03fr_0.97fr] lg:gap-20">
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0.6, x: -26 }}
+            initial={reduceMotion ? false : { opacity: 0, x: -58 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="relative inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-green-800">
               <span
@@ -85,14 +85,14 @@ export default function WhyMontra() {
                   <motion.article
                     key={benefit.title}
                     initial={
-                      reduceMotion ? false : { opacity: 0.55, y: 18 }
+                      reduceMotion ? false : { opacity: 0, y: 38, scale: 0.95 }
                     }
-                    whileInView={{ opacity: 1, y: 0 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
-                    whileHover={reduceMotion ? undefined : { y: -4 }}
+                    whileHover={reduceMotion ? undefined : { y: -8, scale: 1.015 }}
                     transition={{
-                      duration: 0.45,
-                      delay: reduceMotion ? 0 : index * 0.065,
+                      duration: 0.64,
+                      delay: reduceMotion ? 0 : index * 0.11,
                       ease: [0.22, 1, 0.36, 1],
                       y: { type: "spring", stiffness: 280, damping: 24 }
                     }}
@@ -114,12 +114,12 @@ export default function WhyMontra() {
           </motion.div>
 
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0.55, x: 28, scale: 0.975 }}
+            initial={reduceMotion ? false : { opacity: 0, x: 62, scale: 0.92 }}
             whileInView={{ opacity: 1, x: 0, scale: 1 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{
-              duration: 0.7,
-              delay: reduceMotion ? 0 : 0.08,
+              duration: 0.86,
+              delay: reduceMotion ? 0 : 0.16,
               ease: [0.22, 1, 0.36, 1]
             }}
             className="relative mx-auto h-[390px] w-full max-w-[560px] sm:h-[500px]"

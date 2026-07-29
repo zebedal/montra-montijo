@@ -31,8 +31,8 @@ export default function NewBusinesses({ businesses }: Props) {
   const viewportAnimation = reduceMotion
     ? { initial: false as const }
     : {
-        initial: { opacity: 0.65, y: 18 },
-        whileInView: { opacity: 1, y: 0 },
+        initial: { opacity: 0, y: 38, scale: 0.95 },
+        whileInView: { opacity: 1, y: 0, scale: 1 },
         viewport: { once: true, amount: 0.15 }
       };
 
@@ -42,7 +42,7 @@ export default function NewBusinesses({ businesses }: Props) {
         <motion.div
           className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
           {...viewportAnimation}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -75,7 +75,7 @@ export default function NewBusinesses({ businesses }: Props) {
                 key={latestBusiness.id}
                 className="min-w-0 md:col-span-1 lg:col-span-5"
                 {...viewportAnimation}
-                whileHover={reduceMotion ? undefined : { y: -5 }}
+                whileHover={reduceMotion ? undefined : { y: -9, scale: 1.01 }}
                 whileTap={reduceMotion ? undefined : { scale: 0.995 }}
                 transition={{
                   duration: 0.55,
@@ -219,8 +219,8 @@ type BusinessTileProps = {
   viewportAnimation:
     | { initial: false }
     | {
-        initial: { opacity: number; y: number };
-        whileInView: { opacity: number; y: number };
+        initial: { opacity: number; y: number; scale: number };
+        whileInView: { opacity: number; y: number; scale: number };
         viewport: { once: boolean; amount: number };
       };
 };
@@ -235,11 +235,11 @@ function BusinessTile({
     <motion.div
       className="h-full min-w-0"
       {...viewportAnimation}
-      whileHover={reduceMotion ? undefined : { y: -4, scale: 1.008 }}
+      whileHover={reduceMotion ? undefined : { y: -8, scale: 1.02 }}
       whileTap={reduceMotion ? undefined : { scale: 0.992 }}
       transition={{
-        delay: reduceMotion ? 0 : Math.min((index + 1) * 0.07, 0.28),
-        duration: 0.5,
+        delay: reduceMotion ? 0 : Math.min((index + 1) * 0.1, 0.5),
+        duration: 0.68,
         ease: [0.22, 1, 0.36, 1],
         scale: { type: "spring", stiffness: 340, damping: 25 },
         y: { type: "spring", stiffness: 280, damping: 24 }
@@ -272,7 +272,7 @@ function BusinessTile({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       {business.category && (
-                        <p className="inline-flex rounded-full bg-[#EAF3EE] px-2.5 py-1 text-xs font-semibold text-primary-light">
+                        <p className="inline-flex rounded-full bg-[#EAF3EE] px-2 py-0.5 text-[10px] font-semibold leading-4 text-primary-light">
                           {business.category.name}
                         </p>
                       )}
@@ -287,7 +287,7 @@ function BusinessTile({
 
                     <BusinessSpecialtyChips
                       specialties={business.specialties}
-                      className="mt-2 hidden flex-wrap gap-1.5 sm:flex"
+                      className="mt-2 hidden flex-wrap gap-1 sm:flex [&_[data-slot=badge]]:h-4 [&_[data-slot=badge]]:px-1.5 [&_[data-slot=badge]]:py-0 [&_[data-slot=badge]]:text-[10px]"
                     />
 
                     {business.city && (
