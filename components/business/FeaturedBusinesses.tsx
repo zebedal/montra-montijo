@@ -4,7 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Building2, ChevronLeft, ChevronRight, MapPin, Megaphone, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Megaphone,
+  Sparkles
+} from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
 import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
@@ -58,7 +66,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
   const hasNavigation = businesses.length > 1;
 
   return (
-    <section className="my-14 overflow-hidden bg-[#f4f7f5] sm:my-20 lg:my-24">
+    <section className="mb-14 overflow-hidden bg-[#f4f7f5] sm:mb-20 lg:mb-24">
       <PageContainer className="py-16 sm:py-20 lg:py-24">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -68,47 +76,87 @@ export default function FeaturedBusinesses({ businesses }: Props) {
               </span>
               Escolhas da Montra
             </div>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight">Negócios em destaque</h2>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight">
+              Negócios em destaque
+            </h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
-              Descubra espaços, serviços e experiências do comércio local do Montijo.
+              Descubra espaços, serviços e experiências do comércio local do
+              Montijo.
             </p>
           </div>
 
           <div className="hidden flex-wrap items-center gap-2 sm:flex">
             {hasNavigation && (
               <>
-                <Button type="button" size="icon" variant="outline" onClick={() => api?.scrollPrev()} disabled={!canScrollPrev} className="rounded-full border-green-950/10 bg-white shadow-sm" aria-label="Negócio anterior">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  onClick={() => api?.scrollPrev()}
+                  disabled={!canScrollPrev}
+                  className="rounded-full border-green-950/10 bg-white shadow-sm"
+                  aria-label="Negócio anterior"
+                >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
-                <Button type="button" size="icon" variant="outline" onClick={() => api?.scrollNext()} disabled={!canScrollNext} className="rounded-full border-green-950/10 bg-white shadow-sm" aria-label="Negócio seguinte">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  onClick={() => api?.scrollNext()}
+                  disabled={!canScrollNext}
+                  className="rounded-full border-green-950/10 bg-white shadow-sm"
+                  aria-label="Negócio seguinte"
+                >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </>
             )}
-            <Button asChild variant="ghost" className="text-green-900 hover:bg-white/70 dark:text-green-200">
-              <Link href={Routes.NEGOCIOS}>Ver mais negócios <ArrowRight className="h-4 w-4" /></Link>
+            <Button
+              asChild
+              variant="ghost"
+              className="text-green-900 hover:bg-white/70 dark:text-green-200"
+            >
+              <Link href={Routes.NEGOCIOS}>
+                Ver mais negócios <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
 
-        <Carousel setApi={handleApi} opts={{ align: "start", dragFree: true }} className="mt-10 w-full overflow-visible">
+        <Carousel
+          setApi={handleApi}
+          opts={{ align: "start", dragFree: true }}
+          className="mt-10 w-full overflow-visible"
+        >
           <CarouselContent className="-ml-5 overflow-visible">
             {businesses.map((business, index) => {
               const imageUrl = business.imageUrl ?? business.logoUrl;
-              const isLogoOnly = !business.imageUrl && Boolean(business.logoUrl);
+              const isLogoOnly =
+                !business.imageUrl && Boolean(business.logoUrl);
               return (
-                <CarouselItem key={business.id} className="basis-[90%] pl-5 sm:basis-[76%] lg:basis-[62%] xl:basis-[56%]">
+                <CarouselItem
+                  key={business.id}
+                  className="basis-[90%] pl-5 sm:basis-[76%] lg:basis-[62%] xl:basis-[56%]"
+                >
                   <motion.article
                     initial={false}
                     whileHover={prefersReducedMotion ? undefined : { y: -5 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className="group relative h-[350px] overflow-hidden rounded-[1.75rem] border border-white/80 bg-emerald-950 shadow-[0_22px_55px_rgba(22,65,47,0.14)] sm:h-[390px]"
                   >
-                    <Link href={`/negocio/${business.slug}`} className="relative block h-full">
+                    <Link
+                      href={`/negocio/${business.slug}`}
+                      className="relative block h-full"
+                    >
                       {imageUrl ? (
                         <Image
                           src={imageUrl}
-                          alt={isLogoOnly ? `Logótipo de ${business.name}` : `Fotografia de ${business.name}`}
+                          alt={
+                            isLogoOnly
+                              ? `Logótipo de ${business.name}`
+                              : `Fotografia de ${business.name}`
+                          }
                           fill
                           sizes="(max-width: 640px) 90vw, (max-width: 1024px) 76vw, 62vw"
                           className={`${isLogoOnly ? "bg-white object-contain p-14 sm:p-20" : "object-cover"} transition-transform duration-700 group-hover:scale-[1.035]`}
@@ -122,10 +170,14 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/5" />
                       <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 sm:p-5">
                         <div className="flex flex-wrap gap-2">
-                          <BusinessPlanBadge plan={business.plan} className="shadow-lg" />
+                          <BusinessPlanBadge
+                            plan={business.plan}
+                            className="shadow-lg"
+                          />
                           {business.hasActiveCampaign && (
                             <Badge className="gap-1 border border-white/30 bg-white/90 text-emerald-950 shadow-lg hover:bg-white/90">
-                              <Megaphone className="h-3.5 w-3.5" /> Oferta disponível
+                              <Megaphone className="h-3.5 w-3.5" /> Oferta
+                              disponível
                             </Badge>
                           )}
                         </div>
@@ -154,9 +206,12 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                               <MapPin className="h-4 w-4 shrink-0" />
                               <span className="truncate">{business.city}</span>
                             </span>
-                          ) : <span />}
+                          ) : (
+                            <span />
+                          )}
                           <span className="shrink-0 font-semibold">
-                            Ver negócio <ArrowRight className="ml-1 inline h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            Ver negócio{" "}
+                            <ArrowRight className="ml-1 inline h-4 w-4 transition-transform group-hover:translate-x-1" />
                           </span>
                         </div>
                       </div>
@@ -194,7 +249,11 @@ export default function FeaturedBusinesses({ businesses }: Props) {
             </Button>
           </div>
 
-          <Button asChild variant="ghost" className="text-green-900 hover:bg-white/70">
+          <Button
+            asChild
+            variant="ghost"
+            className="text-green-900 hover:bg-white/70"
+          >
             <Link href={Routes.NEGOCIOS}>
               Ver todos <ArrowRight className="h-4 w-4" />
             </Link>

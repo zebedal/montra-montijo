@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Building2, MapPin, Megaphone } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
@@ -16,11 +19,23 @@ type Props = {
 
 export default function NewBusinesses({ businesses }: Props) {
   const hasBusinesses = businesses?.length > 0;
+  const reduceMotion = useReducedMotion();
+  const viewportAnimation = reduceMotion
+    ? { initial: false as const }
+    : {
+        initial: { opacity: 0.65, y: 18 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.15 }
+      };
 
   return (
     <section className="bg-background">
       <PageContainer className="py-16 sm:py-20">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <motion.div
+          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+          {...viewportAnimation}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Adicionados recentemente
@@ -43,16 +58,24 @@ export default function NewBusinesses({ businesses }: Props) {
               </Link>
             </Button>
           )}
-        </div>
+        </motion.div>
 
         {hasBusinesses ? (
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            {businesses.map((business) => (
-              <Link
+            {businesses.map((business, index) => (
+              <motion.div
                 key={business.id}
-                href={`/negocio/${business.slug}`}
-                className="group flex min-w-0 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                {...viewportAnimation}
+                transition={{
+                  delay: reduceMotion ? 0 : Math.min(index * 0.07, 0.28),
+                  duration: 0.5,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
               >
+                <Link
+                  href={`/negocio/${business.slug}`}
+                  className="group flex h-full min-w-0 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                >
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
                   {business.logoUrl || business.imageUrl ? (
                     <Image
@@ -111,11 +134,16 @@ export default function NewBusinesses({ businesses }: Props) {
                 </div>
 
                 <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-primary" />
-              </Link>
+                </Link>
+              </motion.div>
             ))}
           </div>
         ) : (
-          <div className="mt-10 rounded-3xl border border-dashed bg-muted/30 px-6 py-14 text-center sm:px-8">
+          <motion.div
+            className="mt-10 rounded-3xl border border-dashed bg-muted/30 px-6 py-14 text-center sm:px-8"
+            {...viewportAnimation}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Building2 className="h-8 w-8 text-primary" />
             </div>
@@ -142,7 +170,7 @@ export default function NewBusinesses({ businesses }: Props) {
                 <Link href="/categorias">Ver categorias</Link>
               </Button>
             </div>
-          </div>
+          </motion.div>
         )}
       </PageContainer>
     </section>
