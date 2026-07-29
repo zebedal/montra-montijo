@@ -8,6 +8,7 @@ import { ArrowRight, Shapes } from "lucide-react";
 
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
+import CategoryBreadcrumb from "@/components/categorias/CategoryBreadcrumb";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 import { categoryIcons } from "@/lib/category-icons";
 import { getSectorImage } from "@/lib/sector-images";
@@ -129,7 +130,12 @@ export default async function SectorPage({ params }: Props) {
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
           <div className="relative grid overflow-hidden rounded-[2rem] bg-[#123c2b] shadow-[0_24px_70px_rgba(20,65,46,0.16)] lg:min-h-[430px] lg:grid-cols-[0.92fr_1.08fr]">
             <div className="relative z-10 flex flex-col justify-center px-6 py-10 text-white sm:px-10 sm:py-12 lg:px-14 lg:py-16">
-              <span className="flex size-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-sm backdrop-blur-sm">
+              <CategoryBreadcrumb
+                title={sector.name}
+                slug={sector.slug}
+              />
+
+              <span className="mt-8 flex size-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-sm backdrop-blur-sm">
                 <Icon className="size-7" />
               </span>
               <p className="mt-7 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">

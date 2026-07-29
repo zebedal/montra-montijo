@@ -13,7 +13,7 @@ type Props = {
 
 export default function CategoryBreadcrumb({ title, sector }: Props) {
   return (
-    <nav className="flex items-center gap-2 text-sm text-white/80">
+    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-white/80">
       <Link href="/" className="flex items-center gap-1 hover:text-white">
         <Home className="h-4 w-4" />
 
