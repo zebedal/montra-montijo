@@ -137,7 +137,7 @@ export default function RootLayout({
         />
         <GoogleAnalytics
           measurementId={
-            process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-WLTX5M984N"
+            process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-RJ075Y0TZF"
           }
         />
       </body>
