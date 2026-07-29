@@ -67,7 +67,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
 
   return (
     <section className="mb-14 overflow-hidden bg-[#f4f7f5] sm:mb-20 lg:mb-24">
-      <PageContainer className="py-16 sm:py-20 lg:py-24">
+      <PageContainer className="py-12 sm:py-14 lg:py-16">
         <motion.div
           initial={prefersReducedMotion ? false : { opacity: 0.65, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
