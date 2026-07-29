@@ -4,6 +4,7 @@ import { Mail, MapPin } from "lucide-react";
 import { SiFacebook, SiInstagram } from "react-icons/si";
 import Image from "next/image";
 import PageContainer from "@/components/PageContainer";
+import { CookieSettingsButton } from "@/components/analytics/GoogleAnalytics";
 
 const exploreLinks = [
   {
@@ -178,7 +179,10 @@ export default function Footer() {
               reservados.
             </p>
 
-            <p>Criado para promover o comércio local do concelho do Montijo.</p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <p>Criado para promover o comércio local do concelho do Montijo.</p>
+              <CookieSettingsButton />
+            </div>
           </div>
         </div>
       </PageContainer>

@@ -68,15 +68,16 @@ export default function CookiesPolicyPage() {
         </h2>
 
         <p className="text-muted-foreground">
-          Se viermos a utilizar cookies de análise, publicidade, personalização
-          ou outros mecanismos não essenciais, será apresentada informação
-          adicional e, quando necessário, será solicitado consentimento antes da
-          sua utilização.
+          Utilizamos o Google Analytics 4 para compreender, de forma agregada,
+          como a plataforma é utilizada, incluindo páginas visitadas, origem da
+          visita, tipo de dispositivo e interações gerais com o site. Esta
+          ferramenta só é ativada depois de o utilizador prestar consentimento.
         </p>
 
         <p className="text-muted-foreground">
-          Os utilizadores deverão poder aceitar ou recusar categorias não
-          essenciais e alterar posteriormente a sua escolha.
+          Pode aceitar ou recusar estes cookies no aviso apresentado no site e
+          alterar posteriormente a sua escolha através da opção “Gerir cookies”
+          no rodapé.
         </p>
       </section>
 
