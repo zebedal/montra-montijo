@@ -38,7 +38,7 @@ export default function NewBusinesses({ businesses }: Props) {
 
   return (
     <section className="bg-background">
-      <PageContainer className="py-16 sm:py-20">
+      <PageContainer className="pb-16 pt-10 sm:pb-20 sm:pt-12">
         <motion.div
           className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
           {...viewportAnimation}
@@ -124,7 +124,7 @@ export default function NewBusinesses({ businesses }: Props) {
                         {latestBusiness.category.name}
                       </p>
                     )}
-                    <h3 className="mt-2 text-2xl font-semibold leading-tight tracking-tight">
+                    <h3 className="mt-2 text-lg font-semibold leading-tight tracking-tight sm:text-xl">
                       {latestBusiness.name}
                     </h3>
                     {latestBusiness.description && (
@@ -281,7 +281,7 @@ function BusinessTile({
                       )}
                     </div>
 
-                    <h3 className="mt-2 line-clamp-2 text-lg font-semibold leading-snug transition-colors group-hover:text-primary">
+                    <h3 className="mt-2 line-clamp-2 text-[15px] font-semibold leading-snug transition-colors group-hover:text-primary sm:text-base">
                       {business.name}
                     </h3>
 
