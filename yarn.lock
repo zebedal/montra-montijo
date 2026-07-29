@@ -876,6 +876,18 @@
   resolved "https://registry.npmjs.org/@kurkle/color/-/color-0.3.4.tgz"
   integrity sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==
 
+"@lottiefiles/dotlottie-react@^0.19.12":
+  version "0.19.12"
+  resolved "https://registry.yarnpkg.com/@lottiefiles/dotlottie-react/-/dotlottie-react-0.19.12.tgz#306e6242e5c33597035e9ee0a81ac6aec47d9e4b"
+  integrity sha512-Onm0XUcfU8Io4E6zbNF23hW0AwHpwAWUhazII6z/mGAcGh8RFAqqrkFJW1sZ3Z6C9JXOiiud+MmrejNKikBShw==
+  dependencies:
+    "@lottiefiles/dotlottie-web" "0.78.2"
+
+"@lottiefiles/dotlottie-web@0.78.2":
+  version "0.78.2"
+  resolved "https://registry.yarnpkg.com/@lottiefiles/dotlottie-web/-/dotlottie-web-0.78.2.tgz#1cee4a51d6389c7e9cf2b60aeb48f2e29256335c"
+  integrity sha512-ERBw7qATlekpFnR1xwNoTeXsXqw0FzCiEgei0IwPiquT277m36/o0aSWZDK7CgkhVd1NYre3M9fH+6n4waUfHA==
+
 "@modelcontextprotocol/sdk@^1.26.0":
   version "1.29.0"
   resolved "https://registry.npmjs.org/@modelcontextprotocol/sdk/-/sdk-1.29.0.tgz"

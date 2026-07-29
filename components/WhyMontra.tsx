@@ -1,9 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowRight,
   Building2,
   HeartHandshake,
   MapPin,
@@ -13,8 +11,7 @@ import {
 import { motion, useReducedMotion } from "framer-motion";
 
 import PageContainer from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Routes } from "@/types";
+import ShopLottieCta from "@/components/home/ShopLottieCta";
 
 const benefits = [
   {
@@ -171,17 +168,7 @@ export default function WhyMontra() {
               />
             </motion.figure>
 
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="absolute bottom-[6%] right-0 h-12 rounded-full border border-white/80 bg-white px-5 text-green-950 shadow-xl hover:bg-amber-100 sm:right-3"
-            >
-              <Link href={Routes.CRIAR_NEGOCIO}>
-                Criar negócio na Montra
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <ShopLottieCta />
           </motion.div>
         </div>
       </PageContainer>
