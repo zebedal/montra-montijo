@@ -27,7 +27,7 @@ export default function CategoryCard({ name, slug, businessCount }: Props) {
         />
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0e1f17] via-[#111111]/80 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-night via-black/80 to-black/40" />
 
         <CardContent className="relative z-10 flex h-full min-h-56 flex-col items-center justify-center gap-4 p-6 text-center text-white">
           <div className="rounded-full border border-white/20 bg-white/10 p-4 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/15">

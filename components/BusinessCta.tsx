@@ -41,7 +41,7 @@ export default function BusinessCta() {
             className="scale-105 object-cover blur-[1px] transition-transform duration-[1800ms] ease-out group-hover:scale-[1.09]"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-r from-[#183d2d]/97 via-primary/93 to-primary/75" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-hero-overlay/97 via-primary/93 to-primary/75" />
 
           <div
             aria-hidden="true"
@@ -114,7 +114,7 @@ export default function BusinessCta() {
                 aria-label="Conhecer os planos da Montra Montijo"
                 className="group block overflow-hidden rounded-[1.75rem] border border-white/80 bg-white p-3 text-emerald-950 shadow-[0_24px_60px_rgba(7,35,24,0.28)] transition-transform duration-300 hover:-translate-y-1"
               >
-                <span className="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-[#eef7f1]">
+                <span className="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-brand-mint-light">
                   <span className="absolute -right-8 -top-10 size-32 rounded-full bg-amber-200/45 blur-2xl" />
                   {reduceMotion ? (
                     <TrendingUp className="size-14 text-emerald-800" />

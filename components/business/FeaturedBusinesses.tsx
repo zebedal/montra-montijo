@@ -70,7 +70,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
   const hasNavigation = businesses.length > 1;
 
   return (
-    <section className="mb-14 overflow-hidden bg-[#f4f7f5] sm:mb-20 lg:mb-24">
+    <section className="mb-14 overflow-hidden bg-brand-surface sm:mb-20 lg:mb-24">
       <PageContainer className="py-12 sm:py-14 lg:py-16">
         <motion.div
           initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
@@ -264,7 +264,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                     delay: 0.16,
                     ease: [0.22, 1, 0.36, 1]
                   }}
-                  className="relative flex h-[350px] flex-col overflow-hidden rounded-[1.75rem] border border-emerald-900/10 bg-[#e7f2eb] p-6 shadow-[0_22px_55px_rgba(22,65,47,0.1)] sm:h-[390px] sm:p-7"
+                  className="relative flex h-[350px] flex-col overflow-hidden rounded-[1.75rem] border border-emerald-900/10 bg-brand-promo p-6 shadow-[0_22px_55px_rgba(22,65,47,0.1)] sm:h-[390px] sm:p-7"
                 >
                   <div className="absolute -right-20 -top-24 size-64 rounded-full bg-amber-200/55 blur-3xl" />
                   <div className="absolute -bottom-28 -left-24 size-64 rounded-full bg-emerald-700/15 blur-3xl" />

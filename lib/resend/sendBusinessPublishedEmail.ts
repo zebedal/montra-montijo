@@ -149,7 +149,7 @@ export async function sendBusinessPublishedEmail({
                         <tr>
                           <td
                             align="center"
-                            bgcolor="#16a34a"
+                            bgcolor="#23804f"
                             style="border-radius:10px;"
                           >
                             <a
@@ -192,7 +192,7 @@ export async function sendBusinessPublishedEmail({
                         <a
                           href="${clientAreaUrl}"
                           style="
-                            color:#15803d;
+                            color:#185637;
                             text-decoration:underline;
                           "
                         >
@@ -220,7 +220,7 @@ export async function sendBusinessPublishedEmail({
                         <a
                           href="mailto:geral@montramontijo.pt"
                           style="
-                            color:#15803d;
+                            color:#185637;
                             text-decoration:underline;
                           "
                         >

@@ -79,7 +79,7 @@ export default function PopularCategories({
                   className="group flex min-h-22 h-full items-center gap-3 rounded-2xl border border-foreground/10 bg-card p-4 transition-colors hover:border-green-300 hover:bg-green-50/70"
                 >
                   <motion.span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf3ee] text-green-800 transition-colors group-hover:bg-green-200/70"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-mint text-green-800 transition-colors group-hover:bg-green-200/70"
                     whileHover={
                       reduceMotion ? undefined : { rotate: -10, scale: 1.14 }
                     }

@@ -28,7 +28,7 @@ export default function ShopLottieCta() {
         aria-label="Criar negócio na Montra Montijo"
         className="group flex max-w-[310px] items-center gap-2 rounded-2xl border border-white/90 bg-white p-2 pr-4 text-left text-green-950 shadow-2xl shadow-emerald-950/20 transition-transform duration-300 hover:-translate-y-1"
       >
-        <span className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#eef7f1] sm:size-22">
+        <span className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-mint-light sm:size-22">
           {reduceMotion ? (
             <Store className="size-9 text-green-800" />
           ) : (

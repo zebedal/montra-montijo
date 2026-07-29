@@ -3,7 +3,15 @@ import { redirect } from "next/navigation";
 import CollectionPageJsonLd from "@/components/seo/CollectionPageJsonLd";
 import type { Metadata } from "next";
 
-import { ArrowRight, Building2, MapPin, Search } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Clock3,
+  Compass,
+  MapPin,
+  Search,
+  Store
+} from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -108,65 +116,96 @@ export default async function BusinessesPage({ searchParams }: Props) {
           url: `${siteUrl}/negocio/${business.slug}`
         }))}
       />
-      <main className="min-h-[70vh]">
-        <section className="relative h-112.5 overflow-hidden">
-          <Image
-            src={heroImage}
-            alt="Vista sobre o Montijo"
-            fill
-            preload
-            placeholder="blur"
-            sizes="100vw"
-            className="object-cover"
-          />
+      <main className="min-h-[70vh] bg-brand-cream">
+        <PageContainer className="pb-4 pt-5 sm:pb-6 sm:pt-8">
+          <section className="relative min-h-[470px] overflow-hidden rounded-[2rem] bg-brand-forest shadow-2xl sm:min-h-[500px]">
+            <Image
+              src={heroImage}
+              alt="Vista sobre o Montijo"
+              fill
+              preload
+              placeholder="blur"
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              className="object-cover object-center"
+            />
 
-          <div className="absolute inset-0 bg-black/65" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-hero-overlay/98 via-primary/92 to-primary/55" />
+            <div className="absolute -right-16 -top-24 size-80 rounded-full bg-brand-gold/25 blur-3xl" />
+            <div className="absolute -bottom-28 left-1/3 size-72 rounded-full bg-green-300/15 blur-3xl" />
 
-          <PageContainer className="relative flex min-h-85 items-center py-16">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">
-                Diretório local
-              </p>
+            <div className="relative flex min-h-[470px] flex-col justify-between px-6 py-9 sm:min-h-[500px] sm:px-10 sm:py-12 lg:px-14">
+              <div className="max-w-3xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
+                  <MapPin className="size-3.5 text-brand-gold" />
+                  Diretório local do Montijo
+                </div>
 
-              <h1 className="mt-3 text-4xl font-bold tracking-tight text-white lg:text-5xl">
-                Diretório de negócios no Montijo
-              </h1>
+                <h1 className="mt-6 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                  O comércio local,
+                  <span className="block text-brand-gold">todo num só lugar.</span>
+                </h1>
 
-              <p className="mt-5 max-w-2xl text-md leading-7 text-white/90">
-                Descubra restaurantes, lojas, empresas e serviços do comércio
-                local. Consulte contactos, moradas, horários e informação útil
-                num só lugar.
-              </p>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-white/78 sm:text-lg">
+                  Encontre restaurantes, lojas, profissionais e serviços do
+                  Montijo. Consulte contactos, moradas e horários antes de sair
+                  de casa.
+                </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild variant="fat">
-                  <Link href="/search">
-                    <Search className="mr-2 h-4 w-4" />
-                    Pesquisar negócio
-                  </Link>
-                </Button>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-white text-brand-forest hover:bg-white/90"
+                  >
+                    <Link href="/search">
+                      <Search className="mr-2 size-4" />
+                      Pesquisar no diretório
+                    </Link>
+                  </Button>
 
-                <Button asChild variant="default" className="p-5">
-                  <Link href="/categorias">
-                    Explorar categorias
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 bg-white/8 text-white hover:bg-white/15 hover:text-white"
+                  >
+                    <Link href="/categorias">
+                      Explorar setores
+                      <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-10 flex flex-wrap gap-2.5 text-sm text-white/75">
+                <span className="rounded-full border border-white/12 bg-black/15 px-4 py-2 backdrop-blur-md">
+                  <strong className="text-white">{total}</strong>{" "}
+                  {total === 1 ? "negócio" : "negócios"}
+                </span>
+                <span className="rounded-full border border-white/12 bg-black/15 px-4 py-2 backdrop-blur-md">
+                  Comércio, serviços e restauração
+                </span>
+                <span className="rounded-full border border-white/12 bg-black/15 px-4 py-2 backdrop-blur-md">
+                  Informação local atualizada
+                </span>
               </div>
             </div>
-          </PageContainer>
-        </section>
+          </section>
+        </PageContainer>
         <section
           aria-labelledby="businesses-heading"
-          className="mx-auto mt-12 w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
+          className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8"
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.17em] text-brand-primary">
+                Explorar o diretório
+              </p>
               <h2
                 id="businesses-heading"
-                className="text-2xl font-bold tracking-tight sm:text-3xl"
+                className="mt-2 text-2xl font-bold tracking-tight text-brand-ink sm:text-3xl"
               >
-                Explorar o diretório
+                Negócios no Montijo
               </h2>
 
               <p className="mt-2 text-sm text-muted-foreground">
@@ -187,7 +226,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
 
           {businesses.length > 0 ? (
             <>
-              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {businesses.map((business) => (
                   <BusinessHomeCard key={business.id} business={business} />
                 ))}
@@ -216,10 +255,10 @@ export default async function BusinessesPage({ searchParams }: Props) {
           )}
         </section>
 
-        <section className="border-t bg-muted/20">
-          <PageContainer className="py-12 sm:py-16">
-            <div className="grid overflow-hidden rounded-3xl border bg-card shadow-sm lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="relative min-h-[280px] lg:min-h-[460px]">
+        <section className="pb-16 pt-4 sm:pb-24 sm:pt-8">
+          <PageContainer className="py-0">
+            <div className="grid overflow-hidden rounded-[2rem] bg-brand-surface shadow-lg lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="relative min-h-[300px] lg:min-h-[480px]">
                 <Image
                   src="/images/zona-ribeirinha.jpg"
                   alt="Zona ribeirinha do Montijo"
@@ -228,7 +267,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
                   className="object-cover"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-night/80 via-brand-night/10 to-transparent" />
 
                 <div className="absolute bottom-0 left-0 p-6 text-white sm:p-8">
                   <div className="flex items-center gap-2 text-sm font-medium">
@@ -243,13 +282,13 @@ export default async function BusinessesPage({ searchParams }: Props) {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
-                <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                  Comércio local no Montijo
+              <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-14">
+                <p className="text-xs font-semibold uppercase tracking-[0.17em] text-brand-primary">
+                  Feito para descobrir perto
                 </p>
 
-                <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-                  Descubra mais perto de si
+                <h2 className="mt-3 max-w-xl text-3xl font-bold tracking-tight text-brand-ink sm:text-4xl">
+                  Mais fácil encontrar. Mais fácil escolher.
                 </h2>
 
                 <p className="mt-4 leading-7 text-muted-foreground">
@@ -259,48 +298,45 @@ export default async function BusinessesPage({ searchParams }: Props) {
                   comunidade.
                 </p>
 
-                <div className="mt-7 grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                  <div className="rounded-xl bg-muted/50 p-4">
-                    <Building2 className="h-5 w-5 text-primary" />
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Negócios locais
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      Empresas e serviços da região do Montijo.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-muted/50 p-4">
-                    <Search className="h-5 w-5 text-primary" />
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Pesquisa simples
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      Pesquise por nome, categoria ou serviço.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-muted/50 p-4">
-                    <MapPin className="h-5 w-5 text-primary" />
-
-                    <p className="mt-3 text-sm font-semibold">
-                      Informação útil
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      Consulte contactos, localização e horários.
-                    </p>
-                  </div>
+                <div className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                  {[
+                    {
+                      icon: Store,
+                      title: "Escolha local",
+                      text: "Descubra quem está perto de si."
+                    },
+                    {
+                      icon: Compass,
+                      title: "Encontre depressa",
+                      text: "Pesquise por setor ou serviço."
+                    },
+                    {
+                      icon: Clock3,
+                      title: "Decida informado",
+                      text: "Veja horários, contactos e moradas."
+                    }
+                  ].map(({ icon: Icon, title, text }) => (
+                    <div
+                      key={title}
+                      className="rounded-2xl bg-white/75 p-4 shadow-sm"
+                    >
+                      <span className="flex size-9 items-center justify-center rounded-xl bg-brand-mint text-brand-primary">
+                        <Icon className="size-4.5" />
+                      </span>
+                      <p className="mt-3 text-sm font-semibold text-brand-ink">
+                        {title}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                        {text}
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Button asChild>
                     <Link href="/categorias">
-                      Explorar categorias
+                      Explorar setores
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

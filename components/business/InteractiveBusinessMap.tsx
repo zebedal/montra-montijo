@@ -20,7 +20,7 @@ type Props = {
 const markerIcon = divIcon({
   className: "business-map-marker",
   html: `
-    <span style="display:flex;width:36px;height:36px;align-items:center;justify-content:center;border:3px solid white;border-radius:999px 999px 999px 0;background:#16a34a;box-shadow:0 4px 12px rgba(0,0,0,.28);transform:rotate(-45deg);">
+    <span style="display:flex;width:36px;height:36px;align-items:center;justify-content:center;border:3px solid white;border-radius:999px 999px 999px 0;background:var(--color-brand-primary);box-shadow:0 4px 12px rgba(0,0,0,.28);transform:rotate(-45deg);">
       <span style="display:block;width:10px;height:10px;border-radius:999px;background:white;"></span>
     </span>
   `,

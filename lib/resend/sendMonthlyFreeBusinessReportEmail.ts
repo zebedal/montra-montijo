@@ -145,7 +145,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
                           ? `<p style="margin:0 0 22px;padding:10px 14px;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:13px;line-height:1.5;font-weight:700;text-align:center;">EMAIL DE TESTE — não foi registado como envio mensal</p>`
                           : ""
                       }
-                      <p style="margin:0 0 10px;font-size:13px;line-height:1.5;font-weight:700;letter-spacing:.08em;text-align:center;text-transform:uppercase;color:#15803d;">
+                      <p style="margin:0 0 10px;font-size:13px;line-height:1.5;font-weight:700;letter-spacing:.08em;text-align:center;text-transform:uppercase;color:#185637;">
                         Resumo de ${safePeriodLabel}
                       </p>
 
@@ -159,8 +159,8 @@ export async function sendMonthlyFreeBusinessReportEmail({
 
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:30px 0;border-collapse:separate;border-spacing:10px 0;">
                         <tr>
-                          <td width="50%" align="center" style="padding:22px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;">
-                            <div style="font-size:34px;line-height:1;font-weight:750;color:#15803d;">${pageViews}</div>
+                          <td width="50%" align="center" style="padding:22px 12px;background:#f3f8f5;border:1px solid #c3dfcf;border-radius:14px;">
+                            <div style="font-size:34px;line-height:1;font-weight:750;color:#185637;">${pageViews}</div>
                             <div style="margin-top:9px;font-size:13px;line-height:1.4;color:#4b5563;">Visualizações da página</div>
                           </td>
 
@@ -180,7 +180,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
                           ? `
                             ${
                               insights.milestone
-                                ? `<div style="margin:0 0 24px;padding:14px 18px;border-radius:12px;background:#ecfdf5;border:1px solid #a7f3d0;color:#166534;font-size:15px;line-height:1.5;font-weight:700;text-align:center;">🎉 ${escapeHtml(insights.milestone)}</div>`
+                                ? `<div style="margin:0 0 24px;padding:14px 18px;border-radius:12px;background:#f3f8f5;border:1px solid #92c5a8;color:#15452e;font-size:15px;line-height:1.5;font-weight:700;text-align:center;">🎉 ${escapeHtml(insights.milestone)}</div>`
                                 : ""
                             }
 
@@ -242,7 +242,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
                                       <td style="width:72px;padding:7px 10px 7px 0;color:#6b7280;">${escapeHtml(item.label)}</td>
                                       <td style="padding:7px 0;">
                                         <div style="height:9px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
-                                          <div style="width:${Math.round((item.count / maxWeeklyViews) * 100)}%;height:9px;background:#16a34a;border-radius:999px;"></div>
+                                          <div style="width:${Math.round((item.count / maxWeeklyViews) * 100)}%;height:9px;background:#23804f;border-radius:999px;"></div>
                                         </div>
                                       </td>
                                       <td align="right" style="width:36px;padding:7px 0 7px 10px;font-weight:700;color:#111827;">${item.count}</td>
@@ -254,8 +254,8 @@ export async function sendMonthlyFreeBusinessReportEmail({
                           `
                           : insights
                             ? `
-                              <div style="margin:0 0 30px;padding:18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;">
-                                <strong style="display:block;font-size:16px;line-height:1.5;color:#166534;">Existem mais detalhes sobre esta atividade</strong>
+                              <div style="margin:0 0 30px;padding:18px;background:#f3f8f5;border:1px solid #c3dfcf;border-radius:12px;">
+                                <strong style="display:block;font-size:16px;line-height:1.5;color:#15452e;">Existem mais detalhes sobre esta atividade</strong>
                                 <p style="margin:7px 0 0;font-size:14px;line-height:1.65;color:#3f6212;">Com o Plano Destaque pode consultar a evolução mensal, os canais utilizados, o dia com mais procura e o gráfico semanal.</p>
                               </div>
                             `
@@ -289,7 +289,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
 
                       <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:34px auto 26px;">
                         <tr>
-                          <td align="center" bgcolor="#16a34a" style="border-radius:10px;">
+                          <td align="center" bgcolor="#23804f" style="border-radius:10px;">
                             <a href="${safeRecommendations.length > 0 ? editBusinessUrl : isPremium ? statisticsUrl : clientAreaUrl}" style="display:inline-block;padding:16px 28px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:650;border-radius:10px;">
                               ${safeRecommendations.length > 0 ? safeRecommendations[0].ctaLabel : isPremium ? "Consultar estatísticas detalhadas" : "Ativar Plano Destaque — 4,99 €/mês"}
                             </a>
@@ -298,7 +298,7 @@ export async function sendMonthlyFreeBusinessReportEmail({
                       </table>
 
                       <p style="margin:0;text-align:center;font-size:14px;line-height:1.7;">
-                        <a href="${businessUrl}" style="color:#15803d;text-decoration:underline;">Ver a página do negócio</a>
+                        <a href="${businessUrl}" style="color:#185637;text-decoration:underline;">Ver a página do negócio</a>
                       </p>
 
                       <hr style="border:0;border-top:1px solid #e5e7eb;margin:34px 0;" />

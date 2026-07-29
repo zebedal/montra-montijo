@@ -117,7 +117,7 @@ export function CampaignCarouselSection({
   );
 
   return (
-    <section className="overflow-hidden border-y border-white/5 bg-[radial-gradient(circle_at_12%_0%,rgba(16,185,129,0.16),transparent_34%),linear-gradient(145deg,#071512_0%,#0b1715_48%,#07100f_100%)] text-white">
+    <section className="overflow-hidden border-y border-white/5 bg-[radial-gradient(circle_at_12%_0%,rgba(16,185,129,0.16),transparent_34%),linear-gradient(145deg,var(--color-brand-night-deep)_0%,var(--color-brand-night-mid)_48%,var(--color-brand-night-black)_100%)] text-white">
       <PageContainer className="py-16 sm:py-20">
         <motion.div
           initial={prefersReducedMotion ? false : { opacity: 0, y: 40 }}
@@ -161,7 +161,7 @@ export function CampaignCarouselSection({
               ease: [0.22, 1, 0.36, 1],
               y: { type: "spring", stiffness: 260, damping: 24 }
             }}
-            className="group overflow-hidden rounded-[2rem] border border-white/10 bg-[#10201d] shadow-2xl shadow-black/25"
+            className="group overflow-hidden rounded-[2rem] border border-white/10 bg-brand-night shadow-2xl shadow-black/25"
           >
             {singleCampaignHasCopy ? (
               <div className="grid lg:grid-cols-[1.35fr_0.65fr]">
@@ -287,7 +287,7 @@ export function CampaignCarouselSection({
                       delay: Math.min(index * 0.08, 0.32),
                       y: { type: "spring", stiffness: 260, damping: 24 }
                     }}
-                    className="group h-full overflow-hidden rounded-3xl border border-white/10 bg-[#10201d] shadow-2xl shadow-black/25"
+                    className="group h-full overflow-hidden rounded-3xl border border-white/10 bg-brand-night shadow-2xl shadow-black/25"
                   >
                     <div className="grid h-full md:grid-cols-[1.08fr_0.92fr]">
                       <Link

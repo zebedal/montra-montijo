@@ -41,7 +41,7 @@ export default function WhyMontra() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden bg-[#f4f7f5]">
+    <section className="relative overflow-hidden bg-brand-surface">
       <div
         aria-hidden="true"
         className="absolute -left-28 bottom-10 h-64 w-64 rounded-full bg-amber-300/20 blur-3xl"

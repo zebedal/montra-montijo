@@ -53,7 +53,7 @@ export function Hero() {
         />
       </motion.div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-[#183d2d]/97 via-primary/93 to-primary/75" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-hero-overlay/97 via-primary/93 to-primary/75" />
 
       <motion.div
         className="relative z-10 w-full max-w-3xl px-4 text-white"

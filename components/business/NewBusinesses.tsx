@@ -101,7 +101,7 @@ export default function NewBusinesses({ businesses }: Props) {
                         className={`${latestBusiness.imageUrl ? "object-cover" : "bg-white object-contain p-12"} transition-transform duration-700 group-hover:scale-[1.035]`}
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center bg-[#EAF3EE]">
+                      <div className="flex h-full items-center justify-center bg-brand-mint">
                         <Building2 className="h-14 w-14 text-primary/25" />
                       </div>
                     )}
@@ -272,7 +272,7 @@ function BusinessTile({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       {business.category && (
-                        <p className="inline-flex rounded-full bg-[#EAF3EE] px-2 py-0.5 text-[10px] font-semibold leading-4 text-primary-light">
+                        <p className="inline-flex rounded-full bg-brand-mint px-2 py-0.5 text-[10px] font-semibold leading-4 text-primary-light">
                           {business.category.name}
                         </p>
                       )}

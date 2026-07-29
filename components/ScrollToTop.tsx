@@ -42,7 +42,7 @@ export default function ScrollToTop() {
         "bg-primary-green text-white",
         "shadow-xl shadow-black/20",
         "transition-all duration-300",
-        "hover:bg-[#15803d]",
+        "hover:bg-green-700",
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0"

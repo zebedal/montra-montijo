@@ -126,9 +126,9 @@ export default async function SectorPage({ params }: Props) {
         ]}
       />
 
-      <section className="border-b bg-[#eef5f0]">
+      <section className="border-b bg-brand-mint-light">
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-          <div className="relative grid overflow-hidden rounded-[2rem] bg-[#123c2b] shadow-[0_24px_70px_rgba(20,65,46,0.16)] lg:min-h-[430px] lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="relative grid overflow-hidden rounded-[2rem] bg-brand-forest shadow-[0_24px_70px_rgba(20,65,46,0.16)] lg:min-h-[430px] lg:grid-cols-[0.92fr_1.08fr]">
             <div className="relative z-10 flex flex-col justify-center px-6 py-10 text-white sm:px-10 sm:py-12 lg:px-14 lg:py-16">
               <CategoryBreadcrumb
                 title={sector.name}
@@ -167,7 +167,7 @@ export default async function SectorPage({ params }: Props) {
               ) : (
                 <div className="h-full min-h-[280px] bg-[radial-gradient(circle_at_top_right,rgba(110,231,183,0.3),transparent_55%)]" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#123c2b]/35 via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#123c2b] lg:via-[#123c2b]/10 lg:to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-forest/35 via-transparent to-transparent lg:bg-gradient-to-r lg:from-brand-forest lg:via-brand-forest/10 lg:to-transparent" />
             </div>
           </div>
         </div>

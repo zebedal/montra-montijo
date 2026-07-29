@@ -64,7 +64,7 @@ const informationLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-[#f8faf8]">
+    <footer className="border-t bg-brand-footer">
       <PageContainer className="py-16">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-md">

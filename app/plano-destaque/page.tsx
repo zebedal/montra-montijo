@@ -138,7 +138,7 @@ export default function PlansPage() {
         </PageContainer>
       </section>
 
-      <section id="planos" className="scroll-mt-20 bg-[#f4f7f5]">
+      <section id="planos" className="scroll-mt-20 bg-brand-surface">
         <PageContainer className="py-16 sm:py-20 lg:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-green-700">Escolha o seu plano</p>
@@ -150,7 +150,7 @@ export default function PlansPage() {
             {plans.map((plan) => {
               const Icon = plan.icon;
               return (
-                <Card key={plan.name} className={`relative flex h-full flex-col overflow-hidden ${plan.premium ? "border-emerald-700 bg-[#0d211b] text-white shadow-xl" : plan.featured ? "border-green-300 bg-green-50 shadow-lg" : ""}`}>
+                <Card key={plan.name} className={`relative flex h-full flex-col overflow-hidden ${plan.premium ? "border-emerald-700 bg-brand-premium text-white shadow-xl" : plan.featured ? "border-green-300 bg-green-50 shadow-lg" : ""}`}>
                   {plan.premium && <Badge className="absolute right-5 top-5 bg-emerald-300 text-emerald-950 hover:bg-emerald-300">Acesso a campanhas</Badge>}
                   <CardHeader className="space-y-5">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${plan.premium ? "bg-white/10" : plan.featured ? "bg-amber-100" : "bg-green-100"}`}><Icon className={`h-6 w-6 ${plan.premium ? "text-emerald-300" : plan.featured ? "fill-amber-400 text-amber-600" : "text-green-700"}`} /></div>

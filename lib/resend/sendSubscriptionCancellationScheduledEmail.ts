@@ -163,7 +163,7 @@ export async function sendSubscriptionCancellationScheduledEmail({
                         <tr>
                           <td
                             align="center"
-                            bgcolor="#16a34a"
+                            bgcolor="#23804f"
                             style="border-radius:10px;"
                           >
                             <a
@@ -205,7 +205,7 @@ export async function sendSubscriptionCancellationScheduledEmail({
                         <a
                           href="${businessUrl}"
                           style="
-                            color:#15803d;
+                            color:#185637;
                             text-decoration:underline;
                           "
                         >
@@ -233,7 +233,7 @@ export async function sendSubscriptionCancellationScheduledEmail({
                         <a
                           href="mailto:suporte@montramontijo.pt"
                           style="
-                            color:#15803d;
+                            color:#185637;
                             text-decoration:underline;
                           "
                         >

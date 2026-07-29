@@ -23,33 +23,33 @@ type SectorWithCategories = BusinessSector & {
 
 const sectorAccents = [
   {
-    icon: "bg-[#fff0cf] text-[#9a5b00]",
-    eyebrow: "text-[#8a5605]",
+    icon: "bg-amber-100 text-amber-700",
+    eyebrow: "text-amber-700",
     glow: "bg-amber-300/35"
   },
   {
-    icon: "bg-[#e4efff] text-[#315f9b]",
-    eyebrow: "text-[#315f9b]",
+    icon: "bg-sector-blue-soft text-sector-blue",
+    eyebrow: "text-sector-blue",
     glow: "bg-sky-300/30"
   },
   {
-    icon: "bg-[#f7e4ec] text-[#99506d]",
-    eyebrow: "text-[#8c4864]",
+    icon: "bg-sector-rose-soft text-sector-rose",
+    eyebrow: "text-sector-rose",
     glow: "bg-rose-300/30"
   },
   {
-    icon: "bg-[#eee7fb] text-[#6f55a0]",
-    eyebrow: "text-[#654c94]",
+    icon: "bg-sector-violet-soft text-sector-violet",
+    eyebrow: "text-sector-violet",
     glow: "bg-violet-300/30"
   },
   {
-    icon: "bg-[#dff3ee] text-[#287564]",
-    eyebrow: "text-[#28705f]",
+    icon: "bg-sector-teal-soft text-sector-teal",
+    eyebrow: "text-sector-teal",
     glow: "bg-emerald-300/30"
   },
   {
-    icon: "bg-[#fae7db] text-[#a14f2f]",
-    eyebrow: "text-[#91462b]",
+    icon: "bg-orange-100 text-orange-700",
+    eyebrow: "text-orange-700",
     glow: "bg-orange-300/30"
   }
 ] as const;
@@ -105,9 +105,9 @@ export default function CategoriesView({ categories }: Props) {
 
   return (
     <div className="py-2 sm:py-4">
-      <section className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,#123c2b_0%,#1d523c_58%,#2f6a50_100%)] px-6 py-10 sm:px-10 sm:py-14 lg:px-14">
-        <div className="absolute -right-24 -top-28 size-80 rounded-full bg-[#f4c95d]/25 blur-3xl" />
-        <div className="absolute -bottom-36 left-[38%] size-72 rounded-full bg-[#9ec5b2]/20 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,var(--color-brand-forest)_0%,var(--color-brand-forest-mid)_58%,var(--color-brand-forest-light)_100%)] px-6 py-10 sm:px-10 sm:py-14 lg:px-14">
+        <div className="absolute -right-24 -top-28 size-80 rounded-full bg-brand-gold/25 blur-3xl" />
+        <div className="absolute -bottom-36 left-[38%] size-72 rounded-full bg-green-300/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-3 right-5 hidden w-[36%] max-w-[410px] lg:block xl:right-10">
           <DirectoryHeroIllustration />
         </div>
@@ -118,7 +118,7 @@ export default function CategoriesView({ categories }: Props) {
           </p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
             Encontre o que procura,
-            <span className="block text-[#f4c95d]">perto de si.</span>
+            <span className="block text-brand-gold">perto de si.</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
             Explore lojas, restaurantes, profissionais e serviços organizados
@@ -203,7 +203,7 @@ export default function CategoriesView({ categories }: Props) {
               <Link
                 key={sector.id}
                 href={`/setores/${sector.slug}`}
-                className="group relative flex min-h-[390px] flex-col overflow-hidden rounded-3xl border border-black/[0.07] bg-[#fffdfa] shadow-[0_12px_32px_rgba(58,45,31,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(58,45,31,0.12)]"
+                className="group relative flex min-h-[390px] flex-col overflow-hidden rounded-3xl border border-black/[0.07] bg-brand-cream shadow-[0_12px_32px_rgba(58,45,31,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(58,45,31,0.12)]"
               >
                 <div className="relative h-36 overflow-hidden bg-muted">
                   {imageUrl ? (
@@ -215,13 +215,13 @@ export default function CategoriesView({ categories }: Props) {
                       className="object-cover transition-transform duration-700 group-hover:scale-[1.045]"
                     />
                   ) : (
-                    <div className="h-full bg-[#efe7dc]" />
+                    <div className="h-full bg-brand-sand" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
-                  <span className={`absolute -bottom-1 left-5 flex size-12 items-center justify-center rounded-2xl border-4 border-[#fffdfa] ${accent.icon}`}>
+                  <span className={`absolute -bottom-1 left-5 flex size-12 items-center justify-center rounded-2xl border-4 border-brand-cream ${accent.icon}`}>
                     <Icon className="size-5" />
                   </span>
-                  <span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-[#3f4b44] shadow-sm backdrop-blur-sm">
+                  <span className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-brand-ink/85 shadow-sm backdrop-blur-sm">
                     {sector.businessCount} {sector.businessCount === 1 ? "negócio" : "negócios"}
                   </span>
                 </div>
@@ -231,19 +231,19 @@ export default function CategoriesView({ categories }: Props) {
                   <p className={`relative text-[11px] font-semibold uppercase tracking-[0.16em] ${accent.eyebrow}`}>
                     Setor
                   </p>
-                  <h2 className="relative mt-1.5 text-xl font-bold tracking-tight text-[#26342d]">
+                  <h2 className="relative mt-1.5 text-xl font-bold tracking-tight text-brand-ink">
                     {sector.name}
                   </h2>
-                  <p className="relative mt-2 line-clamp-2 text-sm leading-6 text-[#667169]">
+                  <p className="relative mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
                     {sector.description}
                   </p>
 
-                  <p className="relative mt-4 line-clamp-2 text-sm text-[#4d5a52]">
+                  <p className="relative mt-4 line-clamp-2 text-sm text-brand-ink/75">
                     {visibleCategories.map((category) => category.name).join(" · ")}
                     {sector.categories.length > visibleCategories.length && " · …"}
                   </p>
 
-                  <span className="relative mt-auto flex items-center gap-2 pt-5 text-sm font-semibold text-[#315f4a]">
+                  <span className="relative mt-auto flex items-center gap-2 pt-5 text-sm font-semibold text-brand-mid">
                     Ver {sector.categories.length}{" "}
                     {sector.categories.length === 1 ? "categoria" : "categorias"}
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />

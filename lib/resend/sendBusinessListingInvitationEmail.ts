@@ -59,7 +59,7 @@ Este é um aviso único enviado para o contacto público do negócio. Se não re
                   </tr>
                   <tr>
                     <td style="padding:12px 40px 42px;">
-                      <p style="margin:0 0 10px;text-align:center;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#15803d;">
+                      <p style="margin:0 0 10px;text-align:center;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#185637;">
                         O comércio local mostra-se
                       </p>
                       <h1 style="margin:0;text-align:center;font-size:28px;line-height:1.3;color:#111827;">
@@ -75,7 +75,7 @@ Este é um aviso único enviado para o contacto público do negócio. Se não re
 
                       <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:32px auto 18px;">
                         <tr>
-                          <td bgcolor="#16a34a" style="border-radius:10px;">
+                          <td bgcolor="#23804f" style="border-radius:10px;">
                             <a href="${claimUrl}" style="display:inline-block;padding:16px 28px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;border-radius:10px;">
                               Reivindicar página gratuitamente
                             </a>
@@ -84,12 +84,12 @@ Este é um aviso único enviado para o contacto público do negócio. Se não re
                       </table>
 
                       <p style="margin:0;text-align:center;font-size:14px;line-height:1.7;">
-                        <a href="${businessUrl}" style="color:#15803d;text-decoration:underline;">Consultar a página do negócio</a>
+                        <a href="${businessUrl}" style="color:#185637;text-decoration:underline;">Consultar a página do negócio</a>
                       </p>
 
                       <hr style="border:0;border-top:1px solid #e5e7eb;margin:34px 0 24px;" />
                       <p style="margin:0;font-size:12px;line-height:1.7;color:#6b7280;">
-                        Este é um aviso único enviado para o contacto público do negócio. Se não representa esta empresa, pode ignorar este email ou escrever para <a href="mailto:geral@montramontijo.pt" style="color:#15803d;">geral@montramontijo.pt</a>.
+                        Este é um aviso único enviado para o contacto público do negócio. Se não representa esta empresa, pode ignorar este email ou escrever para <a href="mailto:geral@montramontijo.pt" style="color:#185637;">geral@montramontijo.pt</a>.
                       </p>
                     </td>
                   </tr>

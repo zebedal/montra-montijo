@@ -168,7 +168,7 @@ export function Header() {
         <div className="flex items-center gap-1 sm:gap-2">
           <Button
             asChild
-            className="bg-green-600 text-white hover:bg-green-700"
+            variant="primary"
           >
             <Link href={Routes.CRIAR_NEGOCIO}>
               <Plus className="h-4 w-4 sm:mr-2" />
@@ -267,7 +267,7 @@ export function Header() {
 
             <SheetContent
               side="right"
-              className="w-[88vw] overflow-y-auto border-l border-white/10 bg-[#10281e] p-0 text-white sm:max-w-sm"
+              className="w-[88vw] overflow-y-auto border-l border-white/10 bg-brand-drawer p-0 text-white sm:max-w-sm"
             >
               <div className="flex min-h-full flex-col">
                 <div className="relative border-b border-white/10 px-6 pb-6 pt-7">

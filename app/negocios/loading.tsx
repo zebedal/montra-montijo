@@ -5,47 +5,54 @@ const BUSINESS_SKELETONS = 6;
 
 export default function BusinessesLoading() {
   return (
-    <main className="min-h-[70vh]">
-      <section className="relative overflow-hidden bg-muted">
-        <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
+    <main className="min-h-[70vh] bg-brand-cream">
+      <PageContainer className="pb-4 pt-5 sm:pb-6 sm:pt-8">
+        <section className="relative min-h-[470px] overflow-hidden rounded-[2rem] bg-brand-forest sm:min-h-[500px]">
+          <Skeleton className="absolute inset-0 h-full w-full rounded-none bg-white/10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-hero-overlay/98 via-primary/92 to-primary/55" />
 
-        <div className="absolute inset-0 bg-black/35" />
+          <div className="relative flex min-h-[470px] flex-col justify-between px-6 py-9 sm:min-h-[500px] sm:px-10 sm:py-12 lg:px-14">
+            <div className="w-full max-w-3xl">
+              <Skeleton className="h-8 w-56 rounded-full bg-white/20" />
+              <Skeleton className="mt-6 h-12 w-full max-w-xl bg-white/25 sm:h-14" />
+              <Skeleton className="mt-3 h-12 w-full max-w-md bg-brand-gold/30 sm:h-14" />
 
-        <PageContainer className="relative flex min-h-85 items-center py-16">
-          <div className="w-full max-w-3xl">
-            <Skeleton className="h-4 w-36 bg-white/30" />
+              <div className="mt-5 space-y-2">
+                <Skeleton className="h-4 w-full max-w-2xl bg-white/20" />
+                <Skeleton className="h-4 w-full max-w-xl bg-white/20" />
+              </div>
 
-            <Skeleton className="mt-4 h-12 w-full max-w-xl bg-white/30 sm:h-14" />
-
-            <div className="mt-5 space-y-2">
-              <Skeleton className="h-4 w-full max-w-2xl bg-white/25" />
-              <Skeleton className="h-4 w-full max-w-xl bg-white/25" />
-              <Skeleton className="h-4 w-full max-w-md bg-white/25" />
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Skeleton className="h-11 w-52 bg-white/25" />
+                <Skeleton className="h-11 w-44 bg-white/20" />
+              </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Skeleton className="h-10 w-44 bg-white/30" />
-              <Skeleton className="h-10 w-44 bg-white/30" />
+            <div className="mt-10 flex flex-wrap gap-2.5">
+              <Skeleton className="h-9 w-28 rounded-full bg-white/15" />
+              <Skeleton className="h-9 w-56 rounded-full bg-white/15" />
+              <Skeleton className="h-9 w-52 rounded-full bg-white/15" />
             </div>
           </div>
-        </PageContainer>
-      </section>
+        </section>
+      </PageContainer>
 
       <section
         aria-busy="true"
         aria-label="A carregar negócios"
-        className="mx-auto mt-12 w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
+        className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Skeleton className="h-8 w-56" />
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="mt-3 h-8 w-56" />
             <Skeleton className="mt-3 h-4 w-44" />
           </div>
 
           <Skeleton className="h-4 w-36" />
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: BUSINESS_SKELETONS }).map((_, index) => (
             <BusinessCardSkeleton key={index} />
           ))}
@@ -59,12 +66,12 @@ export default function BusinessesLoading() {
         </div>
       </section>
 
-      <section className="border-t bg-muted/20">
-        <PageContainer className="py-12 sm:py-16">
-          <div className="grid overflow-hidden rounded-3xl border bg-card shadow-sm lg:grid-cols-[1.05fr_0.95fr]">
-            <Skeleton className="min-h-70 rounded-none lg:min-h-115" />
+      <section className="pb-16 pt-4 sm:pb-24 sm:pt-8">
+        <PageContainer className="py-0">
+          <div className="grid overflow-hidden rounded-[2rem] bg-brand-surface shadow-lg lg:grid-cols-[0.9fr_1.1fr]">
+            <Skeleton className="min-h-75 rounded-none lg:min-h-120" />
 
-            <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
+            <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-14">
               <Skeleton className="h-4 w-52" />
 
               <Skeleton className="mt-4 h-9 w-full max-w-md" />
