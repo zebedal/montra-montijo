@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 
 import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
+import { sendBusinessListingInvitationEmailOnce } from "@/lib/resend/sendBusinessListingInvitationEmailOnce";
 import { sendNewBusinessNotificationEmailOnce } from "@/lib/resend/sendNewBusinessNotificationEmailOnce";
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -184,7 +185,7 @@ async function trySendBusinessPublishedEmail(businessId: string) {
   try {
     const { data: business, error: businessError } = await supabaseAdmin
       .from("businesses")
-      .select("id, user_id, name, slug, plan")
+      .select("id, user_id, name, slug, plan, email")
       .eq("id", businessId)
       .maybeSingle();
 
@@ -194,6 +195,27 @@ async function trySendBusinessPublishedEmail(businessId: string) {
 
     if (!business) {
       throw new Error("Negócio não encontrado.");
+    }
+
+    if (
+      process.env.ADMIN_USER_ID &&
+      business.user_id === process.env.ADMIN_USER_ID &&
+      business.email
+    ) {
+      try {
+        await sendBusinessListingInvitationEmailOnce({
+          userId: business.user_id,
+          businessId: business.id,
+          email: business.email,
+          businessName: business.name,
+          businessSlug: business.slug
+        });
+      } catch (invitationError) {
+        console.error(
+          "Negócio publicado, mas falhou o convite de reivindicação:",
+          invitationError
+        );
+      }
     }
 
     const {
