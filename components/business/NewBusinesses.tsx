@@ -49,7 +49,7 @@ export default function NewBusinesses({ businesses }: Props) {
               Adicionados recentemente
             </p>
 
-            <h2 className="mt-2 text-brand-section-title">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
               Novos negócios
             </h2>
 

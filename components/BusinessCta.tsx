@@ -63,14 +63,17 @@ export default function BusinessCta() {
                 A grande vantagem do Premium
               </p>
 
-              <h2 className="mt-3 text-brand-section-title">
-                Transforme uma novidade numa razão para visitar o seu negócio
+              <h2 className="mt-3 max-w-3xl text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+                Partilhe novidades
+                <span className="block text-green-300">
+                  e atraia mais clientes.
+                </span>
               </h2>
 
               <p className="mt-4 max-w-2xl text-brand-body text-white/85 sm:text-brand-lead">
-                Com o Plano Premium pode criar uma campanha com imagem,
-                mensagem e botão próprio. A campanha ganha espaço na homepage e
-                encaminha pessoas diretamente para a ação que pretende.
+                Com o Plano Premium pode criar uma campanha com imagem, mensagem
+                e botão próprio. A campanha ganha espaço na homepage e encaminha
+                pessoas diretamente para a ação que pretende.
               </p>
 
               <ul className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -98,7 +101,11 @@ export default function BusinessCta() {
 
             <motion.div
               ref={lottieRef}
-              initial={reduceMotion ? false : { opacity: 0, x: 70, scale: 0.88, rotate: 2 }}
+              initial={
+                reduceMotion
+                  ? false
+                  : { opacity: 0, x: 70, scale: 0.88, rotate: 2 }
+              }
               whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true, amount: 0.35 }}
               transition={{

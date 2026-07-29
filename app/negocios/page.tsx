@@ -140,7 +140,7 @@ export default async function BusinessesPage({ searchParams }: Props) {
                   Diretório local do Montijo
                 </div>
 
-                <h1 className="mt-6 max-w-2xl text-brand-page-title text-white">
+                <h1 className="mt-6 max-w-2xl text-4xl font-bold leading-[1.04] tracking-tight text-white sm:text-5xl lg:text-6xl">
                   O comércio local,
                   <span className="block text-brand-gold">
                     todo num só lugar.

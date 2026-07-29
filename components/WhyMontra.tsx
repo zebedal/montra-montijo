@@ -68,7 +68,7 @@ export default function WhyMontra() {
               <span className="relative">Montra Montijo</span>
             </div>
 
-            <h2 className="mt-4 max-w-2xl text-brand-section-title">
+            <h2 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
               Uma plataforma pensada para aproximar pessoas e negócios
             </h2>
 

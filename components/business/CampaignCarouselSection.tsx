@@ -130,7 +130,7 @@ export function CampaignCarouselSection({
             <p className="flex items-center gap-2 text-brand-label uppercase text-emerald-300">
               <Megaphone className="h-4 w-4" /> Por tempo limitado
             </p>
-            <h2 className="mt-3 text-brand-section-title">
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
               Ofertas e novidades no Montijo
             </h2>
             <p className="mt-3 text-base leading-7 text-white/65">

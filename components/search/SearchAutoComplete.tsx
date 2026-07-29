@@ -300,7 +300,9 @@ export default function SearchAutocomplete({
               setHasTyped(true);
               setQuery(event.target.value);
               setShouldFetchSuggestions(true);
-              setIsSuggestionsOpen(true);
+              setSuggestions([]);
+              setIsSuggestionsOpen(false);
+              setActiveSuggestionIndex(-1);
             }}
             onFocus={() => {
               setIsInputFocused(true);

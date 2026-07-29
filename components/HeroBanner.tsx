@@ -34,26 +34,28 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex h-125 w-full overflow-hidden items-center justify-center text-center"
+      className="relative flex h-125 w-full items-center justify-center text-center"
     >
-      <motion.div
-        className="absolute -inset-y-10 inset-x-0"
-        style={reduceMotion ? undefined : { y: imageY }}
-        animate={reduceMotion ? undefined : { scale: [1, 1.035, 1] }}
-        transition={{ duration: 20, ease: "easeInOut", repeat: Infinity }}
-      >
-        <Image
-          className="object-cover object-center"
-          src={heroImage}
-          alt="Comércio local no Montijo"
-          fill
-          preload
-          placeholder="blur"
-          sizes="100vw"
-        />
-      </motion.div>
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute -inset-y-10 inset-x-0"
+          style={reduceMotion ? undefined : { y: imageY }}
+          animate={reduceMotion ? undefined : { scale: [1, 1.035, 1] }}
+          transition={{ duration: 20, ease: "easeInOut", repeat: Infinity }}
+        >
+          <Image
+            className="object-cover object-center"
+            src={heroImage}
+            alt="Comércio local no Montijo"
+            fill
+            preload
+            placeholder="blur"
+            sizes="100vw"
+          />
+        </motion.div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-hero-overlay/97 via-primary/93 to-primary/75" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-hero-overlay/97 via-primary/93 to-primary/75" />
+      </div>
 
       <motion.div
         className="relative z-10 w-full max-w-3xl px-4 text-white"

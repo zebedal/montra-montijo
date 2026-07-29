@@ -86,7 +86,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
               </span>
               Escolhas da Montra
             </div>
-            <h2 className="mt-4 text-brand-section-title">
+            <h2 className="mt-4 text-3xl font-bold tracking-tight">
               Negócios em destaque
             </h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">
