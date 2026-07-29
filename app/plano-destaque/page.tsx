@@ -24,9 +24,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_PT",
     siteName: "Montra Montijo",
-    images: [{ url: "/images/plano-premium.png", width: 1024, height: 1024, alt: "Planos da Montra Montijo" }]
+    images: [
+      {
+        url: "/images/default-og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Planos da Montra Montijo"
+      }
+    ]
   },
-  twitter: { card: "summary_large_image", title: "Planos | Montra Montijo", description: "Compare os planos para negócios da Montra Montijo.", images: ["/images/plano-premium.png"] },
+  twitter: {
+    card: "summary_large_image",
+    title: "Planos | Montra Montijo",
+    description: "Compare os planos para negócios da Montra Montijo.",
+    images: ["/images/default-og-image.jpg"]
+  },
   robots: { index: true, follow: true }
 };
 
@@ -168,7 +180,7 @@ export default function PlansPage() {
         </PageContainer>
       </section>
 
-      <section className="bg-background">
+      <section id="comparacao-planos" className="scroll-mt-20 bg-background">
         <PageContainer className="py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center"><p className="text-sm font-semibold uppercase tracking-[0.16em] text-green-700">Comparação</p><h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Compare todas as funcionalidades</h2></div>
           <div className="mx-auto mt-10 max-w-5xl overflow-x-auto rounded-2xl border bg-card shadow-sm">

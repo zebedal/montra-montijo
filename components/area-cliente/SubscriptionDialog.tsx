@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   BadgeCheck,
   BarChart3,
   CalendarDays,
   CreditCard,
+  Crown,
+  Megaphone,
   RefreshCw,
   RotateCcw
 } from "lucide-react";
@@ -30,7 +33,10 @@ import {
   reactivateBusinessSubscription,
   upgradeBusinessToPremium
 } from "@/lib/helpers";
-import { getBusinessPlanLabel } from "@/lib/business-plan";
+import {
+  getBusinessPlanLabel,
+  type PaidBusinessPlan
+} from "@/lib/business-plan";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,6 +76,8 @@ export default function SubscriptionDialog({
   const router = useRouter();
 
   const [isUpdating, setIsUpdating] = useState(false);
+  const [activatingPlan, setActivatingPlan] =
+    useState<PaidBusinessPlan | null>(null);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const isPaid = business.plan !== "free";
   const isFeatured = business.plan === "featured";
@@ -134,24 +142,26 @@ export default function SubscriptionDialog({
     }
   }
 
-  async function handleActivatePremium() {
+  async function handleActivatePlan(plan: PaidBusinessPlan) {
     try {
       setIsUpdating(true);
+      setActivatingPlan(plan);
 
-      await activateBusinessPremium(business.id, "featured");
+      await activateBusinessPremium(business.id, plan);
     } catch (error) {
       console.error(error);
 
       toast.error(
         error instanceof Error
           ? error.message
-          : "Não foi possível iniciar a ativação do Premium.",
+          : "Não foi possível iniciar a ativação do plano.",
         {
           position: "top-center"
         }
       );
 
       setIsUpdating(false);
+      setActivatingPlan(null);
     }
   }
 
@@ -172,12 +182,18 @@ export default function SubscriptionDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className={isPaid ? "sm:max-w-lg" : "sm:max-w-2xl"}>
           <DialogHeader>
-            <DialogTitle>Subscrição de {business.name}</DialogTitle>
+            <DialogTitle>
+              {isPaid
+                ? `Subscrição de ${business.name}`
+                : `Escolha um plano para ${business.name}`}
+            </DialogTitle>
 
             <DialogDescription>
-              Consulte e faça a gestão da subscrição associada a este negócio.
+              {isPaid
+                ? "Consulte e faça a gestão da subscrição associada a este negócio."
+                : "Compare as opções e escolha as ferramentas certas para dar mais visibilidade ao seu negócio."}
             </DialogDescription>
           </DialogHeader>
 
@@ -255,9 +271,10 @@ export default function SubscriptionDialog({
               </>
             )}
 
-            {!isPaid &&
-              (variant === "statistics" ? (
-                <div className="rounded-lg border border-green-200 bg-green-50 p-5">
+            {!isPaid && (
+              <>
+                {variant === "statistics" && (
+                  <div className="rounded-lg border border-green-200 bg-green-50 p-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
                       <BarChart3 className="h-5 w-5 text-green-700" />
@@ -265,35 +282,94 @@ export default function SubscriptionDialog({
 
                     <div>
                       <h3 className="font-semibold text-green-900">
-                        Estatísticas do Plano Destaque
+                        Estatísticas disponíveis nos planos pagos
                       </h3>
 
                       <p className="mt-1 text-sm text-green-800">
-                        Descubra como os clientes interagem com o seu negócio
-                        através de estatísticas detalhadas.
+                        O Destaque e o Premium permitem perceber como os
+                        clientes interagem com o seu negócio.
                       </p>
-
-                      <ul className="mt-4 space-y-2 text-sm text-green-900">
-                        <li>• Visualizações da página do negócio</li>
-                        <li>• Cliques no telefone e website</li>
-                        <li>• Cliques nas redes sociais</li>
-                        <li>• Evolução do desempenho ao longo do tempo</li>
-                      </ul>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="rounded-lg border bg-muted/30 p-4">
-                  <p className="font-medium">
-                    Este negócio ainda não tem uma subscrição paga.
-                  </p>
+                  </div>
+                )}
 
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Ative o Destaque para promover este negócio e aceder a
-                    funcionalidades adicionais.
-                  </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col rounded-2xl border border-green-200 bg-green-50 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                        <Crown className="size-5 fill-amber-400" />
+                      </span>
+                      <div className="text-right">
+                        <strong className="text-xl text-green-950">4,99 €</strong>
+                        <p className="text-xs text-green-800/65">por mês</p>
+                      </div>
+                    </div>
+                    <h3 className="mt-4 text-lg font-bold text-green-950">
+                      Destaque
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-green-900/70">
+                      Ganhe prioridade e transforme visitas em ações.
+                    </p>
+                    <ul className="mt-4 space-y-2 text-sm text-green-950">
+                      <li>• Destaque e prioridade nos resultados</li>
+                      <li>• Ação principal personalizada</li>
+                      <li>• Estatísticas detalhadas</li>
+                    </ul>
+                    <Button
+                      type="button"
+                      className="mt-5 w-full bg-brand-primary text-white hover:bg-green-700"
+                      onClick={() => void handleActivatePlan("featured")}
+                      disabled={isUpdating}
+                    >
+                      {activatingPlan === "featured"
+                        ? "A preparar..."
+                        : "Ativar Destaque"}
+                    </Button>
+                  </div>
+
+                  <div className="flex flex-col rounded-2xl border border-green-950 bg-brand-premium p-5 text-white shadow-lg">
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="flex size-10 items-center justify-center rounded-xl bg-white/10 text-green-300">
+                        <Megaphone className="size-5" />
+                      </span>
+                      <div className="text-right">
+                        <strong className="text-xl">9,99 €</strong>
+                        <p className="text-xs text-white/55">por mês</p>
+                      </div>
+                    </div>
+                    <h3 className="mt-4 text-lg font-bold">Premium</h3>
+                    <p className="mt-1 text-sm leading-6 text-white/65">
+                      Tudo do Destaque, mais campanhas com grande visibilidade.
+                    </p>
+                    <ul className="mt-4 space-y-2 text-sm text-white/90">
+                      <li>• Todas as vantagens do Destaque</li>
+                      <li>• Criação de campanhas</li>
+                      <li>• Exposição no carrossel da homepage</li>
+                    </ul>
+                    <Button
+                      type="button"
+                      className="mt-5 w-full bg-white text-brand-premium hover:bg-green-50"
+                      onClick={() => void handleActivatePlan("premium")}
+                      disabled={isUpdating}
+                    >
+                      {activatingPlan === "premium"
+                        ? "A preparar..."
+                        : "Ativar Premium"}
+                    </Button>
+                  </div>
                 </div>
-              ))}
+
+                <Button asChild variant="link" className="h-auto self-center p-0">
+                  <Link
+                    href="/plano-destaque#comparacao-planos"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Comparar todos os detalhes dos planos
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <DialogFooter>
@@ -336,18 +412,7 @@ export default function SubscriptionDialog({
                   {isUpdating ? "A cancelar..." : "Cancelar subscrição"}
                 </Button>
               )
-            ) : (
-              <Button
-                type="button"
-                onClick={handleActivatePremium}
-                disabled={isUpdating}
-                className="bg-primary-green"
-              >
-                <BadgeCheck className="mr-2 h-4 w-4" />
-
-                {isUpdating ? "A preparar..." : "Ativar Destaque"}
-              </Button>
-            )}
+            ) : null}
           </DialogFooter>
         </DialogContent>
       </Dialog>

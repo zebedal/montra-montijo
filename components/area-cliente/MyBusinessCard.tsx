@@ -262,7 +262,7 @@ export default function MyBusinessCard({
                       <BadgeCheck className="mr-2 h-4 w-4" />
                       {business.plan !== "free"
                         ? "Gerir subscrição"
-                        : "Ativar Destaque"}
+                        : "Escolher plano"}
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />

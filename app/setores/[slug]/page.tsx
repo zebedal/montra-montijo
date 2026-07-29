@@ -67,6 +67,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           alt: `${sector.name} no Montijo`
         }
       ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image]
+    },
+    robots: {
+      index: true,
+      follow: true
     }
   };
 }
@@ -141,7 +151,7 @@ export default async function SectorPage({ params }: Props) {
               <p className="mt-7 text-brand-label uppercase text-emerald-200">
                 Setor
               </p>
-              <h1 className="mt-2 text-brand-page-title">
+              <h1 className="mt-2 text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
                 {sector.name}
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">

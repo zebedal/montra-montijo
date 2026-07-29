@@ -116,7 +116,7 @@ export default function CategoriesView({ categories }: Props) {
           <p className="text-brand-label uppercase text-amber-200">
             Diretório local do Montijo
           </p>
-          <h1 className="mt-3 text-brand-page-title text-white">
+          <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-5xl">
             Encontre o que procura,
             <span className="block text-brand-gold">perto de si.</span>
           </h1>
