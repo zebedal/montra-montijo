@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   useForm,
@@ -97,6 +97,12 @@ type Categoria = {
   id: string;
   name: string;
   slug: string;
+  sector: {
+    id: string;
+    name: string;
+    slug: string;
+    position: number;
+  } | null;
 };
 
 type Props = {
@@ -150,6 +156,7 @@ export default function BusinessForm({
         (initialData?.openingHours?.length ?? 0) > 0)
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [selectedSectorId, setSelectedSectorId] = useState("");
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [images, setImages] = useState<UploadImage[]>(
     mode === "edit" ? (initialImages ?? []) : []
@@ -292,6 +299,30 @@ export default function BusinessForm({
       (Boolean(initialData?.logo) && logoPreview === null));
   const hasEditChanges =
     isDirty || imagesChanged || logoChanged || primaryCtaChanged;
+  const sectors = useMemo(() => {
+    const unique = new Map<
+      string,
+      NonNullable<Categoria["sector"]>
+    >();
+
+    categorias.forEach((category) => {
+      if (category.sector) unique.set(category.sector.id, category.sector);
+    });
+
+    return [...unique.values()].sort(
+      (a, b) => a.position - b.position || a.name.localeCompare(b.name, "pt-PT")
+    );
+  }, [categorias]);
+  const hasSectorTaxonomy = sectors.length > 0;
+  const availableCategories = useMemo(
+    () =>
+      hasSectorTaxonomy
+        ? categorias.filter(
+            (category) => category.sector?.id === selectedSectorId
+          )
+        : categorias,
+    [categorias, hasSectorTaxonomy, selectedSectorId]
+  );
 
   function getAddressKey(
     data: Pick<
@@ -740,6 +771,7 @@ export default function BusinessForm({
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCategorySearch(selected?.name ?? "");
+    setSelectedSectorId(selected?.sector?.id ?? "");
   }, [selectedCategoryId, categorias]);
 
   useEffect(() => {
@@ -830,18 +862,64 @@ export default function BusinessForm({
               </div>
 
               <div className="space-y-1">
+                {hasSectorTaxonomy && (
+                  <div className="mb-4 space-y-2">
+                    <label className="text-sm font-medium" htmlFor="sector">
+                      Setor do negócio
+                    </label>
+                    <Select
+                      value={selectedSectorId}
+                      onValueChange={(value) => {
+                        setSelectedSectorId(value);
+
+                        const currentCategory = categorias.find(
+                          (category) => category.id === getValues("category_id")
+                        );
+
+                        if (currentCategory?.sector?.id !== value) {
+                          setValue("category_id", "", {
+                            shouldDirty: true,
+                            shouldValidate: false
+                          });
+                          setValue("specialtyIds", [], {
+                            shouldDirty: true,
+                            shouldValidate: false
+                          });
+                          setCategorySearch("");
+                          setSpecialties([]);
+                        }
+                      }}
+                    >
+                      <SelectTrigger id="sector" className="w-full">
+                        <SelectValue placeholder="Seleciona primeiro um setor *" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sectors.map((sector) => (
+                          <SelectItem key={sector.id} value={sector.id}>
+                            {sector.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      O setor organiza negócios semelhantes; a categoria define
+                      o tipo de atividade com mais precisão.
+                    </p>
+                  </div>
+                )}
+
                 <Controller
                   control={control}
                   name="category_id"
                   render={({ field, fieldState }) => (
                     <>
                       <Combobox
-                        items={categorias}
+                        items={availableCategories}
                         value={field.value}
                         onValueChange={(value) => {
                           field.onChange(value);
 
-                          const selectedCategory = categorias.find(
+                          const selectedCategory = availableCategories.find(
                             (category) => category.id === value
                           );
 
@@ -856,7 +934,7 @@ export default function BusinessForm({
 
                             setCategorySearch(searchValue);
 
-                            const selectedCategory = categorias.find(
+                            const selectedCategory = availableCategories.find(
                               (category) => category.id === field.value
                             );
 
@@ -872,7 +950,12 @@ export default function BusinessForm({
                             }
                           }}
                           onBlur={field.onBlur}
-                          placeholder="Seleciona uma categoria *"
+                          placeholder={
+                            hasSectorTaxonomy && !selectedSectorId
+                              ? "Seleciona primeiro um setor"
+                              : "Seleciona uma categoria *"
+                          }
+                          disabled={hasSectorTaxonomy && !selectedSectorId}
                           aria-invalid={fieldState.invalid}
                           aria-describedby="category-help"
                         />
@@ -902,8 +985,8 @@ export default function BusinessForm({
                         id="category-help"
                         className="text-sm text-muted-foreground"
                       >
-                        Não encontras a categoria certa? Envia-nos a tua
-                        sugestão para{" "}
+                        Não encontras o tipo certo? Escolhe a opção mais próxima
+                        ou envia-nos a tua sugestão para{" "}
                         <a
                           href={CATEGORY_REQUEST_EMAIL}
                           className="font-medium text-primary underline-offset-4 hover:underline"

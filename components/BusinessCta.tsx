@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Building2, Check } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
@@ -15,16 +18,24 @@ const advantages = [
 ];
 
 export default function BusinessCta() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section className="bg-background">
       <PageContainer className="py-16 sm:py-20">
-        <div className="relative overflow-hidden rounded-3xl shadow-lg">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0.55, y: 28, scale: 0.985 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.22 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="group relative overflow-hidden rounded-3xl shadow-lg"
+        >
           <Image
             src="/images/businesscta.jpg"
             alt=""
             fill
             sizes="(max-width: 1280px) 100vw, 1280px"
-            className="scale-105 object-cover blur-[1px]"
+            className="scale-105 object-cover blur-[1px] transition-transform duration-[1800ms] ease-out group-hover:scale-[1.09]"
           />
 
           <div className="absolute inset-0 bg-gradient-to-r from-[#183d2d]/97 via-primary/93 to-primary/75" />
@@ -60,9 +71,17 @@ export default function BusinessCta() {
               </p>
 
               <ul className="mt-7 grid gap-3 sm:grid-cols-2">
-                {advantages.map((advantage) => (
-                  <li
+                {advantages.map((advantage, index) => (
+                  <motion.li
                     key={advantage}
+                    initial={reduceMotion ? false : { opacity: 0.5, x: -12 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: reduceMotion ? 0 : 0.12 + index * 0.055,
+                      ease: [0.22, 1, 0.36, 1]
+                    }}
                     className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-white/90 backdrop-blur-sm"
                   >
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/15">
@@ -70,7 +89,7 @@ export default function BusinessCta() {
                     </span>
 
                     <span>{advantage}</span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </div>
@@ -96,7 +115,7 @@ export default function BusinessCta() {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </PageContainer>
     </section>
   );

@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, CalendarDays } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,16 +14,6 @@ import type { PublicEvent } from "@/lib/queries/getUpcomingEvents";
 type Props = {
   event: PublicEvent;
 };
-
-function formatEventDate(date: string) {
-  return new Intl.DateTimeFormat("pt-PT", {
-    timeZone: "Europe/Lisbon",
-    weekday: "short",
-    day: "2-digit",
-    month: "long",
-    year: "numeric"
-  }).format(new Date(date));
-}
 
 function getRelevantCategories(categories: string[]) {
   return categories
@@ -35,9 +28,21 @@ function getRelevantCategories(categories: string[]) {
 
 export default function EventCard({ event }: Props) {
   const categories = getRelevantCategories(event.categories);
+  const reduceMotion = useReducedMotion();
 
   return (
-    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
+    <motion.article
+      initial={reduceMotion ? false : { opacity: 0.55, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      whileHover={reduceMotion ? undefined : { y: -5 }}
+      transition={{
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+        y: { type: "spring", stiffness: 280, damping: 24 }
+      }}
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-md"
+    >
       <div className="relative aspect-video overflow-hidden bg-muted">
         {event.imageUrl ? (
           <Image
@@ -111,6 +116,6 @@ export default function EventCard({ event }: Props) {
           </Button>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }

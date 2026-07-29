@@ -60,7 +60,13 @@ export default function FeaturedBusinesses({ businesses }: Props) {
   return (
     <section className="mb-14 overflow-hidden bg-[#f4f7f5] sm:mb-20 lg:mb-24">
       <PageContainer className="py-16 sm:py-20 lg:py-24">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0.65, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.35 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+        >
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-green-800 dark:text-green-300">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-200 text-amber-800">
@@ -89,7 +95,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
               <Link href={Routes.NEGOCIOS}>Ver mais negócios <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
-        </div>
+        </motion.div>
 
         <Carousel setApi={handleApi} opts={{ align: "start", dragFree: true }} className="mt-10 w-full overflow-visible">
           <CarouselContent className="-ml-5 overflow-visible">
@@ -99,9 +105,22 @@ export default function FeaturedBusinesses({ businesses }: Props) {
               return (
                 <CarouselItem key={business.id} className="basis-[90%] pl-5 sm:basis-[76%] lg:basis-[62%] xl:basis-[56%]">
                   <motion.article
-                    initial={false}
+                    initial={
+                      prefersReducedMotion
+                        ? false
+                        : { opacity: 0.55, y: 24, scale: 0.985 }
+                    }
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.18 }}
                     whileHover={prefersReducedMotion ? undefined : { y: -5 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    transition={{
+                      duration: 0.55,
+                      delay: prefersReducedMotion
+                        ? 0
+                        : Math.min(index * 0.055, 0.22),
+                      ease: [0.22, 1, 0.36, 1],
+                      y: { type: "spring", stiffness: 260, damping: 24 }
+                    }}
                     className="group relative h-[350px] overflow-hidden rounded-[1.75rem] border border-white/80 bg-emerald-950 shadow-[0_22px_55px_rgba(22,65,47,0.14)] sm:h-[390px]"
                   >
                     <Link href={`/negocio/${business.slug}`} className="relative block h-full">
@@ -120,6 +139,7 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                       )}
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/5" />
+                      <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-amber-200/0 blur-3xl transition-all duration-700 group-hover:bg-amber-200/20" />
                       <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 sm:p-5">
                         <div className="flex flex-wrap gap-2">
                           <BusinessPlanBadge plan={business.plan} className="shadow-lg" />

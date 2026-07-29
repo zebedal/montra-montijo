@@ -24,7 +24,7 @@ const getCategoryBySlug = cache(async (slug: string) => {
 
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, slug")
+    .select("id, name, slug, sector:business_sectors(name, slug)")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -102,6 +102,9 @@ export default async function CategoryPage({ params }: Props) {
   const siteUrl = getSiteUrl();
 
   const categoryUrl = `${siteUrl}/categorias/${category.slug}`;
+  const sector = Array.isArray(category.sector)
+    ? (category.sector[0] ?? null)
+    : category.sector;
 
   return (
     <>
@@ -125,6 +128,14 @@ export default async function CategoryPage({ params }: Props) {
             name: "Categorias",
             url: `${siteUrl}/categorias`
           },
+          ...(sector
+            ? [
+                {
+                  name: sector.name,
+                  url: `${siteUrl}/setores/${sector.slug}`
+                }
+              ]
+            : []),
           {
             name: category.name,
             url: categoryUrl
@@ -133,9 +144,11 @@ export default async function CategoryPage({ params }: Props) {
       />
       <main>
         <CategoryHero
+          key={category.slug}
           title={category.name}
           slug={category.slug}
           businessCount={businesses.length}
+          sector={sector}
         />
 
         <section

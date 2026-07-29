@@ -52,8 +52,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   ];
 
-  const [categoriesResult, businessesResult, eventsResult] = await Promise.all([
+  const [categoriesResult, sectorsResult, businessesResult, eventsResult] = await Promise.all([
     supabaseAdmin.from("categories").select("slug").not("slug", "is", null),
+
+    supabaseAdmin
+      .from("business_sectors")
+      .select("slug")
+      .not("slug", "is", null),
 
     supabaseAdmin
       .from("businesses")
@@ -93,6 +98,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
+  if (sectorsResult.error) {
+    console.error("Erro ao obter setores para o sitemap:", sectorsResult.error);
+  }
+
   if (eventsResult.error) {
     console.error("Erro ao obter eventos para o sitemap:", eventsResult.error);
   }
@@ -100,6 +109,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryPages: MetadataRoute.Sitemap =
     categoriesResult.data?.map((category) => ({
       url: `${siteUrl}/categorias/${category.slug}`,
+      changeFrequency: "weekly",
+      priority: 0.8
+    })) ?? [];
+
+  const sectorPages: MetadataRoute.Sitemap =
+    sectorsResult.data?.map((sector) => ({
+      url: `${siteUrl}/setores/${sector.slug}`,
       changeFrequency: "weekly",
       priority: 0.8
     })) ?? [];
@@ -142,6 +158,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...businessPaginationPages,
+    ...sectorPages,
     ...categoryPages,
     ...businessPages,
     ...eventPages

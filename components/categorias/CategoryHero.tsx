@@ -11,15 +11,25 @@ type Props = {
   title: string;
   slug: string;
   businessCount: number;
+  sector?: {
+    name: string;
+    slug: string;
+  } | null;
 };
 
-export default function CategoryHero({ title, slug, businessCount }: Props) {
+export default function CategoryHero({
+  title,
+  slug,
+  businessCount,
+  sector
+}: Props) {
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  const imageUrl =
+  const initialImageUrl =
     slug === "agencias-viagem"
       ? "/images/categorias/agencias-viagem.jpg"
       : getCategoryCoverUrl(slug);
+  const fallbackImageUrl = "/images/background.webp";
+  const [imageUrl, setImageUrl] = useState(initialImageUrl);
 
   return (
     <section className="relative h-72 overflow-hidden sm:h-80">
@@ -40,12 +50,21 @@ export default function CategoryHero({ title, slug, businessCount }: Props) {
         }`}
         preload
         onLoad={() => setImageLoaded(true)}
+        onError={() => {
+          if (imageUrl !== fallbackImageUrl) {
+            setImageLoaded(false);
+            setImageUrl(fallbackImageUrl);
+            return;
+          }
+
+          setImageLoaded(true);
+        }}
       />
 
       <div className="absolute inset-0 bg-black/60" />
 
       <div className="container relative z-10 mx-auto flex h-full flex-col justify-center text-white p-5">
-        <CategoryBreadcrumb title={title} slug={slug} />
+        <CategoryBreadcrumb title={title} slug={slug} sector={sector} />
 
         <h1 className="mt-4 text-4xl font-bold">{title}</h1>
 

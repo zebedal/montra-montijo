@@ -1,7 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 
 import {
+  Apple,
   Baby,
+  Beef,
   BookOpen,
   Brain,
   Building2,
@@ -28,7 +30,6 @@ import {
   Plug,
   Scissors,
   Shirt,
-  ShoppingBasket,
   ShoppingCart,
   Sparkles,
   Store,
@@ -37,6 +38,7 @@ import {
   UtensilsCrossed,
   Wrench,
   Eye,
+  Fish,
   ShoppingBag,
   Home,
   Beer,
@@ -46,6 +48,21 @@ import {
 } from "lucide-react";
 
 export const categoryIcons: Record<string, LucideIcon> = {
+  // Setores
+  "alimentacao-restauracao": UtensilsCrossed,
+  comercio: Store,
+  saude: HeartPulse,
+  "beleza-bem-estar": Sparkles,
+  servicos: Wrench,
+  "casa-construcao": Home,
+  automovel: Car,
+  "educacao-formacao": GraduationCap,
+  desporto: Dumbbell,
+  "cultura-lazer-eventos": CalendarDays,
+  "imobiliario-financas": Building2,
+  "turismo-alojamento": Hotel,
+  animais: PawPrint,
+
   // Alimentação
   restaurantes: UtensilsCrossed,
   cafes: Coffee,
@@ -55,9 +72,9 @@ export const categoryIcons: Record<string, LucideIcon> = {
   padarias: Cake,
   pastelarias: Cake,
   supermercados: ShoppingCart,
-  talhos: ShoppingBasket,
-  peixarias: ShoppingBasket,
-  frutarias: ShoppingBasket,
+  talhos: Beef,
+  peixarias: Fish,
+  frutarias: Apple,
 
   // Saúde
   "clinicas-medicas": HeartPulse,
@@ -92,6 +109,8 @@ export const categoryIcons: Record<string, LucideIcon> = {
 
   // Comércio
   "lojas-locais": Store,
+  "lojas-especializadas": Store,
+  "grossistas-distribuicao": ShoppingCart,
   roupa: Shirt,
   calcado: ShoppingBag,
   papelaria: BookOpen,

@@ -65,16 +65,21 @@ export default function NewBusinesses({ businesses }: Props) {
             {businesses.map((business, index) => (
               <motion.div
                 key={business.id}
+                className="min-w-0"
                 {...viewportAnimation}
+                whileHover={reduceMotion ? undefined : { y: -4, scale: 1.008 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.992 }}
                 transition={{
                   delay: reduceMotion ? 0 : Math.min(index * 0.07, 0.28),
                   duration: 0.5,
-                  ease: [0.22, 1, 0.36, 1]
+                  ease: [0.22, 1, 0.36, 1],
+                  scale: { type: "spring", stiffness: 340, damping: 25 },
+                  y: { type: "spring", stiffness: 280, damping: 24 }
                 }}
               >
                 <Link
                   href={`/negocio/${business.slug}`}
-                  className="group flex h-full min-w-0 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                  className="group flex h-full min-w-0 items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-lg"
                 >
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
                   {business.logoUrl || business.imageUrl ? (

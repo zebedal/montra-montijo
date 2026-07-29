@@ -12,6 +12,7 @@ export async function getCategories(): Promise<CategorySummary[]> {
         id,
         name,
         slug,
+        sector:business_sectors(id, name, slug, description, position),
         businesses(
             id
         )
@@ -24,7 +25,10 @@ export async function getCategories(): Promise<CategorySummary[]> {
       id: category.id,
       name: category.name,
       slug: category.slug,
-      businessCount: category.businesses?.length ?? 0
+      businessCount: category.businesses?.length ?? 0,
+      sector: Array.isArray(category.sector)
+        ? (category.sector[0] ?? null)
+        : category.sector
     })) ?? []
   );
 }
