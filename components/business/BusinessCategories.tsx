@@ -51,20 +51,16 @@ export default function PopularCategories({
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {categories.map((category, index) => {
             const Icon = categoryIcons[category.slug] ?? Shapes;
 
             return (
               <motion.div
                 key={category.id}
-                className="min-w-0"
+                className="min-w-0 "
                 {...viewportAnimation}
-                whileHover={
-                  reduceMotion
-                    ? undefined
-                    : { y: -8, scale: 1.025 }
-                }
+                whileHover={reduceMotion ? undefined : { y: -8, scale: 1.025 }}
                 whileTap={reduceMotion ? undefined : { scale: 0.985 }}
                 transition={{
                   delay: reduceMotion ? 0 : Math.min(index * 0.075, 0.45),
@@ -125,9 +121,7 @@ export default function PopularCategories({
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
               </span>
               <span>
-                <span className="block text-sm font-semibold">
-                  Ver todos
-                </span>
+                <span className="block text-sm font-semibold">Ver todos</span>
                 <span className="mt-0.5 block text-xs text-green-800/70">
                   Explorar setores e categorias
                 </span>

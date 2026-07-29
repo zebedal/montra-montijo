@@ -1722,7 +1722,7 @@ export default function BusinessForm({
                 </>
               )}
             </section>
-            <div className="flex  justify-end gap-3 border-t pt-6">
+            <div className="flex justify-end gap-3 border-t pt-6">
               {mode === "edit" && (
                 <Button
                   type="button"
@@ -1736,7 +1736,11 @@ export default function BusinessForm({
 
               <Button
                 type="submit"
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                className={
+                  mode === "create"
+                    ? "w-full bg-brand-primary text-white hover:bg-green-700 sm:w-auto sm:min-w-56"
+                    : "flex-1 bg-brand-primary text-white hover:bg-green-700"
+                }
                 disabled={
                   isProcessing || (mode === "edit" && !hasEditChanges)
                 }

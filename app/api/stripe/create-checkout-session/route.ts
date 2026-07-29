@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
 import type { PaidBusinessPlan } from "@/lib/business-plan";
+import { getBusinessPlanPrice } from "@/lib/stripe/businessPlanPrices";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -21,13 +22,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Plano inválido." }, { status: 400 });
     }
 
-    const price =
-      plan === "premium"
-        ? process.env.STRIPE_PRICE_PREMIUM_CAMPAIGNS
-        : process.env.STRIPE_PRICE_DESTAQUE ?? process.env.STRIPE_PRICE_PREMIUM;
-    if (!price) {
-      return NextResponse.json({ error: "O preço deste plano não está configurado." }, { status: 503 });
-    }
+    const price = getBusinessPlanPrice(plan);
 
     const {
       data: { user },

@@ -95,6 +95,59 @@
   --color-app-background: #f8fafc;
   --color-text-primary: #0f172a;
   --color-text-secondary: #64748b;
+
+  /* Typography scale — primitives used by the existing Tailwind utilities. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.625rem;
+  --text-md: 1.0625rem;
+  --text-md--line-height: 1.6875rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1.08;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1.05;
+
+  /* Semantic typography — preferred for new public-facing layouts. */
+  --text-brand-label: 0.75rem;
+  --text-brand-label--line-height: 1rem;
+  --text-brand-label--letter-spacing: 0.16em;
+  --text-brand-label--font-weight: 600;
+  --text-brand-caption: 0.8125rem;
+  --text-brand-caption--line-height: 1.25rem;
+  --text-brand-body-sm: 0.875rem;
+  --text-brand-body-sm--line-height: 1.5rem;
+  --text-brand-body: 1rem;
+  --text-brand-body--line-height: 1.625rem;
+  --text-brand-lead: 1.125rem;
+  --text-brand-lead--line-height: 1.75rem;
+  --text-brand-card-title: 1.125rem;
+  --text-brand-card-title--line-height: 1.5rem;
+  --text-brand-card-title--font-weight: 700;
+  --text-brand-section-title: clamp(1.75rem, 3vw, 2.25rem);
+  --text-brand-section-title--line-height: 1.15;
+  --text-brand-section-title--letter-spacing: -0.025em;
+  --text-brand-section-title--font-weight: 700;
+  --text-brand-page-title: clamp(2.25rem, 5vw, 3.75rem);
+  --text-brand-page-title--line-height: 1.05;
+  --text-brand-page-title--letter-spacing: -0.035em;
+  --text-brand-page-title--font-weight: 700;
+  --text-brand-display: clamp(2.5rem, 6vw, 4.5rem);
+  --text-brand-display--line-height: 1;
+  --text-brand-display--letter-spacing: -0.04em;
+  --text-brand-display--font-weight: 700;
 }
 
 @theme inline {

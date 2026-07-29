@@ -12,10 +12,10 @@ import PageContainer from "@/components/PageContainer";
 import { Routes } from "@/types";
 
 const advantages = [
-  "Maior destaque nos resultados",
-  "Estatísticas de desempenho",
-  "Ação principal personalizada",
-  "Campanhas no Plano Premium"
+  "Publique uma oferta, novidade ou evento",
+  "Apareça na página principal da Montra",
+  "Leve visitantes a agir com um novo CTA",
+  "Meça os cliques gerados pela campanha"
 ];
 
 export default function BusinessCta() {
@@ -59,18 +59,18 @@ export default function BusinessCta() {
                 <Building2 className="h-8 w-8" />
               </div>
 
-              <p className="mt-6 text-sm font-semibold uppercase tracking-wider text-white/75">
-                Faça crescer a sua presença
+              <p className="mt-6 text-brand-label uppercase text-white/75">
+                A grande vantagem do Premium
               </p>
 
-              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                Dê mais visibilidade ao seu negócio
+              <h2 className="mt-3 text-brand-section-title">
+                Transforme uma novidade numa razão para visitar o seu negócio
               </h2>
 
-              <p className="mt-4 max-w-2xl text-base leading-7 text-white/85 sm:text-lg">
-                Compare os planos da Montra Montijo e escolha as ferramentas
-                certas para chegar a mais pessoas e transformar visitas em
-                oportunidades reais.
+              <p className="mt-4 max-w-2xl text-brand-body text-white/85 sm:text-brand-lead">
+                Com o Plano Premium pode criar uma campanha com imagem,
+                mensagem e botão próprio. A campanha ganha espaço na homepage e
+                encaminha pessoas diretamente para a ação que pretende.
               </p>
 
               <ul className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -87,10 +87,9 @@ export default function BusinessCta() {
                     }}
                     className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-white/90 backdrop-blur-sm"
                   >
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/15">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/15 text-brand-gold">
                       <Check className="h-3.5 w-3.5" />
                     </span>
-
                     <span>{advantage}</span>
                   </motion.li>
                 ))}
@@ -112,12 +111,12 @@ export default function BusinessCta() {
               <Link
                 href={Routes.PLANO_DESTAQUE}
                 aria-label="Conhecer os planos da Montra Montijo"
-                className="group block overflow-hidden rounded-[1.75rem] border border-white/80 bg-white p-3 text-emerald-950 shadow-[0_24px_60px_rgba(7,35,24,0.28)] transition-transform duration-300 hover:-translate-y-1"
+                className="group block overflow-hidden rounded-[1.75rem] border border-white/80 bg-white p-3 text-brand-forest shadow-xl transition-transform duration-300 hover:-translate-y-1"
               >
                 <span className="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-brand-mint-light">
                   <span className="absolute -right-8 -top-10 size-32 rounded-full bg-amber-200/45 blur-2xl" />
                   {reduceMotion ? (
-                    <TrendingUp className="size-14 text-emerald-800" />
+                    <TrendingUp className="size-14 text-brand-primary" />
                   ) : (
                     <motion.span
                       animate={
@@ -147,17 +146,17 @@ export default function BusinessCta() {
                 </span>
 
                 <span className="block p-4 pb-3">
-                  <span className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700/70">
-                    Publicar gratuitamente ou conhecer os planos
+                  <span className="text-brand-label uppercase text-brand-primary">
+                    Exclusivo do Plano Premium
                   </span>
-                  <span className="mt-2 flex items-center justify-between gap-4 text-lg font-bold">
-                    Conhecer os planos
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-emerald-950 text-white transition-transform duration-300 group-hover:translate-x-1">
+                  <span className="mt-2 flex items-center justify-between gap-4 text-brand-card-title">
+                    Conhecer o Premium
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-forest text-white transition-transform duration-300 group-hover:translate-x-1">
                       <ArrowRight className="size-4" />
                     </span>
                   </span>
-                  <span className="mt-1 block text-sm font-normal text-emerald-950/55">
-                    Encontre a opção certa para o seu negócio.
+                  <span className="mt-1 block text-brand-body-sm font-normal text-brand-forest/60">
+                    Imagem, mensagem e CTA numa campanha em destaque.
                   </span>
                 </span>
               </Link>

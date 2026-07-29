@@ -45,11 +45,11 @@ export default function NewBusinesses({ businesses }: Props) {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="text-brand-label uppercase text-muted-foreground">
               Adicionados recentemente
             </p>
 
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-2 text-brand-section-title">
               Novos negócios
             </h2>
 
@@ -165,6 +165,7 @@ export default function NewBusinesses({ businesses }: Props) {
                   <BusinessTile
                     business={business}
                     index={index}
+                    showDescription={spansFullRow}
                     reduceMotion={reduceMotion}
                     viewportAnimation={viewportAnimation}
                   />
@@ -215,6 +216,7 @@ export default function NewBusinesses({ businesses }: Props) {
 type BusinessTileProps = {
   business: PublicBusiness;
   index: number;
+  showDescription?: boolean;
   reduceMotion: boolean | null;
   viewportAnimation:
     | { initial: false }
@@ -228,6 +230,7 @@ type BusinessTileProps = {
 function BusinessTile({
   business,
   index,
+  showDescription = false,
   reduceMotion,
   viewportAnimation
 }: BusinessTileProps) {
@@ -284,6 +287,12 @@ function BusinessTile({
                     <h3 className="mt-2 line-clamp-2 text-[15px] font-semibold leading-snug transition-colors group-hover:text-primary sm:text-base">
                       {business.name}
                     </h3>
+
+                    {showDescription && business.description && (
+                      <p className="mt-2 hidden max-w-2xl text-brand-body-sm text-muted-foreground lg:line-clamp-2">
+                        {business.description}
+                      </p>
+                    )}
 
                     <BusinessSpecialtyChips
                       specialties={business.specialties}

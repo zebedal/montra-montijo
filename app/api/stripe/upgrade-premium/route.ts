@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getBusinessPlanPrice } from "@/lib/stripe/businessPlanPrices";
 
 export async function POST(request: Request) {
   const { businessId } = (await request.json()) as { businessId?: string };
@@ -23,8 +24,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "O upgrade está disponível para negócios com Plano Destaque ativo." }, { status: 409 });
   }
 
-  const price = process.env.STRIPE_PRICE_PREMIUM_CAMPAIGNS;
-  if (!price) return NextResponse.json({ error: "O preço Premium não está configurado." }, { status: 503 });
+  const price = getBusinessPlanPrice("premium");
 
   try {
     const subscription = await stripe.subscriptions.retrieve(business.stripe_subscription_id);

@@ -14,6 +14,7 @@ import {
 
 import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 import type { PaidBusinessPlan } from "@/lib/business-plan";
+import { getBusinessPlanFromPriceId } from "@/lib/stripe/businessPlanPrices";
 
 type FulfillBusinessCheckoutResult = {
   businessId: string;
@@ -65,6 +66,10 @@ export async function fulfillBusinessCheckout(
     throw new Error("A sessão Stripe não corresponde a uma subscrição.");
   }
 
+  if (session.payment_status !== "paid") {
+    throw new Error("O pagamento do checkout ainda não foi confirmado.");
+  }
+
   const subscriptionId =
     typeof session.subscription === "string"
       ? session.subscription
@@ -75,7 +80,15 @@ export async function fulfillBusinessCheckout(
   }
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  const plan: PaidBusinessPlan = session.metadata?.plan === "premium" ? "premium" : "featured";
+  const requestedPlan: PaidBusinessPlan =
+    session.metadata?.plan === "premium" ? "premium" : "featured";
+  const plan = getBusinessPlanFromPriceId(
+    subscription.items.data[0]?.price.id
+  );
+
+  if (!plan || plan !== requestedPlan) {
+    throw new Error("O preço da subscrição não corresponde ao plano escolhido.");
+  }
 
   const currentPeriodEnd =
     subscription.items.data[0]?.current_period_end ?? null;

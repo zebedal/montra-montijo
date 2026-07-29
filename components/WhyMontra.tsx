@@ -59,7 +59,7 @@ export default function WhyMontra() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="relative inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-green-800">
+            <div className="relative inline-flex items-center gap-2 text-brand-label uppercase text-green-800">
               <span
                 aria-hidden="true"
                 className="absolute -left-3 -top-2 h-7 w-7 rounded-full bg-amber-300/55"
@@ -68,7 +68,7 @@ export default function WhyMontra() {
               <span className="relative">Montra Montijo</span>
             </div>
 
-            <h2 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-4 max-w-2xl text-brand-section-title">
               Uma plataforma pensada para aproximar pessoas e negócios
             </h2>
 

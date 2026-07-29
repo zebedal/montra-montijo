@@ -127,10 +127,10 @@ export function CampaignCarouselSection({
           className="mb-8 flex items-end justify-between gap-6"
         >
           <div className="max-w-2xl">
-            <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-300">
+            <p className="flex items-center gap-2 text-brand-label uppercase text-emerald-300">
               <Megaphone className="h-4 w-4" /> Por tempo limitado
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-3 text-brand-section-title">
               Ofertas e novidades no Montijo
             </h2>
             <p className="mt-3 text-base leading-7 text-white/65">

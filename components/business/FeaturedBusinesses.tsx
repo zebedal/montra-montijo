@@ -80,13 +80,13 @@ export default function FeaturedBusinesses({ businesses }: Props) {
           className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-green-800 dark:text-green-300">
+            <div className="inline-flex items-center gap-2 text-brand-label uppercase text-green-800 dark:text-green-300">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-200 text-amber-800">
                 <Sparkles className="h-3.5 w-3.5" />
               </span>
               Escolhas da Montra
             </div>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight">
+            <h2 className="mt-4 text-brand-section-title">
               Negócios em destaque
             </h2>
             <p className="mt-2 max-w-2xl text-muted-foreground">

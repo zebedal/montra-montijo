@@ -138,10 +138,10 @@ export default async function SectorPage({ params }: Props) {
               <span className="mt-8 flex size-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-sm backdrop-blur-sm">
                 <Icon className="size-7" />
               </span>
-              <p className="mt-7 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">
+              <p className="mt-7 text-brand-label uppercase text-emerald-200">
                 Setor
               </p>
-              <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+              <h1 className="mt-2 text-brand-page-title">
                 {sector.name}
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-white/75 sm:text-lg">

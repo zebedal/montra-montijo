@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/server";
 import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
+import { getBusinessPlanPrice } from "@/lib/stripe/businessPlanPrices";
 
 type RequestBody = {
   businessId: string;
@@ -77,12 +78,7 @@ export async function POST(request: Request) {
     }
 
     const origin = request.headers.get("origin") ?? getSiteUrl();
-    const price = plan === "premium"
-      ? process.env.STRIPE_PRICE_PREMIUM_CAMPAIGNS
-      : process.env.STRIPE_PRICE_DESTAQUE ?? process.env.STRIPE_PRICE_PREMIUM;
-    if (!price) {
-      return NextResponse.json({ error: "O preço deste plano não está configurado." }, { status: 503 });
-    }
+    const price = getBusinessPlanPrice(plan);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

@@ -58,12 +58,12 @@ export default function BusinessHomeCard({
 
         <div className="flex flex-1 flex-col p-5">
           {business.category && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            <p className="text-brand-label uppercase text-primary">
               {business.category.name}
             </p>
           )}
 
-          <h2 className="mt-1 line-clamp-1 text-lg font-semibold transition-colors group-hover:text-primary">
+          <h2 className="mt-1 line-clamp-1 text-brand-card-title transition-colors group-hover:text-primary">
             {business.name}
           </h2>
 

@@ -135,17 +135,19 @@ export default async function BusinessesPage({ searchParams }: Props) {
 
             <div className="relative flex min-h-[470px] flex-col justify-between px-6 py-9 sm:min-h-[500px] sm:px-10 sm:py-12 lg:px-14">
               <div className="max-w-3xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-brand-label uppercase text-white/85 backdrop-blur-md">
                   <MapPin className="size-3.5 text-brand-gold" />
                   Diretório local do Montijo
                 </div>
 
-                <h1 className="mt-6 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                <h1 className="mt-6 max-w-2xl text-brand-page-title text-white">
                   O comércio local,
-                  <span className="block text-brand-gold">todo num só lugar.</span>
+                  <span className="block text-brand-gold">
+                    todo num só lugar.
+                  </span>
                 </h1>
 
-                <p className="mt-5 max-w-2xl text-base leading-7 text-white/78 sm:text-lg">
+                <p className="mt-5 max-w-2xl text-brand-body text-white/78 sm:text-brand-lead">
                   Encontre restaurantes, lojas, profissionais e serviços do
                   Montijo. Consulte contactos, moradas e horários antes de sair
                   de casa.
@@ -198,12 +200,12 @@ export default async function BusinessesPage({ searchParams }: Props) {
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.17em] text-brand-primary">
+              <p className="text-brand-label uppercase text-brand-primary">
                 Explorar o diretório
               </p>
               <h2
                 id="businesses-heading"
-                className="mt-2 text-2xl font-bold tracking-tight text-brand-ink sm:text-3xl"
+                className="mt-2 text-brand-section-title text-brand-ink"
               >
                 Negócios no Montijo
               </h2>
@@ -283,15 +285,15 @@ export default async function BusinessesPage({ searchParams }: Props) {
               </div>
 
               <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-14">
-                <p className="text-xs font-semibold uppercase tracking-[0.17em] text-brand-primary">
-                  Feito para descobrir perto
+                <p className="text-brand-label uppercase text-brand-primary">
+                  Descobre o que existe perto de ti
                 </p>
 
-                <h2 className="mt-3 max-w-xl text-3xl font-bold tracking-tight text-brand-ink sm:text-4xl">
+                <h2 className="mt-3 max-w-xl text-brand-section-title text-brand-ink">
                   Mais fácil encontrar. Mais fácil escolher.
                 </h2>
 
-                <p className="mt-4 leading-7 text-muted-foreground">
+                <p className="mt-4 text-brand-body text-muted-foreground">
                   A Montra Montijo reúne restaurantes, lojas, empresas e
                   prestadores de serviços locais num único diretório. Encontre
                   contactos, conheça novas opções e apoie quem faz parte da

@@ -113,10 +113,10 @@ export default function CategoriesView({ categories }: Props) {
         </div>
 
         <div className="relative max-w-3xl lg:max-w-[62%]">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-200">
+          <p className="text-brand-label uppercase text-amber-200">
             Diretório local do Montijo
           </p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <h1 className="mt-3 text-brand-page-title text-white">
             Encontre o que procura,
             <span className="block text-brand-gold">perto de si.</span>
           </h1>
@@ -140,10 +140,10 @@ export default function CategoriesView({ categories }: Props) {
       {!hasQuery && (
         <div className="mt-14 flex items-end justify-between gap-5 sm:mt-16">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="text-brand-label uppercase text-muted-foreground">
               Explorar o diretório
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+            <h2 className="mt-2 text-brand-section-title">
               Setores do comércio local
             </h2>
           </div>

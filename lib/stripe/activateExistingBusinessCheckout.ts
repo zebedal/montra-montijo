@@ -5,13 +5,15 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { PaidBusinessPlan } from "@/lib/business-plan";
+import { getBusinessPlanFromPriceId } from "@/lib/stripe/businessPlanPrices";
 
 export async function activateExistingBusinessCheckout(
   session: Stripe.Checkout.Session
 ) {
   const businessId = session.metadata?.businessId;
   const userId = session.metadata?.userId;
-  const plan: PaidBusinessPlan = session.metadata?.plan === "premium" ? "premium" : "featured";
+  const requestedPlan: PaidBusinessPlan =
+    session.metadata?.plan === "premium" ? "premium" : "featured";
 
   if (
     session.metadata?.flow !== "activate_existing_business" ||
@@ -39,6 +41,13 @@ export async function activateExistingBusinessCheckout(
   }
 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const plan = getBusinessPlanFromPriceId(
+    subscription.items.data[0]?.price.id
+  );
+
+  if (!plan || plan !== requestedPlan) {
+    throw new Error("O preço da subscrição não corresponde ao plano escolhido.");
+  }
   const currentPeriodEnd =
     subscription.items.data[0]?.current_period_end ?? null;
 
