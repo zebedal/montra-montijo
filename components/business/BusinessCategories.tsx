@@ -17,10 +17,12 @@ type Category = {
 
 type PopularCategoriesProps = {
   categories: Category[];
+  mode?: "categories" | "sectors";
 };
 
 export default function PopularCategories({
-  categories
+  categories,
+  mode = "categories"
 }: PopularCategoriesProps) {
   const reduceMotion = useReducedMotion();
   const viewportAnimation = reduceMotion
@@ -40,10 +42,12 @@ export default function PopularCategories({
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Categorias populares
+            {mode === "sectors" ? "Explorar por setor" : "Categorias populares"}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            Explore negócios e serviços por categoria.
+            {mode === "sectors"
+              ? "Encontre mais facilmente a área de negócio que procura."
+              : "Explore negócios e serviços por categoria."}
           </p>
         </motion.div>
 
@@ -54,20 +58,35 @@ export default function PopularCategories({
             return (
               <motion.div
                 key={category.id}
+                className="min-w-0"
                 {...viewportAnimation}
+                whileHover={
+                  reduceMotion
+                    ? undefined
+                    : { y: -5, scale: 1.012 }
+                }
+                whileTap={reduceMotion ? undefined : { scale: 0.985 }}
                 transition={{
                   delay: reduceMotion ? 0 : Math.min(index * 0.045, 0.27),
                   duration: 0.45,
-                  ease: [0.22, 1, 0.36, 1]
+                  ease: [0.22, 1, 0.36, 1],
+                  scale: { type: "spring", stiffness: 360, damping: 24 },
+                  y: { type: "spring", stiffness: 300, damping: 24 }
                 }}
               >
                 <Link
-                  href={`/categorias/${category.slug}`}
+                  href={`/${mode === "sectors" ? "setores" : "categorias"}/${category.slug}`}
                   className="group flex min-h-22 h-full items-center gap-3 rounded-2xl border border-foreground/10 bg-card p-4 transition-colors hover:border-green-300 hover:bg-green-50/70"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf3ee] text-green-800 transition-colors group-hover:bg-green-200/70">
+                  <motion.span
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf3ee] text-green-800 transition-colors group-hover:bg-green-200/70"
+                    whileHover={
+                      reduceMotion ? undefined : { rotate: -7, scale: 1.08 }
+                    }
+                    transition={{ type: "spring", stiffness: 380, damping: 18 }}
+                  >
                     <Icon className="h-5 w-5" />
-                  </span>
+                  </motion.span>
 
                   <span className="min-w-0">
                     <span className="block line-clamp-2 text-sm font-semibold leading-5">
@@ -84,13 +103,18 @@ export default function PopularCategories({
           })}
 
           <motion.div
+            className="min-w-0"
             {...viewportAnimation}
+            whileHover={reduceMotion ? undefined : { y: -5, scale: 1.012 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.985 }}
             transition={{
               delay: reduceMotion
                 ? 0
                 : Math.min(categories.length * 0.045, 0.27),
               duration: 0.45,
-              ease: [0.22, 1, 0.36, 1]
+              ease: [0.22, 1, 0.36, 1],
+              scale: { type: "spring", stiffness: 360, damping: 24 },
+              y: { type: "spring", stiffness: 300, damping: 24 }
             }}
           >
             <Link
@@ -101,9 +125,11 @@ export default function PopularCategories({
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
               </span>
               <span>
-                <span className="block text-sm font-semibold">Ver todas</span>
+                <span className="block text-sm font-semibold">
+                  Ver todos
+                </span>
                 <span className="mt-0.5 block text-xs text-green-800/70">
-                  Explorar categorias
+                  Explorar setores e categorias
                 </span>
               </span>
             </Link>

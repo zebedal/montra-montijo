@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { moveDraftAssets, publishBusiness } from "@/lib/helpers";
 import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
+import { sendBusinessListingInvitationEmailOnce } from "@/lib/resend/sendBusinessListingInvitationEmailOnce";
 import { sendNewBusinessNotificationEmailOnce } from "@/lib/resend/sendNewBusinessNotificationEmailOnce";
 import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -131,6 +132,35 @@ export async function POST(req: Request) {
       } catch (emailError) {
         console.error(
           "Negócio publicado, mas falhou a notificação administrativa:",
+          emailError
+        );
+      }
+    }
+
+    const publicBusinessEmail = draft.data.form.email?.trim();
+    const isCreatedByMontra =
+      Boolean(process.env.ADMIN_USER_ID) &&
+      user.id === process.env.ADMIN_USER_ID;
+
+    if (isCreatedByMontra && publicBusinessEmail && !isHiddenTestBusiness) {
+      try {
+        const result = await sendBusinessListingInvitationEmailOnce({
+          userId: user.id,
+          businessId: publishedBusiness.id,
+          email: publicBusinessEmail,
+          businessName: draft.data.form.name,
+          businessSlug: publishedBusiness.slug
+        });
+
+        console.log(
+          result.alreadySent
+            ? "Convite de reivindicação já tinha sido enviado."
+            : "Convite de reivindicação enviado ao negócio.",
+          { businessId: publishedBusiness.id }
+        );
+      } catch (emailError) {
+        console.error(
+          "Negócio publicado, mas falhou o convite de reivindicação:",
           emailError
         );
       }

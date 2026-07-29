@@ -119,7 +119,13 @@ export function CampaignCarouselSection({
   return (
     <section className="overflow-hidden border-y border-white/5 bg-[radial-gradient(circle_at_12%_0%,rgba(16,185,129,0.16),transparent_34%),linear-gradient(145deg,#071512_0%,#0b1715_48%,#07100f_100%)] text-white">
       <PageContainer className="py-16 sm:py-20">
-        <div className="mb-8 flex items-end justify-between gap-6">
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0.6, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.35 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-8 flex items-end justify-between gap-6"
+        >
           <div className="max-w-2xl">
             <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-300">
               <Megaphone className="h-4 w-4" /> Por tempo limitado
@@ -142,14 +148,19 @@ export function CampaignCarouselSection({
               </Button>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {singleCampaign ? (
           <motion.article
             initial={prefersReducedMotion ? false : { opacity: 0.65, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+            transition={{
+              duration: 0.5,
+              ease: [0.22, 1, 0.36, 1],
+              y: { type: "spring", stiffness: 260, damping: 24 }
+            }}
             className="group overflow-hidden rounded-[2rem] border border-white/10 bg-[#10201d] shadow-2xl shadow-black/25"
           >
             {singleCampaignHasCopy ? (
@@ -270,7 +281,12 @@ export function CampaignCarouselSection({
                     initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.16) }}
+                    whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+                    transition={{
+                      duration: 0.45,
+                      delay: Math.min(index * 0.04, 0.16),
+                      y: { type: "spring", stiffness: 260, damping: 24 }
+                    }}
                     className="group h-full overflow-hidden rounded-3xl border border-white/10 bg-[#10201d] shadow-2xl shadow-black/25"
                   >
                     <div className="grid h-full md:grid-cols-[1.08fr_0.92fr]">

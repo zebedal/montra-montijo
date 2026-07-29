@@ -3,12 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Building2, LoaderCircle, Search, Tags } from "lucide-react";
+import { useReducedMotion } from "framer-motion";
+import { Building2, Layers3, LoaderCircle, Search, Tags } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BusinessPlanBadge } from "@/components/business/BusinessPlanBadge";
 type SearchSuggestion =
+  | {
+      type: "sector";
+      label: string;
+      value: string;
+      slug: string;
+    }
   | {
       type: "category";
       label: string;
@@ -33,6 +40,7 @@ type SearchAutocompleteProps = {
   initialQuery?: string;
   suggestionsId?: string;
   placeholder?: string;
+  animatedPlaceholders?: string[];
   buttonLabel?: string;
   className?: string;
 };
@@ -41,10 +49,12 @@ export default function SearchAutocomplete({
   initialQuery = "",
   suggestionsId = "search-suggestions",
   placeholder = "Ex.: cabeleireiro, restaurante...",
+  animatedPlaceholders,
   buttonLabel = "Pesquisar",
   className
 }: SearchAutocompleteProps) {
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
 
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +64,57 @@ export default function SearchAutocomplete({
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [shouldFetchSuggestions, setShouldFetchSuggestions] = useState(false);
+  const [hasTyped, setHasTyped] = useState(Boolean(initialQuery));
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [typewriterPlaceholder, setTypewriterPlaceholder] = useState("");
+
+  useEffect(() => {
+    if (
+      reduceMotion ||
+      hasTyped ||
+      isInputFocused ||
+      !animatedPlaceholders ||
+      animatedPlaceholders.length === 0
+    ) {
+      return;
+    }
+
+    let phraseIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+    let timeoutId: number;
+
+    const tick = () => {
+      const phrase = animatedPlaceholders[phraseIndex];
+
+      if (deleting) {
+        characterIndex -= 1;
+      } else {
+        characterIndex += 1;
+      }
+
+      setTypewriterPlaceholder(phrase.slice(0, characterIndex));
+
+      if (!deleting && characterIndex === phrase.length) {
+        deleting = true;
+        timeoutId = window.setTimeout(tick, 1900);
+        return;
+      }
+
+      if (deleting && characterIndex === 0) {
+        deleting = false;
+        phraseIndex = (phraseIndex + 1) % animatedPlaceholders.length;
+        timeoutId = window.setTimeout(tick, 500);
+        return;
+      }
+
+      timeoutId = window.setTimeout(tick, deleting ? 75 : 140);
+    };
+
+    timeoutId = window.setTimeout(tick, 650);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [animatedPlaceholders, hasTyped, isInputFocused, reduceMotion]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -164,6 +225,11 @@ export default function SearchAutocomplete({
       return;
     }
 
+    if (suggestion.type === "sector") {
+      router.push(`/setores/${suggestion.slug}`);
+      return;
+    }
+
     router.push(`/search?q=${encodeURIComponent(suggestion.value)}`);
   }
 
@@ -231,11 +297,15 @@ export default function SearchAutocomplete({
           <Input
             value={query}
             onChange={(event) => {
+              setHasTyped(true);
               setQuery(event.target.value);
               setShouldFetchSuggestions(true);
               setIsSuggestionsOpen(true);
             }}
             onFocus={() => {
+              setIsInputFocused(true);
+              setTypewriterPlaceholder("");
+
               if (
                 shouldFetchSuggestions &&
                 query.trim().length >= 2 &&
@@ -244,8 +314,19 @@ export default function SearchAutocomplete({
                 setIsSuggestionsOpen(true);
               }
             }}
+            onBlur={() => setIsInputFocused(false)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={
+              !animatedPlaceholders?.length
+                ? placeholder
+                : isInputFocused
+                  ? ""
+                : reduceMotion
+                  ? animatedPlaceholders[0]
+                  : hasTyped
+                    ? placeholder
+                    : typewriterPlaceholder
+            }
             className="h-full border-0 pl-10 pr-10 text-foreground shadow-none focus-visible:ring-0"
             role="combobox"
             aria-expanded={showDropdown}
@@ -284,7 +365,7 @@ export default function SearchAutocomplete({
                   key={
                     suggestion.type === "business"
                       ? `business-${suggestion.businessId}`
-                      : `category-${suggestion.slug}`
+                      : `${suggestion.type}-${suggestion.slug}`
                   }
                   id={`${suggestionsId}-${index}`}
                   type="button"
@@ -299,6 +380,8 @@ export default function SearchAutocomplete({
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     {suggestion.type === "category" ? (
                       <Tags className="h-4 w-4 text-primary" />
+                    ) : suggestion.type === "sector" ? (
+                      <Layers3 className="h-4 w-4 text-primary" />
                     ) : (
                       <Building2 className="h-4 w-4 text-primary" />
                     )}
@@ -312,7 +395,9 @@ export default function SearchAutocomplete({
                     <p className="truncate text-xs text-muted-foreground">
                       {suggestion.type === "category"
                         ? "Pesquisar categoria"
-                        : (suggestion.categoryName ?? "Negócio local")}
+                        : suggestion.type === "sector"
+                          ? "Explorar setor"
+                          : (suggestion.categoryName ?? "Negócio local")}
                     </p>
                   </div>
 

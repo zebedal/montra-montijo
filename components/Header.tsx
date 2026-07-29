@@ -153,7 +153,7 @@ export function Header() {
           </Button>
 
           <Button asChild variant="ghost">
-            <Link href="/categorias">Categorias</Link>
+            <Link href="/categorias">Setores</Link>
           </Button>
 
           <Button asChild variant="ghost">
@@ -312,7 +312,7 @@ export function Header() {
                       </MobileNavLink>
 
                       <MobileNavLink href={Routes.CATEGORIAS} icon={Grid2X2}>
-                        Categorias
+                        Setores
                       </MobileNavLink>
 
                       <MobileNavLink href={Routes.EVENTOS} icon={CalendarDays}>

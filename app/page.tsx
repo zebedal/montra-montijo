@@ -136,6 +136,15 @@ export default async function Home() {
     slug,
     businesses (id)
   `);
+  let sectorsQuery = supabase.from("business_sectors").select(`
+    id,
+    name,
+    slug,
+    position,
+    categories (
+      businesses (id)
+    )
+  `);
 
   let featuredQuery = supabase
     .from("businesses")
@@ -155,17 +164,21 @@ export default async function Home() {
     newestQuery = newestQuery.or(previewFilter);
   } else {
     categoriesQuery = categoriesQuery.eq("businesses.is_visible", true);
+    sectorsQuery = sectorsQuery.eq("categories.businesses.is_visible", true);
     featuredQuery = featuredQuery.eq("is_visible", true);
     newestQuery = newestQuery.eq("is_visible", true);
   }
 
   const [
     { data: categoriesData, error: categoriesError },
+    { data: sectorsData, error: sectorsError },
     { data: featuredData, error: featuredError },
     { data: newestData, error: newestError },
     { data: campaignsData, error: campaignsError }
   ] = await Promise.all([
     categoriesQuery,
+
+    sectorsQuery.order("position", { ascending: true }),
 
     featuredQuery
       .order("created_at", {
@@ -192,6 +205,10 @@ export default async function Home() {
     console.error("Erro ao obter categorias populares:", categoriesError);
   }
 
+  if (sectorsError && sectorsError.code !== "PGRST205") {
+    console.error("Erro ao obter setores:", sectorsError);
+  }
+
   if (featuredError) {
     console.error("Erro ao obter negócios em destaque:", featuredError);
   }
@@ -214,6 +231,29 @@ export default async function Home() {
       }))
       .sort((a, b) => b.businessCount - a.businessCount)
       .slice(0, 9) ?? [];
+
+  const allSectors = (sectorsData ?? []).map((sector) => ({
+    id: sector.id,
+    name: sector.name,
+    slug: sector.slug,
+    businessCount: (sector.categories ?? []).reduce(
+      (total, category) => total + (category.businesses?.length ?? 0),
+      0
+    )
+  }));
+
+  const populatedSectors = allSectors.filter(
+    (sector) => sector.businessCount > 0
+  );
+  const additionalSectors = allSectors
+    .filter((sector) => sector.businessCount === 0)
+    .slice(0, Math.max(0, 9 - populatedSectors.length));
+  const homepageSectorIds = new Set(
+    [...populatedSectors, ...additionalSectors].map((sector) => sector.id)
+  );
+  const sectors = allSectors
+    .filter((sector) => homepageSectorIds.has(sector.id))
+    .slice(0, 9);
 
   const campaignBusinessIds = new Set(
     (campaignsData ?? []).flatMap((item) => {
@@ -273,7 +313,10 @@ export default async function Home() {
       <WebsiteJsonLd url={siteUrl} />
       <Hero />
 
-      <BusinessCategories categories={popularCategories} />
+      <BusinessCategories
+        categories={sectors.length > 0 ? sectors : popularCategories}
+        mode={sectors.length > 0 ? "sectors" : "categories"}
+      />
 
       <FeaturedBusinesses businesses={featuredBusinesses} />
       <CampaignCarouselSection campaigns={campaigns} />

@@ -13,6 +13,12 @@ type CategoryRow = {
 
 type Suggestion =
   | {
+      type: "sector";
+      label: string;
+      value: string;
+      slug: string;
+    }
+  | {
       type: "category";
       label: string;
       value: string;
@@ -100,7 +106,11 @@ export async function GET(request: Request) {
     const normalizedQuery = normalizeSearchValue(query);
     const supabase = await createClient();
 
-    const [businesses, { data: categoryData, error: categoriesError }] =
+    const [
+      businesses,
+      { data: categoryData, error: categoriesError },
+      { data: sectorData, error: sectorsError }
+    ] =
       await Promise.all([
         searchBusinesses(query, {
           limit: 6
@@ -118,7 +128,12 @@ export async function GET(request: Request) {
           )
           .order("name", {
             ascending: true
-          })
+          }),
+
+        supabase
+          .from("business_sectors")
+          .select("id,name,slug")
+          .order("position", { ascending: true })
       ]);
 
     if (categoriesError) {
@@ -126,6 +141,28 @@ export async function GET(request: Request) {
 
       throw new Error("Não foi possível pesquisar as categorias.");
     }
+
+    if (sectorsError && sectorsError.code !== "PGRST205") {
+      console.error("Erro ao pesquisar setores:", sectorsError);
+    }
+
+    const sectorSuggestions: Suggestion[] = (sectorData ?? [])
+      .filter((sector) =>
+        [sector.name, sector.slug]
+          .map(normalizeSearchValue)
+          .some(
+            (value) =>
+              value.includes(normalizedQuery) ||
+              normalizedQuery.includes(value)
+          )
+      )
+      .slice(0, 2)
+      .map((sector) => ({
+        type: "sector",
+        label: sector.name,
+        value: sector.name,
+        slug: sector.slug
+      }));
 
     const categories = ((categoryData ?? []) as CategoryRow[])
       .map((category) => ({
@@ -164,7 +201,11 @@ export async function GET(request: Request) {
       }));
 
     return NextResponse.json({
-      suggestions: [...categorySuggestions, ...businessSuggestions].slice(0, 7)
+      suggestions: [
+        ...sectorSuggestions,
+        ...categorySuggestions,
+        ...businessSuggestions
+      ].slice(0, 7)
     });
   } catch (error) {
     console.error("Erro ao obter sugestões:", error);

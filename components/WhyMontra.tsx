@@ -56,7 +56,12 @@ export default function WhyMontra() {
 
       <PageContainer className="relative py-20 sm:py-24 lg:py-28">
         <div className="grid items-center gap-16 lg:grid-cols-[1.03fr_0.97fr] lg:gap-20">
-          <div>
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0.6, x: -26 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="relative inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.16em] text-green-800">
               <span
                 aria-hidden="true"
@@ -82,12 +87,17 @@ export default function WhyMontra() {
                 return (
                   <motion.article
                     key={benefit.title}
-                    initial={false}
+                    initial={
+                      reduceMotion ? false : { opacity: 0.55, y: 18 }
+                    }
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
                     whileHover={reduceMotion ? undefined : { y: -4 }}
                     transition={{
-                      duration: 0.22,
-                      delay: index * 0.015,
-                      ease: "easeOut"
+                      duration: 0.45,
+                      delay: reduceMotion ? 0 : index * 0.065,
+                      ease: [0.22, 1, 0.36, 1],
+                      y: { type: "spring", stiffness: 280, damping: 24 }
                     }}
                     className="group rounded-2xl border border-emerald-950/10 bg-white p-5 shadow-[0_12px_35px_rgba(20,65,46,0.07)]"
                   >
@@ -104,9 +114,19 @@ export default function WhyMontra() {
                 );
               })}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="relative mx-auto h-[390px] w-full max-w-[560px] sm:h-[500px]">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0.55, x: 28, scale: 0.975 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{
+              duration: 0.7,
+              delay: reduceMotion ? 0 : 0.08,
+              ease: [0.22, 1, 0.36, 1]
+            }}
+            className="relative mx-auto h-[390px] w-full max-w-[560px] sm:h-[500px]"
+          >
             <div
               aria-hidden="true"
               className="absolute right-2 top-3 h-[78%] w-[82%] rounded-[2rem] bg-amber-300/45 sm:right-0"
@@ -162,7 +182,7 @@ export default function WhyMontra() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          </div>
+          </motion.div>
         </div>
       </PageContainer>
     </section>

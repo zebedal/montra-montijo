@@ -5,9 +5,13 @@ import { ChevronRight, Home } from "lucide-react";
 type Props = {
   title: string;
   slug: string;
+  sector?: {
+    name: string;
+    slug: string;
+  } | null;
 };
 
-export default function CategoryBreadcrumb({ title }: Props) {
+export default function CategoryBreadcrumb({ title, sector }: Props) {
   return (
     <nav className="flex items-center gap-2 text-sm text-white/80">
       <Link href="/" className="flex items-center gap-1 hover:text-white">
@@ -19,10 +23,23 @@ export default function CategoryBreadcrumb({ title }: Props) {
       <ChevronRight className="h-4 w-4" />
 
       <Link href="/categorias" className="hover:text-white">
-        Categorias
+        Setores
       </Link>
 
       <ChevronRight className="h-4 w-4" />
+
+      {sector && (
+        <>
+          <Link
+            href={`/setores/${sector.slug}`}
+            className="hover:text-white"
+          >
+            {sector.name}
+          </Link>
+
+          <ChevronRight className="h-4 w-4" />
+        </>
+      )}
 
       <span className="font-medium text-white">{title}</span>
     </nav>

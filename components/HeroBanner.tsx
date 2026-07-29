@@ -1,18 +1,44 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { useRef } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform
+} from "framer-motion";
 
 import SearchAutocomplete from "@/components/search/SearchAutoComplete";
 import heroImage from "@/public/images/background.webp";
 
+const heroSearchExamples = [
+  "Restaurantes",
+  "Canalizador",
+  "Eletricista",
+  "Cabeleireiro",
+  "Pastelaria"
+];
+
 export function Hero() {
   const reduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"]
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, 55]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 26]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.78], [1, 0.45]);
 
   return (
-    <section className="relative flex h-125 w-full overflow-hidden items-center justify-center text-center">
+    <section
+      ref={sectionRef}
+      className="relative flex h-125 w-full overflow-hidden items-center justify-center text-center"
+    >
       <motion.div
-        className="absolute inset-0"
+        className="absolute -inset-y-10 inset-x-0"
+        style={reduceMotion ? undefined : { y: imageY }}
         animate={reduceMotion ? undefined : { scale: [1, 1.035, 1] }}
         transition={{ duration: 20, ease: "easeInOut", repeat: Infinity }}
       >
@@ -29,7 +55,14 @@ export function Hero() {
 
       <div className="absolute inset-0 bg-gradient-to-r from-[#183d2d]/97 via-primary/93 to-primary/75" />
 
-      <div className="relative z-10 w-full max-w-3xl px-4 text-white">
+      <motion.div
+        className="relative z-10 w-full max-w-3xl px-4 text-white"
+        style={
+          reduceMotion
+            ? undefined
+            : { y: contentY, opacity: contentOpacity }
+        }
+      >
         <motion.h1
           className="text-4xl font-bold md:text-5xl"
           initial={reduceMotion ? false : { opacity: 0.65, y: 18 }}
@@ -65,9 +98,10 @@ export function Hero() {
           <SearchAutocomplete
             className="mt-6"
             suggestionsId="hero-search-suggestions"
+            animatedPlaceholders={heroSearchExamples}
           />
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
