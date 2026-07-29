@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import { getSiteUrl } from "@/lib/site-url";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 
 const inter = Instrument_Sans({
   subsets: ["latin"],
@@ -133,6 +134,11 @@ export default function RootLayout({
                 "border-red-700 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100"
             }
           }}
+        />
+        <GoogleAnalytics
+          measurementId={
+            process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-WLTX5M984N"
+          }
         />
       </body>
     </html>

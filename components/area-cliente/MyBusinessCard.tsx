@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   BarChart3,
   Building2,
+  ChevronRight,
   EllipsisVertical,
   ExternalLink,
   Mail,
@@ -191,9 +192,10 @@ export default function MyBusinessCard({
                   </div>
                   <Link
                     href={`/area-cliente/negocio/${business.id}/editar`}
-                    className="inline-block text-xs font-medium text-primary underline-offset-4 hover:underline"
+                    className="group inline-flex items-center gap-0.5 text-xs font-medium text-primary underline-offset-4 hover:underline"
                   >
                     Completar página
+                    <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
                 )}
