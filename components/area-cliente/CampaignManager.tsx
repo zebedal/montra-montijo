@@ -895,7 +895,13 @@ function CampaignForm({
           )}
 
           <Button type="submit" disabled={saving}>
-            {saving ? "A criar..." : "Criar campanha"}
+            {saving
+              ? campaign
+                ? "A atualizar..."
+                : "A criar..."
+              : campaign
+                ? "Atualizar campanha"
+                : "Criar campanha"}
           </Button>
         </form>
       </CardContent>

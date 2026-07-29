@@ -17,7 +17,10 @@ import UpcomingEventsSection from "@/components/UpcomingEvents";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 import { CampaignCarouselSection, type CampaignCarouselItem } from "@/components/business/CampaignCarouselSection";
-import type { CampaignType } from "@/lib/business-campaign";
+import type {
+  CampaignCtaType,
+  CampaignType
+} from "@/lib/business-campaign";
 
 const homeDescription =
   "Explore o comércio local do Montijo num só lugar. Encontre restaurantes, lojas, empresas e serviços com contactos, moradas e horários.";
@@ -178,7 +181,7 @@ export default async function Home() {
 
     supabase
       .from("business_campaigns")
-      .select("id,title,description,type,image_path,ends_on,business:businesses(id,name,slug)")
+      .select("id,title,description,type,image_path,ends_on,cta_type,cta_destination,cta_url,cta_message,business:businesses(id,name,slug,whatsapp_phone)")
       .eq("is_active", true)
       .lte("starts_on", new Date().toISOString().slice(0, 10))
       .gte("ends_on", new Date().toISOString().slice(0, 10))
@@ -254,7 +257,12 @@ export default async function Home() {
       endsOn: item.ends_on,
       businessName: business.name,
       businessSlug: business.slug,
-      businessId: business.id
+      businessId: business.id,
+      ctaType: item.cta_type as CampaignCtaType | null,
+      ctaDestination: item.cta_destination as "url" | "whatsapp" | null,
+      ctaUrl: item.cta_url,
+      ctaMessage: item.cta_message,
+      whatsappPhone: business.whatsapp_phone
     }];
   });
 
