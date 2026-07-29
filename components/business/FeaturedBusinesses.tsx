@@ -3,15 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Building2,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Crown,
   MapPin,
   Megaphone,
-  Sparkles
+  Sparkles,
+  Store
 } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
@@ -143,7 +147,11 @@ export default function FeaturedBusinesses({ businesses }: Props) {
               return (
                 <CarouselItem
                   key={business.id}
-                  className="basis-[90%] pl-5 sm:basis-[76%] lg:basis-[62%] xl:basis-[56%]"
+                  className={
+                    businesses.length === 1
+                      ? "basis-[90%] pl-5 sm:basis-[76%] lg:basis-[64%]"
+                      : "basis-[90%] pl-5 sm:basis-[76%] lg:basis-[62%] xl:basis-[56%]"
+                  }
                 >
                   <motion.article
                     initial={
@@ -240,6 +248,76 @@ export default function FeaturedBusinesses({ businesses }: Props) {
                 </CarouselItem>
               );
             })}
+
+            {businesses.length === 1 && (
+              <CarouselItem className="basis-[84%] pl-5 sm:basis-[58%] lg:basis-[36%]">
+                <motion.aside
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : { opacity: 0.5, x: 22, scale: 0.985 }
+                  }
+                  whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.08,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                  className="relative flex h-[350px] flex-col overflow-hidden rounded-[1.75rem] border border-emerald-900/10 bg-[#e7f2eb] p-6 shadow-[0_22px_55px_rgba(22,65,47,0.1)] sm:h-[390px] sm:p-7"
+                >
+                  <div className="absolute -right-20 -top-24 size-64 rounded-full bg-amber-200/55 blur-3xl" />
+                  <div className="absolute -bottom-28 -left-24 size-64 rounded-full bg-emerald-700/15 blur-3xl" />
+
+                  <div className="relative flex items-start justify-between gap-4">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/75 px-3 py-1.5 text-xs font-semibold text-emerald-950 backdrop-blur-sm">
+                      <Crown className="size-3.5 fill-amber-300 text-amber-600" />
+                      Plano Destaque
+                    </span>
+
+                    <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white/65 shadow-sm sm:size-28">
+                      {prefersReducedMotion ? (
+                        <Store className="size-10 text-emerald-800" />
+                      ) : (
+                        <DotLottieReact
+                          src="/animations/shop-cta.json"
+                          autoplay
+                          loop
+                          className="size-full"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="relative mt-auto">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800/70">
+                      O próximo pode ser o seu
+                    </p>
+                    <h3 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-emerald-950">
+                      Dê mais visibilidade ao seu negócio
+                    </h3>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-medium text-emerald-950/65">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-700" /> Prioridade
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Check className="size-3.5 text-emerald-700" /> Mais alcance
+                      </span>
+                    </div>
+
+                    <Button
+                      asChild
+                      className="mt-5 rounded-full bg-emerald-950 px-5 text-white hover:bg-emerald-900"
+                    >
+                      <Link href={Routes.PLANO_DESTAQUE}>
+                        Conhecer os planos
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </motion.aside>
+              </CarouselItem>
+            )}
           </CarouselContent>
         </Carousel>
 
