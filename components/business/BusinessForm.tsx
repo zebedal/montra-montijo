@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { getCategorias } from "@/lib/supabase/getCategories";
 import { getBusinessPlanStepUrl } from "@/lib/business-plan";
+import { isHoneypotTriggered } from "@/lib/honeypot";
 
 import {
   Combobox,
@@ -265,6 +266,7 @@ export default function BusinessForm({
     resolver: zodResolver(businessSchema),
     defaultValues: {
       name: initialData?.name ?? "",
+      contactFax: "",
       category_id: initialData?.category_id ?? "",
       specialtyIds: initialData?.specialtyIds ?? [],
       description: initialData?.description ?? "",
@@ -696,6 +698,10 @@ export default function BusinessForm({
   }
 
   async function onSubmit(data: BusinessFormData) {
+    if (mode === "create" && isHoneypotTriggered(data.contactFax)) {
+      return;
+    }
+
     if (mode === "create") {
       trackAnalyticsEvent("business_form_submit");
     }
@@ -964,6 +970,7 @@ export default function BusinessForm({
 
     reset({
       name: initialData.name ?? "",
+      contactFax: "",
       category_id: initialData.category_id ?? "",
       specialtyIds: initialData.specialtyIds ?? [],
       description: initialData.description ?? "",
@@ -1025,6 +1032,7 @@ export default function BusinessForm({
 
       reset({
         ...parsed.form,
+        contactFax: parsed.form.contactFax ?? "",
         hasPhysicalAddress:
           parsed.form.hasPhysicalAddress ?? Boolean(parsed.form.street),
         allowWhatsApp: parsed.form.allowWhatsApp ?? false,
@@ -1387,7 +1395,13 @@ export default function BusinessForm({
           )}
 
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onSubmit, () => {
+              toast.error("Existem campos que precisam de ser corrigidos.", {
+                description:
+                  "Levamos-te ao primeiro campo com erro para poderes guardar as alterações.",
+                position: "top-center"
+              });
+            })}
             onChangeCapture={() => {
               if (mode === "create" && !hasTrackedFormStart.current) {
                 hasTrackedFormStart.current = true;
@@ -1396,6 +1410,23 @@ export default function BusinessForm({
             }}
             className="space-y-10"
           >
+            {mode === "create" && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-[10000px] h-px w-px overflow-hidden"
+              >
+                <label htmlFor="business-contact-fax">
+                  Não preencher este campo
+                </label>
+                <input
+                  id="business-contact-fax"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  {...register("contactFax")}
+                />
+              </div>
+            )}
             {(mode === "edit" || creationStep === 0) && (
               <>
             {/* INFORMACOES */}

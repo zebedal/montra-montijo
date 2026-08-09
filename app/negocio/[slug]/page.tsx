@@ -16,6 +16,7 @@ import { BusinessServiceAreas } from "@/components/business/BusinessServiceAreas
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 import { BusinessPrimaryCta } from "@/components/business/BusinessPrimaryCta";
 import { BusinessCampaign } from "@/components/business/BusinessCampaign";
+import { BusinessQuoteRequest } from "@/components/business/BusinessQuoteRequest";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
@@ -188,6 +189,11 @@ export default async function BusinessPage({ params }: Props) {
   const adminPreviewUserId = await getAdminPreviewUserId();
 
   const canActivatePremium = isBusinessOwner && business.plan === "free";
+  const canReceiveQuoteRequests = Boolean(
+    business.user_id &&
+      business.user_id !== process.env.ADMIN_USER_ID &&
+      !isBusinessOwner
+  );
 
   const completedProfileItems = [
     (business.description?.trim().length ?? 0) >= 80,
@@ -246,15 +252,15 @@ export default async function BusinessPage({ params }: Props) {
         />
       )}
 
-      <div className="mt-14 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="min-w-0 space-y-6">
-          {business.category && (
-            <BusinessBreadcrumb
-              category={business.category}
-              businessName={business.name}
-            />
-          )}
+      {business.category && (
+        <BusinessBreadcrumb
+          category={business.category}
+          businessName={business.name}
+        />
+      )}
 
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-6">
           <BusinessHeader
             business={business}
             specialties={specialties}
@@ -304,6 +310,12 @@ export default async function BusinessPage({ params }: Props) {
         </div>
 
         <div className="min-w-0 space-y-6 lg:sticky lg:top-6 lg:self-start">
+          {canReceiveQuoteRequests && (
+            <BusinessQuoteRequest
+              businessId={business.id}
+              businessName={business.name}
+            />
+          )}
           <BusinessContact business={business} />
 
           <BusinessHours

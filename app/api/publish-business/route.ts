@@ -8,6 +8,7 @@ import { sendNewBusinessNotificationEmailOnce } from "@/lib/resend/sendNewBusine
 import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isHoneypotTriggered } from "@/lib/honeypot";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -60,6 +61,13 @@ export async function POST(req: Request) {
 
     if (draftError || !draft) {
       return NextResponse.json({ error: "Draft inválido." }, { status: 404 });
+    }
+
+    if (isHoneypotTriggered(draft.data?.form?.contactFax)) {
+      return NextResponse.json(
+        { error: "Não foi possível publicar o negócio." },
+        { status: 400 }
+      );
     }
 
     /**

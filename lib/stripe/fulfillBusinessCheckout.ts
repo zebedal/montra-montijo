@@ -15,6 +15,7 @@ import {
 import { finalizeBusinessDraftUploads } from "@/lib/server/finalizeBusinessDraftUploads";
 import type { PaidBusinessPlan } from "@/lib/business-plan";
 import { getBusinessPlanFromPriceId } from "@/lib/stripe/businessPlanPrices";
+import { isHoneypotTriggered } from "@/lib/honeypot";
 
 type FulfillBusinessCheckoutResult = {
   businessId: string;
@@ -99,6 +100,10 @@ export async function fulfillBusinessCheckout(
     supabaseAdmin,
     checkout.draft_id
   );
+
+  if (isHoneypotTriggered(draft.form.contactFax)) {
+    throw new Error("O formulário foi rejeitado pela proteção anti-spam.");
+  }
 
   console.log("2 - Draft obtido");
 
