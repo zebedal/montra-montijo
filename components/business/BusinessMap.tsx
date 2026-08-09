@@ -51,7 +51,7 @@ export function BusinessMap({
 }: Props) {
   if (!hasValidCoordinates(latitude, longitude)) {
     return (
-      <Card id="mapa" tabIndex={-1} className="scroll-mt-24 outline-none">
+      <Card id="mapa" tabIndex={-1} className="scroll-mt-32 outline-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
@@ -84,7 +84,7 @@ export function BusinessMap({
     <Card
       id="mapa"
       tabIndex={-1}
-      className="scroll-mt-24 overflow-hidden outline-none"
+      className="scroll-mt-32 overflow-hidden outline-none"
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">

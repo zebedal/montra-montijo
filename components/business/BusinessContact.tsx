@@ -192,7 +192,7 @@ export function BusinessContact({ business }: BusinessContactProps) {
   }
 
   return (
-    <Card>
+    <Card id="contactos" tabIndex={-1} className="scroll-mt-32 outline-none">
       <CardHeader>
         <CardTitle>Contactos</CardTitle>
       </CardHeader>

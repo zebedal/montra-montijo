@@ -37,7 +37,11 @@ export function BusinessHeader({
   isBusinessOwner = false
 }: BusinessHeaderProps) {
   return (
-    <Card className="min-w-0 overflow-hidden">
+    <Card
+      id="visao-geral"
+      tabIndex={-1}
+      className="min-w-0 scroll-mt-32 overflow-hidden outline-none"
+    >
       <CardContent className="min-w-0 p-6 sm:p-8">
         <div className="flex min-w-0 flex-col gap-8 md:flex-row">
           <Avatar className="h-32 w-32 shrink-0 rounded-xl">

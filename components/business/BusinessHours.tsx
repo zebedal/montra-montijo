@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getBusinessStatus } from "@/lib/helpers";
+import { getBusinessOpeningStatus } from "@/lib/business-opening-status";
 
 interface BusinessHour {
   day: string;
@@ -33,7 +33,7 @@ export function BusinessHours({ hours, is24Hours }: Props) {
     (hour) => !hour.is_closed && hour.open_time && hour.close_time
   );
 
-  const status = getBusinessStatus(hours);
+  const status = getBusinessOpeningStatus(hours);
 
   const groupedHours = orderedDays.map((day) => ({
     day,
@@ -51,7 +51,7 @@ export function BusinessHours({ hours, is24Hours }: Props) {
   }));
 
   return (
-    <Card>
+    <Card id="horario" tabIndex={-1} className="scroll-mt-32 outline-none">
       <CardHeader>
         <CardTitle>Horário</CardTitle>
         {(is24Hours || hasOpeningHours) && (
@@ -68,11 +68,11 @@ export function BusinessHours({ hours, is24Hours }: Props) {
                   ? "Disponível 24 horas"
                   : status.open
                     ? "Aberto agora"
-                    : "Encerrado"}
+                    : "Encerrado agora"}
               </span>
 
               {!is24Hours && <span className="text-muted-foreground">
-                {" • "}
+                {" · "}
                 {status.message}
               </span>}
             </div>
@@ -98,9 +98,20 @@ export function BusinessHours({ hours, is24Hours }: Props) {
             {groupedHours.map(({ day, periods }) => (
               <div
                 key={day}
-                className="flex items-center justify-between border-b pb-2 last:border-0"
+                className={`flex items-center justify-between rounded-lg px-2 py-2.5 ${
+                  day === status.today
+                    ? "bg-green-50 text-green-950"
+                    : "border-b last:border-0"
+                }`}
               >
-                <span className="font-medium">{day}</span>
+                <span className="font-medium">
+                  {day}
+                  {day === status.today && (
+                    <span className="ml-1.5 text-xs font-normal text-green-700">
+                      Hoje
+                    </span>
+                  )}
+                </span>
 
                 {periods.length === 0 ? (
                   <span className="text-sm text-muted-foreground">
