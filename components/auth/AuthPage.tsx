@@ -17,6 +17,7 @@ import { loginSchema } from "@/lib/schemas/loginSchema";
 import { signupSchema } from "@/lib/schemas/signupSchema";
 import { supabase } from "@/lib/supabase/client";
 import { useUser } from "@/lib/supabase/useUser";
+import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
 
 import { Routes } from "@/types";
 
@@ -106,6 +107,9 @@ export default function AuthPage() {
   ];
 
   function changeMode(nextMode: AuthMode) {
+    if (nextMode === "signup") {
+      trackAnalyticsEvent("signup_mode_selected");
+    }
     setMode(nextMode);
     setConfirmationEmail(null);
 
@@ -158,6 +162,7 @@ export default function AuthPage() {
     }
 
     setIsGoogleLoading(true);
+    trackAnalyticsEvent("auth_google_started", { mode });
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -170,6 +175,7 @@ export default function AuthPage() {
       if (error) {
         throw error;
       }
+
     } catch (error) {
       toast.error("Não foi possível continuar com o Google.", {
         description:
@@ -199,6 +205,8 @@ export default function AuthPage() {
 
         return;
       }
+
+      trackAnalyticsEvent("sign_up", { method: "email" });
 
       /*
        * Em ambientes onde a confirmação de email não é obrigatória,
@@ -247,6 +255,8 @@ export default function AuthPage() {
     }
 
     toast.success("Sessão iniciada com sucesso.", { position: "top-center" });
+
+    trackAnalyticsEvent("login", { method: "email" });
 
     router.replace(redirectPath);
   }
