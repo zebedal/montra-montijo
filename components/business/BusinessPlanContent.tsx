@@ -12,6 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 import { useCreateBusiness } from "@/contexts/CreateBusinessContext";
 import { supabase } from "@/lib/supabase/client";
+import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
 
 type Props = {
   initialDraftId: string | null;
@@ -37,6 +38,10 @@ export default function BusinessPlanContent({
 
   const isSubmitting =
     isPublishingFree || isStartingPremium || isPublishingTest;
+
+  useEffect(() => {
+    trackAnalyticsEvent("business_plan_view");
+  }, []);
 
   useEffect(() => {
     if (draftId) {
@@ -116,6 +121,13 @@ export default function BusinessPlanContent({
 
       clearDraft();
 
+      trackAnalyticsEvent("business_published", { plan: "free" });
+      trackAnalyticsEvent("generate_lead", {
+        currency: "EUR",
+        value: 0,
+        lead_source: "business_publication"
+      });
+
       toast.success("Negócio publicado com sucesso!", {
         position: "top-center"
       });
@@ -147,6 +159,7 @@ export default function BusinessPlanContent({
     try {
       setIsStartingPremium(true);
       setSelectedPaidPlan(plan);
+      trackAnalyticsEvent("business_plan_selected", { plan });
 
       const response = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",

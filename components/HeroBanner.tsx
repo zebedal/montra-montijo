@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRef } from "react";
 import {
   motion,
@@ -8,9 +9,12 @@ import {
   useScroll,
   useTransform
 } from "framer-motion";
+import { ArrowRight, Building2 } from "lucide-react";
 
 import SearchAutocomplete from "@/components/search/SearchAutoComplete";
 import heroImage from "@/public/images/background.webp";
+import { Button } from "@/components/ui/button";
+import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
 
 const heroSearchExamples = [
   "Restaurantes",
@@ -102,6 +106,33 @@ export function Hero() {
             suggestionsId="hero-search-suggestions"
             animatedPlaceholders={heroSearchExamples}
           />
+        </motion.div>
+
+        <motion.div
+          className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: reduceMotion ? 0 : 0.38, duration: 0.6 }}
+        >
+          <span className="text-sm text-white/75">Tens um negócio?</span>
+          <Button
+            asChild
+            variant="secondary"
+            className="bg-white text-brand-forest hover:bg-white/90"
+          >
+            <Link
+              href="/criar-negocio"
+              onClick={() =>
+                trackAnalyticsEvent("business_registration_cta_click", {
+                  source: "homepage_hero"
+                })
+              }
+            >
+              <Building2 className="size-4" />
+              Criar página grátis
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
         </motion.div>
       </motion.div>
     </section>

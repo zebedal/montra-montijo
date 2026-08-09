@@ -81,6 +81,7 @@ import type {
   PrimaryCtaDestination,
   PrimaryCtaType
 } from "@/lib/business-primary-cta";
+import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
 
 const PENDING_BUSINESS_FORM_KEY = "montra-pending-business-form";
 const PENDING_BUSINESS_FORM_NOTICE_KEY =
@@ -231,6 +232,7 @@ export default function BusinessForm({
     formState: { errors, isSubmitting, isDirty, submitCount }
   } = form;
   const lastHandledSubmitCount = useRef(0);
+  const hasTrackedFormStart = useRef(false);
 
   const {
     fields: faqFields,
@@ -434,6 +436,7 @@ export default function BusinessForm({
       } = await supabase.auth.getUser();
 
       if (error || !user) {
+        trackAnalyticsEvent("business_registration_auth_required");
         preservePendingForm(data);
         setAuthDialogOpen(true);
         return false;
@@ -442,6 +445,7 @@ export default function BusinessForm({
       return true;
     } catch (error) {
       console.error("Erro ao verificar autenticação:", error);
+      trackAnalyticsEvent("business_registration_auth_required");
       preservePendingForm(data);
       setAuthDialogOpen(true);
       return false;
@@ -451,6 +455,9 @@ export default function BusinessForm({
   }
 
   async function onSubmit(data: BusinessFormData) {
+    if (mode === "create") {
+      trackAnalyticsEvent("business_form_submit");
+    }
     const address = data.hasPhysicalAddress
       ? await validateAddress(data)
       : null;
@@ -558,6 +565,8 @@ export default function BusinessForm({
         imageUrls
       });
 
+      trackAnalyticsEvent("business_draft_created");
+
       clearPendingForm();
 
       /**
@@ -605,6 +614,12 @@ export default function BusinessForm({
       shouldValidate: true
     });
   };
+
+  useEffect(() => {
+    if (mode === "create") {
+      trackAnalyticsEvent("business_form_view");
+    }
+  }, [mode]);
 
   useEffect(() => {
     async function load() {
@@ -847,7 +862,16 @@ export default function BusinessForm({
         )}
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            onChangeCapture={() => {
+              if (mode === "create" && !hasTrackedFormStart.current) {
+                hasTrackedFormStart.current = true;
+                trackAnalyticsEvent("business_form_start");
+              }
+            }}
+            className="space-y-10"
+          >
             {/* INFORMACOES */}
             <section className="space-y-4">
               <h2 className="text-lg font-semibold">Informações</h2>

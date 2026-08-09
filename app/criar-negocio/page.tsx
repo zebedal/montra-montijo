@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import BusinessForm from "@/components/business/BusinessForm";
+import { CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Divulgue o seu negócio no comércio local do Montijo",
@@ -53,13 +54,24 @@ export default async function CriarNegocioPage({ searchParams }: Props) {
         </p>
 
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          Divulgue o seu negócio no Montijo
+          Crie gratuitamente a página do seu negócio
         </h1>
 
         <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
-          Faça parte da Montra Montijo e dê mais visibilidade ao seu negócio
-          junto de quem procura lojas, empresas e serviços no comércio local.
+          Apareça quando alguém procura lojas, empresas e profissionais no
+          Montijo. Comece pelos dados essenciais e complete o perfil depois.
         </p>
+
+        <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-foreground">
+          {["Sem cartão", "Publicação gratuita", "Editável a qualquer momento"].map(
+            (benefit) => (
+              <span key={benefit} className="flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-green-600" />
+                {benefit}
+              </span>
+            )
+          )}
+        </div>
       </section>
 
       <BusinessForm

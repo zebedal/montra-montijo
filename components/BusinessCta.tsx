@@ -6,16 +6,17 @@ import { useRef } from "react";
 
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { ArrowRight, Building2, Check, TrendingUp } from "lucide-react";
+import { ArrowRight, Building2, Check } from "lucide-react";
 
 import PageContainer from "@/components/PageContainer";
 import { Routes } from "@/types";
+import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
 
 const advantages = [
-  "Publique uma oferta, novidade ou evento",
-  "Apareça na página principal da Montra",
-  "Leve visitantes a agir com um novo CTA",
-  "Meça os cliques gerados pela campanha"
+  "Página pública para o seu negócio",
+  "Contactos, serviços, horários e fotografias",
+  "Presença nas pesquisas e categorias locais",
+  "Pode editar e completar o perfil mais tarde"
 ];
 
 export default function BusinessCta() {
@@ -60,20 +61,20 @@ export default function BusinessCta() {
               </div>
 
               <p className="mt-6 text-brand-label uppercase text-white/75">
-                A grande vantagem do Premium
+                Para empresas e profissionais independentes
               </p>
 
               <h2 className="mt-3 max-w-3xl text-4xl font-bold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
-                Partilhe novidades
+                O seu negócio merece
                 <span className="block text-green-300">
-                  e atraia mais clientes.
+                  ser encontrado no Montijo.
                 </span>
               </h2>
 
               <p className="mt-4 max-w-2xl text-brand-body text-white/85 sm:text-brand-lead">
-                Com o Plano Premium pode criar uma campanha com imagem, mensagem
-                e botão próprio. A campanha ganha espaço na homepage e encaminha
-                pessoas diretamente para a ação que pretende.
+                Crie gratuitamente uma página com a informação que os clientes
+                procuram. Não precisa de cartão e pode começar apenas com os
+                dados essenciais.
               </p>
 
               <ul className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -116,14 +117,19 @@ export default function BusinessCta() {
               className="w-full max-w-sm lg:w-[320px]"
             >
               <Link
-                href={Routes.PLANO_DESTAQUE}
-                aria-label="Conhecer os planos da Montra Montijo"
+                href={Routes.CRIAR_NEGOCIO}
+                aria-label="Criar gratuitamente uma página de negócio"
+                onClick={() =>
+                  trackAnalyticsEvent("business_registration_cta_click", {
+                    source: "homepage_bottom_cta"
+                  })
+                }
                 className="group block overflow-hidden rounded-[1.75rem] border border-white/80 bg-white p-3 text-brand-forest shadow-xl transition-transform duration-300 hover:-translate-y-1"
               >
                 <span className="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl bg-brand-mint-light">
                   <span className="absolute -right-8 -top-10 size-32 rounded-full bg-amber-200/45 blur-2xl" />
                   {reduceMotion ? (
-                    <TrendingUp className="size-14 text-brand-primary" />
+                    <Building2 className="size-14 text-brand-primary" />
                   ) : (
                     <motion.span
                       animate={
@@ -154,16 +160,16 @@ export default function BusinessCta() {
 
                 <span className="block p-4 pb-3">
                   <span className="text-brand-label uppercase text-brand-primary">
-                    Exclusivo do Plano Premium
+                    Comece hoje gratuitamente
                   </span>
                   <span className="mt-2 flex items-center justify-between gap-4 text-brand-card-title">
-                    Conhecer o Premium
+                    Criar página grátis
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-forest text-white transition-transform duration-300 group-hover:translate-x-1">
                       <ArrowRight className="size-4" />
                     </span>
                   </span>
                   <span className="mt-1 block text-brand-body-sm font-normal text-brand-forest/60">
-                    Imagem, mensagem e CTA numa campanha em destaque.
+                    Sem cartão. Pode completar o perfil mais tarde.
                   </span>
                 </span>
               </Link>
