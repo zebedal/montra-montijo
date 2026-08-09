@@ -6,7 +6,8 @@ import {
   useForm,
   Controller,
   useFieldArray,
-  useWatch
+  useWatch,
+  type FieldPath
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -44,7 +45,26 @@ import { LogoUpload } from "./UploadLogo";
 import { BusinessImagesUpload } from "./BusinessImagesUpload";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
-import { CheckCircle2, ChevronDown, Info, LocateFixed, LogIn, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  Check,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  CircleHelp,
+  Clock3,
+  Contact,
+  Images,
+  Info,
+  ListChecks,
+  LocateFixed,
+  LogIn,
+  MapPin,
+  Plus,
+  Trash2
+} from "lucide-react";
 
 import {
   Dialog,
@@ -122,6 +142,7 @@ type Props = {
     url: string | null;
     message: string | null;
   };
+  onCreationStepChange?: (step: number) => void;
 };
 
 type ValidatedAddress = {
@@ -129,6 +150,43 @@ type ValidatedAddress = {
   longitude: number;
   displayName: string;
 };
+
+type ExistingBusinessMatch = {
+  id: string;
+  name: string;
+  slug: string;
+  categoryName: string | null;
+  city: string | null;
+};
+
+const CREATION_STEPS = [
+  {
+    title: "O essencial",
+    description: "Começa pelos dados que identificam o negócio."
+  },
+  {
+    title: "Como trabalha",
+    description: "Indica como os clientes podem contactar e encontrar o negócio."
+  },
+  {
+    title: "Dar mais destaque",
+    description: "Enriquece a página agora ou deixa estes detalhes para mais tarde."
+  },
+  {
+    title: "Rever e continuar",
+    description: "Confirma os dados essenciais antes de escolher o plano."
+  }
+] as const;
+
+const EDIT_SECTIONS = [
+  { id: "informacoes", label: "Informações", icon: Building2 },
+  { id: "contactos", label: "Contactos", icon: Contact },
+  { id: "localizacao", label: "Localização", icon: MapPin },
+  { id: "fotografias", label: "Imagens", icon: Images },
+  { id: "servicos-e-precos", label: "Serviços", icon: ListChecks },
+  { id: "perguntas-frequentes", label: "Perguntas", icon: CircleHelp },
+  { id: "horario-funcionamento", label: "Horário", icon: Clock3 }
+] as const;
 
 export const defaultOpeningHours = [
   { day: "Segunda", periods: [{ open: "", close: "" }], closed: false },
@@ -149,7 +207,8 @@ export default function BusinessForm({
   preferredPlan = null,
   businessPlan = "free",
   categorySlug,
-  primaryCta
+  primaryCta,
+  onCreationStepChange
 }: Props) {
   const [showHours, setShowHours] = useState(
     mode === "edit" &&
@@ -169,7 +228,16 @@ export default function BusinessForm({
   );
   const [categorySearch, setCategorySearch] = useState<string>("");
   const [showSocials, setShowSocials] = useState(false);
-  const [showOptionalDetails, setShowOptionalDetails] = useState(mode === "edit");
+  const [creationStep, setCreationStep] = useState(0);
+  const [existingBusinessCheck, setExistingBusinessCheck] = useState<{
+    status: "idle" | "loading" | "clear" | "matches" | "error";
+    matches: ExistingBusinessMatch[];
+    key: string;
+  }>({ status: "idle", matches: [], key: "" });
+  const [editSectionsScroll, setEditSectionsScroll] = useState({
+    canScrollLeft: false,
+    canScrollRight: false
+  });
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -189,6 +257,8 @@ export default function BusinessForm({
   );
 
   const router = useRouter();
+  const formCardRef = useRef<HTMLDivElement>(null);
+  const editSectionsRef = useRef<HTMLElement>(null);
 
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessSchema),
@@ -236,6 +306,19 @@ export default function BusinessForm({
   const lastHandledSubmitCount = useRef(0);
   const hasTrackedFormStart = useRef(false);
 
+  useEffect(() => {
+    return form.subscribe({
+      formState: { values: true },
+      callback: ({ name }) => {
+        const fieldName = name as FieldPath<BusinessFormData> | undefined;
+
+        if (fieldName && form.getFieldState(fieldName).error) {
+          queueMicrotask(() => void form.trigger(fieldName));
+        }
+      }
+    });
+  }, [form]);
+
   const {
     fields: faqFields,
     append: appendFaq,
@@ -258,6 +341,10 @@ export default function BusinessForm({
     control,
     name: "category_id"
   });
+  const businessName = useWatch({
+    control,
+    name: "name"
+  });
   const selectedSpecialtyIds = useWatch({
     control,
     name: "specialtyIds"
@@ -274,6 +361,18 @@ export default function BusinessForm({
     control,
     name: "services"
   });
+  const faqs = useWatch({
+    control,
+    name: "faqs"
+  });
+  const description = useWatch({
+    control,
+    name: "description"
+  });
+  const openingHours = useWatch({
+    control,
+    name: "openingHours"
+  });
   const hasPhysicalAddress = useWatch({
     control,
     name: "hasPhysicalAddress"
@@ -287,6 +386,145 @@ export default function BusinessForm({
     control,
     name: "servesAtCustomerLocation"
   });
+
+  const selectedCategory = categorias.find(
+    (category) => category.id === selectedCategoryId
+  );
+  const existingBusinessCheckKey = `${businessName.trim().toLocaleLowerCase("pt-PT")}|${selectedCategoryId}`;
+  const activeExistingBusinessCheck =
+    existingBusinessCheck.key === existingBusinessCheckKey
+      ? existingBusinessCheck
+      : { status: "idle" as const, matches: [] as ExistingBusinessMatch[] };
+  const editorSectionClass =
+    mode === "edit"
+      ? "scroll-mt-32 rounded-2xl border bg-background p-5 shadow-xs sm:p-6"
+      : "";
+  const editProfileItems = [
+    {
+      label: "Escrever uma descrição mais completa",
+      detail: "Pelo menos 80 caracteres",
+      href: "#informacoes",
+      complete: description.trim().length >= 80
+    },
+    {
+      label: "Adicionar o logo do negócio",
+      detail: "Ajuda a reconhecer a marca",
+      href: "#fotografias",
+      complete: Boolean(logoPreview)
+    },
+    {
+      label: "Adicionar fotografias",
+      detail: "Do espaço, produtos ou serviços",
+      href: "#fotografias",
+      complete: images.length > 0
+    },
+    {
+      label: "Definir o horário",
+      detail: "Inclui também a opção 24 horas",
+      href: "#horario-funcionamento",
+      complete:
+        is24Hours ||
+        Boolean(
+          openingHours?.some(
+            (day) =>
+              day.closed ||
+              day.periods.some((period) => period.open && period.close)
+          )
+        )
+    },
+    {
+      label: "Adicionar serviços",
+      detail: "Mostra o que o negócio oferece",
+      href: "#servicos-e-precos",
+      complete: Boolean(services?.some((service) => service.name.trim().length >= 2))
+    },
+    {
+      label: "Responder a perguntas frequentes",
+      detail: "Antecipa dúvidas dos clientes",
+      href: "#perguntas-frequentes",
+      complete: Boolean(
+        faqs?.some(
+          (faq) =>
+            faq.question.trim().length >= 5 && faq.answer.trim().length >= 5
+        )
+      )
+    }
+  ];
+  const missingEditProfileItems = editProfileItems.filter(
+    (item) => !item.complete
+  );
+  const editProfileCompletion = Math.round(
+    ((editProfileItems.length - missingEditProfileItems.length) /
+      editProfileItems.length) *
+      100
+  );
+
+  const scrollToFormTop = useCallback(() => {
+    formCardRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }, []);
+
+  const updateEditSectionsScroll = useCallback(() => {
+    const navigation = editSectionsRef.current;
+
+    if (!navigation) return;
+
+    setEditSectionsScroll({
+      canScrollLeft: navigation.scrollLeft > 2,
+      canScrollRight:
+        navigation.scrollLeft + navigation.clientWidth <
+        navigation.scrollWidth - 2
+    });
+  }, []);
+
+  const scrollEditSections = useCallback((direction: -1 | 1) => {
+    editSectionsRef.current?.scrollBy({
+      left: direction * 320,
+      behavior: "smooth"
+    });
+  }, []);
+
+  async function goToNextCreationStep() {
+    const fieldsByStep: Array<Array<keyof BusinessFormData>> = [
+      ["name", "category_id", "specialtyIds", "description", "phone"],
+      [
+        "allowWhatsApp",
+        "whatsappPhone",
+        "email",
+        "website",
+        "facebook",
+        "instagram",
+        "hasPhysicalAddress",
+        "street",
+        "number",
+        "postalCode",
+        "city",
+        "servesAtCustomerLocation",
+        "serviceAreas"
+      ],
+      ["services", "is24Hours", "openingHours"]
+    ];
+
+    const isStepValid = await form.trigger(fieldsByStep[creationStep], {
+      shouldFocus: true
+    });
+
+    if (!isStepValid) return;
+
+    const nextStep = Math.min(creationStep + 1, CREATION_STEPS.length - 1);
+    setCreationStep(nextStep);
+    trackAnalyticsEvent("business_wizard_step_completed", {
+      step: creationStep + 1
+    });
+    window.requestAnimationFrame(scrollToFormTop);
+  }
+
+  function goToPreviousCreationStep() {
+    setCreationStep((current) => Math.max(current - 1, 0));
+    window.requestAnimationFrame(scrollToFormTop);
+  }
 
   const isProcessing =
     isSubmitting || isPublishing || isCheckingAuth || isValidatingAddress;
@@ -624,6 +862,84 @@ export default function BusinessForm({
   }, [mode]);
 
   useEffect(() => {
+    const normalizedName = businessName.trim();
+
+    if (
+      mode !== "create" ||
+      creationStep !== 0 ||
+      normalizedName.length < 3 ||
+      !selectedCategoryId
+    ) {
+      return;
+    }
+
+    const checkKey = `${normalizedName.toLocaleLowerCase("pt-PT")}|${selectedCategoryId}`;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setExistingBusinessCheck({ status: "loading", matches: [], key: checkKey });
+
+      try {
+        const params = new URLSearchParams({
+          name: normalizedName,
+          categoryId: selectedCategoryId
+        });
+        const response = await fetch(
+          `/api/businesses/check-existing?${params.toString()}`,
+          { signal: controller.signal }
+        );
+        const result = (await response.json()) as {
+          matches?: ExistingBusinessMatch[];
+        };
+
+        if (!response.ok) throw new Error("Não foi possível verificar.");
+
+        const matches = result.matches ?? [];
+        setExistingBusinessCheck({
+          status: matches.length > 0 ? "matches" : "clear",
+          matches,
+          key: checkKey
+        });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setExistingBusinessCheck({ status: "error", matches: [], key: checkKey });
+      }
+    }, 650);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [businessName, creationStep, mode, selectedCategoryId]);
+
+  useEffect(() => {
+    if (mode === "create") {
+      onCreationStepChange?.(creationStep);
+    }
+  }, [creationStep, mode, onCreationStepChange]);
+
+  useEffect(() => {
+    if (mode !== "edit") return;
+
+    const navigation = editSectionsRef.current;
+    const frame = window.requestAnimationFrame(updateEditSectionsScroll);
+    const resizeObserver = new ResizeObserver(() => {
+      window.requestAnimationFrame(updateEditSectionsScroll);
+    });
+
+    if (navigation) {
+      resizeObserver.observe(navigation);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+    };
+  }, [mode, updateEditSectionsScroll]);
+
+  useEffect(() => {
     async function load() {
       try {
         const data = await getCategorias();
@@ -729,14 +1045,15 @@ export default function BusinessForm({
             : []
       });
 
-      // O utilizador já tinha avançado com estes dados antes da autenticação.
-      // Mantemos as secções adicionais visíveis para não esconder o conteúdo recuperado.
+      // Estado de interface recuperado do rascunho guardado no navegador.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowOptionalDetails(true);
-
       setShowHours(hasOpeningHours);
 
       setShowSocials(Boolean(parsed.form.instagram || parsed.form.facebook));
+
+      // O login é pedido apenas depois da revisão. Retomamos nesse ponto para
+      // não obrigar o utilizador a atravessar novamente todas as etapas.
+      setCreationStep(3);
 
       /*
        * O formulário já está na memória do React Hook Form.
@@ -871,26 +1188,207 @@ export default function BusinessForm({
 
   return (
     <>
-      <Card className="mx-auto max-w-4xl">
+      <Card
+        ref={formCardRef}
+        className="mx-auto max-w-4xl scroll-mt-24 gap-0 overflow-clip py-0"
+      >
         {mode === "edit" && (
-          <CardHeader>
-            <CardTitle>Editar Negócio</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Atualiza as informações do teu negócio.
-            </p>
+          <CardHeader className="gap-5 border-b bg-muted/20 px-5 py-6 sm:px-8">
+            <div>
+              <CardTitle className="text-xl">Editar negócio</CardTitle>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Atualiza apenas o que precisares. As alterações só são aplicadas
+                quando guardares.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Navegar pelas secções
+                  </p>
+                  <p
+                    id="edit-sections-scroll-hint"
+                    className="mt-0.5 text-xs text-muted-foreground"
+                  >
+                    Desliza ou utiliza as setas para ver todos os atalhos.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="size-8 rounded-full bg-background shadow-sm"
+                  onClick={() => scrollEditSections(-1)}
+                  disabled={!editSectionsScroll.canScrollLeft}
+                  aria-label="Ver secções anteriores"
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+
+                <div className="relative min-w-0">
+                  <nav
+                    ref={editSectionsRef}
+                    aria-label="Secções da edição do negócio"
+                    aria-describedby="edit-sections-scroll-hint"
+                    onScroll={updateEditSectionsScroll}
+                    className="flex snap-x snap-mandatory gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  >
+                    {EDIT_SECTIONS.map(({ id, label, icon: Icon }) => (
+                      <a
+                        key={id}
+                        href={`#${id}`}
+                        className="flex shrink-0 snap-start items-center gap-2 rounded-full border bg-background px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        <Icon className="size-4" aria-hidden="true" />
+                        {label}
+                      </a>
+                    ))}
+                  </nav>
+
+                  {editSectionsScroll.canScrollLeft && (
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-muted/95 to-transparent"
+                    />
+                  )}
+                  {editSectionsScroll.canScrollRight && (
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-muted/95 to-transparent"
+                    />
+                  )}
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="size-8 rounded-full bg-background shadow-sm"
+                  onClick={() => scrollEditSections(1)}
+                  disabled={!editSectionsScroll.canScrollRight}
+                  aria-label="Ver mais secções"
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
           </CardHeader>
         )}
         {mode === "create" && (
-          <CardHeader className="border-b bg-muted/20">
-            <CardTitle>Dados essenciais</CardTitle>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Preencha o nome, a atividade, uma descrição curta e o telefone.
-              Tudo o resto pode ser adicionado agora ou mais tarde.
-            </p>
+          <CardHeader className="gap-5 border-b bg-gradient-to-br from-green-50 via-background to-background px-5 py-6 sm:px-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="mb-1 text-sm font-semibold text-brand-primary">
+                  Passo {creationStep + 1} de {CREATION_STEPS.length}
+                </p>
+                <CardTitle>{CREATION_STEPS[creationStep].title}</CardTitle>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  {CREATION_STEPS[creationStep].description}
+                </p>
+              </div>
+              <span className="hidden shrink-0 items-center gap-1.5 pt-1 text-sm text-muted-foreground sm:flex">
+                <Clock3 className="size-4" aria-hidden="true" />
+                Cerca de 2 minutos
+              </span>
+            </div>
+
+            <div
+              className="grid grid-cols-4 gap-2"
+              role="progressbar"
+              aria-valuemin={1}
+              aria-valuemax={CREATION_STEPS.length}
+              aria-valuenow={creationStep + 1}
+              aria-label={`Passo ${creationStep + 1} de ${CREATION_STEPS.length}`}
+            >
+              {CREATION_STEPS.map((step, index) => (
+                <div key={step.title} className="space-y-2">
+                  <div
+                    className={`h-1.5 rounded-full transition-colors ${
+                      index <= creationStep ? "bg-brand-primary" : "bg-muted"
+                    }`}
+                  />
+                  <span className="sr-only">{step.title}</span>
+                </div>
+              ))}
+            </div>
           </CardHeader>
         )}
 
-        <CardContent>
+        <CardContent
+          className={`px-5 py-6 sm:px-8 sm:py-8 ${
+            mode === "edit" ? "bg-muted/20" : ""
+          }`}
+        >
+          {mode === "edit" && (
+            <section
+              aria-labelledby="profile-checklist-title"
+              className={`mb-8 rounded-2xl border p-5 sm:p-6 ${
+                missingEditProfileItems.length === 0
+                  ? "border-green-200 bg-green-50"
+                  : "border-amber-200 bg-amber-50/70"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <h2 id="profile-checklist-title" className="font-semibold">
+                    {missingEditProfileItems.length === 0
+                      ? "Página completa"
+                      : "O que falta para completar a página"}
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    {missingEditProfileItems.length === 0
+                      ? "A página tem todas as informações recomendadas."
+                      : `${missingEditProfileItems.length} ${
+                          missingEditProfileItems.length === 1
+                            ? "recomendação por completar"
+                            : "recomendações por completar"
+                        }.`}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm font-semibold text-primary">
+                  {editProfileCompletion}%
+                </span>
+              </div>
+
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/5">
+                <div
+                  className="h-full rounded-full bg-brand-primary transition-[width] duration-300"
+                  style={{ width: `${editProfileCompletion}%` }}
+                />
+              </div>
+
+              {missingEditProfileItems.length > 0 && (
+                <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                  {missingEditProfileItems.map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className="group flex items-center gap-3 rounded-xl border border-amber-200 bg-background p-3 transition-colors hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+                        <Plus className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium">
+                          {item.label}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {item.detail}
+                        </span>
+                      </span>
+                      <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
           <form
             onSubmit={handleSubmit(onSubmit)}
             onChangeCapture={() => {
@@ -901,8 +1399,13 @@ export default function BusinessForm({
             }}
             className="space-y-10"
           >
+            {(mode === "edit" || creationStep === 0) && (
+              <>
             {/* INFORMACOES */}
-            <section className="space-y-4">
+            <section
+              id="informacoes"
+              className={`space-y-4 ${editorSectionClass}`}
+            >
               <h2 className="text-lg font-semibold">Informações</h2>
 
               <div className="space-y-1">
@@ -1059,6 +1562,86 @@ export default function BusinessForm({
                 )}
               </div>
 
+              {mode === "create" &&
+                businessName.trim().length >= 3 &&
+                selectedCategoryId && (
+                  <div aria-live="polite">
+                    {activeExistingBusinessCheck.status === "loading" && (
+                      <div className="flex items-center gap-2 rounded-xl border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                        <Spinner />
+                        A verificar se este negócio já aparece na Montra…
+                      </div>
+                    )}
+
+                    {activeExistingBusinessCheck.status === "clear" && (
+                      <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
+                        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-green-700" />
+                        <div>
+                          <p className="text-sm font-medium text-green-950">
+                            Não encontrámos um negócio semelhante
+                          </p>
+                          <p className="mt-0.5 text-xs leading-5 text-green-800">
+                            Podes continuar a criar esta página.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeExistingBusinessCheck.status === "matches" && (
+                      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+                        <div>
+                          <p className="font-semibold text-amber-950">
+                            Encontrámos possíveis correspondências
+                          </p>
+                          <p className="mt-1 text-sm leading-5 text-amber-900/75">
+                            Confirma se alguma destas páginas pertence ao teu
+                            negócio antes de criares uma nova.
+                          </p>
+                        </div>
+
+                        <div className="mt-3 space-y-2">
+                          {activeExistingBusinessCheck.matches.map((match) => (
+                            <a
+                              key={match.id}
+                              href={`/negocio/${match.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="group flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-background px-3 py-2.5 transition-colors hover:border-primary/30 hover:bg-primary/5"
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm font-medium">
+                                  {match.name}
+                                </span>
+                                <span className="block truncate text-xs text-muted-foreground">
+                                  {[match.categoryName, match.city]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </span>
+                              </span>
+                              <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
+                                Ver página
+                                <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+
+                        <p className="mt-3 text-xs leading-5 text-amber-900/75">
+                          Se encontrares o teu negócio, abre a página e utiliza
+                          a opção para o reivindicar gratuitamente.
+                        </p>
+                      </div>
+                    )}
+
+                    {activeExistingBusinessCheck.status === "error" && (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        Não conseguimos fazer a verificação agora. Podes
+                        continuar; voltaremos a confirmar antes de publicar.
+                      </p>
+                    )}
+                  </div>
+                )}
+
               {selectedCategoryId && specialties.length > 0 && (
                 <div className="space-y-3 rounded-xl border p-4">
                   <div>
@@ -1129,7 +1712,10 @@ export default function BusinessForm({
             </section>
 
             {/* CONTACTOS */}
-            <section className="space-y-4">
+            <section
+              id="contactos"
+              className={`space-y-4 ${editorSectionClass}`}
+            >
               <h2 className="text-lg font-semibold">Contactos</h2>
 
               <Input placeholder="Telefone *" {...register("phone")} />
@@ -1137,39 +1723,14 @@ export default function BusinessForm({
                 <p className="text-sm text-red-500">{errors.phone.message}</p>
               )}
             </section>
-
-            {mode === "create" && !showOptionalDetails && (
-              <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="flex items-center gap-2 font-semibold text-green-950">
-                      <CheckCircle2 className="h-5 w-5 text-green-700" />
-                      Já tem o essencial para continuar
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-green-800">
-                      Pode escolher o plano agora e completar fotografias,
-                      localização, serviços e horários mais tarde.
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="shrink-0 border-green-300 bg-white text-green-900"
-                    onClick={() => {
-                      setShowOptionalDetails(true);
-                      trackAnalyticsEvent("business_optional_details_open");
-                    }}
-                  >
-                    Completar mais informações
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              </>
             )}
 
-            {(mode === "edit" || showOptionalDetails) && (
+            {(mode === "edit" || creationStep === 1 || creationStep === 2) && (
               <>
-              <section className="space-y-4">
+              {(mode === "edit" || creationStep === 1) && (
+                <>
+              <section className={`space-y-4 ${editorSectionClass}`}>
                 <div>
                   <h2 className="text-lg font-semibold">
                     Contactos adicionais
@@ -1248,7 +1809,10 @@ export default function BusinessForm({
               />
             )}
 
-            <section className="space-y-4">
+            <section
+              id="redes-sociais"
+              className={`space-y-4 ${editorSectionClass}`}
+            >
               <h2 className="text-lg font-semibold">
                 Redes sociais (opcional)
               </h2>
@@ -1274,7 +1838,10 @@ export default function BusinessForm({
             </section>
 
             {/* LOCALIZACAO */}
-            <section id="localizacao" className="scroll-mt-24 space-y-4">
+            <section
+              id="localizacao"
+              className={`scroll-mt-24 space-y-4 ${editorSectionClass}`}
+            >
               <div>
                 <h2 className="text-lg font-semibold">Localização</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -1430,7 +1997,10 @@ export default function BusinessForm({
               )}
             </section>
 
-            <section className="space-y-4">
+            <section
+              id="area-atuacao"
+              className={`space-y-4 ${editorSectionClass}`}
+            >
               <div>
                 <h2 className="text-lg font-semibold">Área de atuação</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -1523,7 +2093,16 @@ export default function BusinessForm({
               )}
             </section>
 
-            <section id="fotografias" className="scroll-mt-24 space-y-4">
+                </>
+              )}
+
+              {(mode === "edit" || creationStep === 2) && (
+                <>
+
+            <section
+              id="fotografias"
+              className={`scroll-mt-24 space-y-4 ${editorSectionClass}`}
+            >
               <h2 className="text-lg font-semibold">Logo</h2>
               <LogoUpload
                 onChange={setLogoFile}
@@ -1532,7 +2111,7 @@ export default function BusinessForm({
               />
             </section>
 
-            <section className="space-y-4">
+            <section className={`space-y-4 ${editorSectionClass}`}>
               <h2 className="text-lg font-semibold">Imagens do negócio</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 A primeira imagem será utilizada como imagem de destaque.
@@ -1546,7 +2125,7 @@ export default function BusinessForm({
 
             <section
               id="servicos-e-precos"
-              className="scroll-mt-24 space-y-4"
+              className={`scroll-mt-24 space-y-4 ${editorSectionClass}`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -1671,7 +2250,7 @@ export default function BusinessForm({
             {mode === "edit" && (
                 <section
                   id="perguntas-frequentes"
-                  className="scroll-mt-24 space-y-4"
+                  className={`scroll-mt-24 space-y-4 ${editorSectionClass}`}
                 >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -1743,7 +2322,7 @@ export default function BusinessForm({
             {/* HORARIO */}
             <section
               id="horario-funcionamento"
-              className="scroll-mt-24 space-y-4"
+              className={`scroll-mt-24 space-y-4 ${editorSectionClass}`}
             >
               <h2 className="text-lg font-semibold">
                 Horário de funcionamento (opcional)
@@ -1825,9 +2404,103 @@ export default function BusinessForm({
                 </>
               )}
             </section>
+                </>
+              )}
               </>
             )}
-            <div className="flex justify-end gap-3 border-t pt-6">
+
+            {mode === "create" && creationStep === 3 && (
+              <section className="space-y-6">
+                <div className="rounded-2xl border border-green-200 bg-green-50 p-5 sm:p-6">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-primary text-white">
+                      <Check className="size-5" />
+                    </span>
+                    <div>
+                      <h2 className="font-semibold text-green-950">
+                        A página está pronta para avançar
+                      </h2>
+                      <p className="mt-1 text-sm leading-6 text-green-800">
+                        No próximo ecrã escolhes como queres publicar. Podes
+                        editar todos os detalhes mais tarde.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="divide-y rounded-2xl border">
+                  <div className="flex items-start justify-between gap-4 p-4 sm:p-5">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Negócio
+                      </p>
+                      <p className="mt-1 font-semibold break-words">
+                        {getValues("name")}
+                      </p>
+                    </div>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setCreationStep(0)}>
+                      Editar
+                    </Button>
+                  </div>
+                  <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Categoria
+                      </p>
+                      <p className="mt-1 text-sm font-medium">
+                        {selectedCategory?.name ?? "Por confirmar"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Contacto
+                      </p>
+                      <p className="mt-1 text-sm font-medium">
+                        {getValues("phone")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-4 sm:p-5">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Informação adicionada
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {getValues("hasPhysicalAddress") && (
+                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">Morada</span>
+                      )}
+                      {getValues("allowWhatsApp") && (
+                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">WhatsApp</span>
+                      )}
+                      {images.length > 0 && (
+                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">{images.length} fotografias</span>
+                      )}
+                      {serviceFields.length > 0 && (
+                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">{serviceFields.length} serviços</span>
+                      )}
+                      {showHours && (
+                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">Horário</span>
+                      )}
+                      {!getValues("hasPhysicalAddress") &&
+                        !getValues("allowWhatsApp") &&
+                        images.length === 0 &&
+                        serviceFields.length === 0 &&
+                        !showHours && (
+                          <span className="text-sm text-muted-foreground">
+                            Apenas os dados essenciais — podes completar depois.
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+            <div
+              className={`flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between ${
+                mode === "edit"
+                  ? "sticky bottom-3 z-20 rounded-2xl border bg-background/95 p-3 shadow-lg backdrop-blur"
+                  : ""
+              }`}
+            >
               {mode === "edit" && (
                 <Button
                   type="button"
@@ -1839,8 +2512,26 @@ export default function BusinessForm({
                 </Button>
               )}
 
+              {mode === "create" && creationStep > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={goToPreviousCreationStep}
+                  disabled={isProcessing}
+                  className="justify-center sm:justify-start"
+                >
+                  <ArrowLeft />
+                  Voltar
+                </Button>
+              )}
+
               <Button
-                type="submit"
+                type={mode === "create" && creationStep < 3 ? "button" : "submit"}
+                onClick={
+                  mode === "create" && creationStep < 3
+                    ? () => void goToNextCreationStep()
+                    : undefined
+                }
                 className={
                   mode === "create"
                     ? "w-full bg-brand-primary text-white hover:bg-green-700 sm:w-auto sm:min-w-56"
@@ -1860,8 +2551,16 @@ export default function BusinessForm({
                         ? "A criar negócio..."
                         : "A guardar alterações..."}
                   </span>
+                ) : mode === "create" && creationStep < 3 ? (
+                  <>
+                    {creationStep === 2 ? "Rever a página" : "Continuar"}
+                    <ArrowRight />
+                  </>
                 ) : mode === "create" ? (
-                  "Continuar para escolher o plano"
+                  <>
+                    Continuar para escolher o plano
+                    <ArrowRight />
+                  </>
                 ) : (
                   "Guardar alterações"
                 )}
