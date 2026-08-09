@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
 import type { PaidBusinessPlan } from "@/lib/business-plan";
 import { getBusinessPlanPrice } from "@/lib/stripe/businessPlanPrices";
+import { isHoneypotTriggered } from "@/lib/honeypot";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -34,18 +35,24 @@ export async function POST(req: Request) {
     }
 
     /**
-     * ⚠️ NÃO usamos draft payload aqui
-     * apenas validamos ownership
+     * Validamos ownership e o campo anti-spam antes de criar uma sessão paga.
      */
     const { data: draft, error: draftError } = await supabase
       .from("business_drafts")
-      .select("id")
+      .select("id, data")
       .eq("id", draftId)
       .eq("user_id", user.id)
       .single();
 
     if (draftError || !draft) {
       return NextResponse.json({ error: "Draft inválido." }, { status: 404 });
+    }
+
+    if (isHoneypotTriggered(draft.data?.form?.contactFax)) {
+      return NextResponse.json(
+        { error: "Não foi possível iniciar o pagamento." },
+        { status: 400 }
+      );
     }
 
     const session = await stripe.checkout.sessions.create({

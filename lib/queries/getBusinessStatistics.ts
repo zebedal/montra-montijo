@@ -1,18 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getPrimaryCtaLabel } from "@/lib/business-primary-cta";
-
-export type BusinessEventType =
-  | "page_view"
-  | "phone_click"
-  | "email_click"
-  | "website_click"
-  | "instagram_click"
-  | "facebook_click"
-  | "directions_click"
-  | "primary_cta_click"
-  | "campaign_view"
-  | "campaign_click"
-  | "campaign_cta_click";
+import {
+  calculateBusinessEventTotals,
+  type BusinessEventType
+} from "@/lib/business-statistics-core";
+import {
+  summarizeQuoteRequests,
+  type QuoteRequestSummaryItem
+} from "@/lib/quote-request";
 
 type BusinessEvent = {
   event_type: BusinessEventType;
@@ -47,6 +42,7 @@ export type BusinessStatistics = {
     campaignCtaClicks: number;
     campaignViews: number;
     campaignClicks: number;
+    quoteRequests: number;
     interactions: number;
   };
 
@@ -61,6 +57,10 @@ export type BusinessStatistics = {
     channel: string;
     value: number;
   }[];
+
+  quoteRequests: {
+    localities: QuoteRequestSummaryItem[];
+  };
 };
 
 type GetBusinessStatisticsResult =
@@ -72,29 +72,6 @@ type GetBusinessStatisticsResult =
       success: false;
       reason: "unauthenticated" | "not_found" | "premium_required";
     };
-
-const EVENT_TO_TOTAL_KEY: Record<
-  Exclude<BusinessEventType, "page_view" | "campaign_view">,
-  | "phoneClicks"
-  | "emailClicks"
-  | "websiteClicks"
-  | "instagramClicks"
-  | "facebookClicks"
-  | "directionsClicks"
-  | "primaryCtaClicks"
-  | "campaignClicks"
-  | "campaignCtaClicks"
-> = {
-  phone_click: "phoneClicks",
-  email_click: "emailClicks",
-  website_click: "websiteClicks",
-  instagram_click: "instagramClicks",
-  facebook_click: "facebookClicks",
-  directions_click: "directionsClicks",
-  primary_cta_click: "primaryCtaClicks",
-  campaign_click: "campaignClicks",
-  campaign_cta_click: "campaignCtaClicks"
-};
 
 function getDateKey(date: Date) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -205,14 +182,22 @@ export async function getBusinessStatistics(
 
   const endDate = new Date();
 
-  const { data: events, error: eventsError } = await supabase
-    .from("business_events")
-    .select("event_type, created_at")
-    .eq("business_id", business.id)
-    .gte("created_at", startDate.toISOString())
-    .order("created_at", {
-      ascending: true
-    });
+  const [eventsResult, quoteRequestsResult] = await Promise.all([
+    supabase
+      .from("business_events")
+      .select("event_type, created_at")
+      .eq("business_id", business.id)
+      .gte("created_at", startDate.toISOString())
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("business_quote_requests")
+      .select("locality, created_at")
+      .eq("business_id", business.id)
+      .gte("created_at", startDate.toISOString())
+      .order("created_at", { ascending: true })
+  ]);
+
+  const { data: events, error: eventsError } = eventsResult;
 
   if (eventsError) {
     console.error("Erro ao obter as estatísticas:", eventsError);
@@ -221,21 +206,27 @@ export async function getBusinessStatistics(
   }
 
   const typedEvents = (events ?? []) as BusinessEvent[];
+  const quoteRequestRows = quoteRequestsResult.error
+    ? []
+    : (quoteRequestsResult.data ?? []) as {
+        locality: string;
+        created_at: string;
+      }[];
 
-  const totals = {
-    pageViews: 0,
-    phoneClicks: 0,
-    emailClicks: 0,
-    websiteClicks: 0,
-    instagramClicks: 0,
-    facebookClicks: 0,
-    directionsClicks: 0,
-    primaryCtaClicks: 0,
-    campaignCtaClicks: 0,
-    campaignViews: 0,
-    campaignClicks: 0,
-    interactions: 0
-  };
+  if (
+    quoteRequestsResult.error &&
+    quoteRequestsResult.error.code !== "PGRST205" &&
+    quoteRequestsResult.error.code !== "42P01"
+  ) {
+    console.error(
+      "Erro ao obter pedidos de orçamento nas estatísticas:",
+      quoteRequestsResult.error
+    );
+  }
+
+  const totals = calculateBusinessEventTotals(typedEvents);
+  totals.quoteRequests = quoteRequestRows.length;
+  totals.interactions += quoteRequestRows.length;
 
   const daily = createDailyRange(safeDays);
 
@@ -247,8 +238,6 @@ export async function getBusinessStatistics(
     const dailyItem = dailyMap.get(dateKey);
 
     if (event.event_type === "page_view") {
-      totals.pageViews += 1;
-
       if (dailyItem) {
         dailyItem.pageViews += 1;
       }
@@ -257,21 +246,26 @@ export async function getBusinessStatistics(
     }
 
     if (event.event_type === "campaign_view") {
-      totals.campaignViews += 1;
       return;
     }
-
-    const totalKey = EVENT_TO_TOTAL_KEY[event.event_type];
-
-    totals[totalKey] += 1;
-    totals.interactions += 1;
 
     if (dailyItem) {
       dailyItem.interactions += 1;
     }
   });
 
+  quoteRequestRows.forEach((request) => {
+    const dailyItem = dailyMap.get(getDateKey(new Date(request.created_at)));
+    if (dailyItem) dailyItem.interactions += 1;
+  });
+
+  const quoteRequestSummary = summarizeQuoteRequests(quoteRequestRows);
+
   const channels = [
+    {
+      channel: "Orçamentos",
+      value: totals.quoteRequests
+    },
     ...(business.primary_cta_type
       ? [
           {
@@ -335,7 +329,8 @@ export async function getBusinessStatistics(
 
       totals,
       daily,
-      channels
+      channels,
+      quoteRequests: quoteRequestSummary
     }
   };
 }

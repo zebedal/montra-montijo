@@ -140,6 +140,9 @@ export const businessServiceSchema = z
 export const businessSchema = z
   .object({
     name: z.string().min(2, "Indica o nome do negócio."),
+    // Campo honeypot usado apenas durante a criação. É opcional para manter
+    // compatibilidade com edições e rascunhos criados antes de existir.
+    contactFax: z.string().max(200).optional(),
 
     category_id: z.string().min(1, "Selecione uma categoria válida."),
     specialtyIds: z

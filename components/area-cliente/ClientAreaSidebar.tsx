@@ -10,7 +10,8 @@ import {
   Megaphone,
   Settings,
   User,
-  FileQuestion
+  FileQuestion,
+  ClipboardList
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -27,6 +28,11 @@ const links = [
     href: Routes.CAMPANHAS,
     label: "Campanhas",
     icon: Megaphone
+  },
+  {
+    href: Routes.PEDIDOS_ORCAMENTO,
+    label: "Orçamentos",
+    icon: ClipboardList
   },
   {
     href: Routes.FAVORITOS,
