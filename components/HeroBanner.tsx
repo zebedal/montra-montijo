@@ -88,8 +88,8 @@ export function Hero() {
             ease: [0.22, 1, 0.36, 1]
           }}
         >
-          Encontra restaurantes, lojas, empresas e serviços com contactos,
-          moradas e horários.
+          Encontra negócios, serviços e profissionais no Montijo. Consulta
+          contactos, áreas de atuação, moradas e horários.
         </motion.p>
 
         <motion.div

@@ -128,7 +128,7 @@ export default function PlansPage() {
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/75">Comece gratuitamente, ganhe visibilidade com o Destaque ou transforme promoções em oportunidades com o Premium.</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" variant="secondary"><Link href="#planos">Comparar planos <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-                <Button asChild size="lg" variant="outline" className="border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"><Link href="/criar-negocio">Criar negócio</Link></Button>
+                <Button asChild size="lg" variant="outline" className="border-white/25 bg-white/10 text-white hover:bg-white/20 hover:text-white"><Link href="/criar-negocio">Criar página grátis</Link></Button>
               </div>
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/70"><span>Sem fidelização</span><span>Cancelamento simples</span><span>Renovação mensal</span></div>
             </div>
@@ -171,7 +171,16 @@ export default function PlansPage() {
                   </CardHeader>
                   <CardContent className="flex flex-1 flex-col">
                     <ul className="space-y-3 text-sm">{plan.features.map((feature) => <li key={feature} className="flex items-start gap-2.5"><BadgeCheck className={`mt-0.5 h-5 w-5 shrink-0 ${plan.premium ? "text-emerald-300" : "text-green-600"}`} />{feature}</li>)}</ul>
-                    <Button asChild size="lg" variant={plan.premium ? "secondary" : plan.featured ? "default" : "outline"} className="mt-8 w-full"><Link href={plan.href}>{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                    <div className="mt-auto pt-8">
+                      <Button
+                        asChild
+                        size="lg"
+                        variant={plan.premium ? "secondary" : "default"}
+                        className={plan.premium ? "w-full" : "w-full bg-brand-forest text-white hover:bg-brand-forest/90"}
+                      >
+                        <Link href={plan.href}>{plan.cta}<ArrowRight className="ml-2 h-4 w-4" /></Link>
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -201,7 +210,7 @@ export default function PlansPage() {
       </section>
 
       <section className="bg-background">
-        <PageContainer className="pb-20 pt-4"><div className="rounded-3xl bg-primary px-6 py-12 text-center text-primary-foreground sm:px-10"><Crown className="mx-auto h-8 w-8" /><h2 className="mt-5 text-3xl font-bold">Pronto para dar o próximo passo?</h2><p className="mx-auto mt-4 max-w-2xl text-primary-foreground/75">Crie o seu negócio e escolha o plano que melhor acompanha os seus objetivos.</p><Button asChild size="lg" variant="secondary" className="mt-7"><Link href="/criar-negocio">Criar negócio<ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div></PageContainer>
+        <PageContainer className="pb-20 pt-4"><div className="rounded-3xl bg-primary px-6 py-12 text-center text-primary-foreground sm:px-10"><Crown className="mx-auto h-8 w-8" /><h2 className="mt-5 text-3xl font-bold">Pronto para dar o próximo passo?</h2><p className="mx-auto mt-4 max-w-2xl text-primary-foreground/75">Crie a página do seu negócio e escolha o plano que melhor acompanha os seus objetivos.</p><Button asChild size="lg" variant="secondary" className="mt-7"><Link href="/criar-negocio">Criar página grátis<ArrowRight className="ml-2 h-4 w-4" /></Link></Button></div></PageContainer>
       </section>
     </main>
   );

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import CreateBusinessFlow from "@/components/business/CreateBusinessFlow";
+import { parsePaidBusinessPlan } from "@/lib/business-plan";
 
 export const metadata: Metadata = {
   title: "Divulgue o seu negócio no comércio local do Montijo",
 
   description:
-    "Registe gratuitamente o seu negócio na Montra Montijo e ganhe visibilidade junto de quem procura comércio local no Montijo.",
+    "Crie gratuitamente a página do seu negócio ou serviço na Montra Montijo e ganhe visibilidade junto de clientes locais.",
 
   alternates: {
     canonical: "/criar-negocio"
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Divulgue o seu negócio no comércio local do Montijo",
     description:
-      "Junte o seu negócio à Montra Montijo e aumente a sua presença no comércio local do Montijo.",
+      "Crie gratuitamente a página do seu negócio ou serviço e aumente a sua visibilidade no Montijo.",
     url: "/criar-negocio",
     type: "website",
     locale: "pt_PT",
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Divulgue o seu negócio no comércio local do Montijo",
     description:
-      "Registe o seu negócio na Montra Montijo e dê-lhe mais visibilidade local."
+      "Crie a página do seu negócio ou serviço e dê-lhe mais visibilidade no Montijo."
   },
 
   robots: {
@@ -43,7 +44,7 @@ type Props = {
 
 export default async function CriarNegocioPage({ searchParams }: Props) {
   const { restoreDraft, plan } = await searchParams;
-  const preferredPlan = plan === "featured" || plan === "premium" ? plan : null;
+  const preferredPlan = parsePaidBusinessPlan(plan);
   return (
     <main className="min-h-screen bg-background px-4 py-10">
       <CreateBusinessFlow

@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "Descubra restaurantes, lojas, empresas e serviços locais no Montijo. Encontre negócios perto de si na Montra Montijo.",
+    "Descubra negócios, serviços e profissionais no Montijo. Encontre informação local útil na Montra Montijo.",
 
   applicationName: "Montra Montijo",
 
@@ -43,6 +43,7 @@ export const metadata: Metadata = {
     "empresas no Montijo",
     "comércio local Montijo",
     "serviços no Montijo",
+    "profissionais no Montijo",
     "lojas no Montijo",
     "restaurantes no Montijo",
     "diretório de negócios Montijo"
@@ -68,7 +69,7 @@ export const metadata: Metadata = {
     siteName: "Montra Montijo",
     title: "Montra Montijo",
     description:
-      "Descubra restaurantes, lojas, empresas e serviços locais no Montijo.",
+      "Descubra negócios, serviços e profissionais no Montijo.",
     images: [
       {
         url: "/images/default-og-image.jpg",
@@ -83,7 +84,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Montra Montijo",
     description:
-      "Descubra restaurantes, lojas, empresas e serviços locais no Montijo.",
+      "Descubra negócios, serviços e profissionais no Montijo.",
     images: ["/images/default-og-image.jpg"]
   },
 

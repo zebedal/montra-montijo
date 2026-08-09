@@ -57,8 +57,8 @@ export async function generateMetadata({
 
   const description =
     page > 1
-      ? `Descubra empresas, lojas, restaurantes e serviços locais no Montijo. Consulte a página ${page} do diretório Montra Montijo.`
-      : "Explore o diretório de negócios locais do Montijo. Encontre restaurantes, lojas, empresas e serviços com contactos, moradas e horários.";
+      ? `Descubra negócios, serviços e profissionais no Montijo. Consulte a página ${page} do diretório Montra Montijo.`
+      : "Explore o diretório de negócios do Montijo. Encontre negócios, serviços e profissionais com contactos, áreas de atuação, moradas e horários.";
 
   const canonical = page > 1 ? `/negocios?page=${page}` : "/negocios";
 

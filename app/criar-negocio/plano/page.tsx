@@ -1,5 +1,6 @@
 import BusinessPlanContent from "@/components/business/BusinessPlanContent";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { parsePaidBusinessPlan } from "@/lib/business-plan";
 
 type Props = {
   searchParams: Promise<{
@@ -10,7 +11,7 @@ type Props = {
 
 export default async function BusinessPlanPage({ searchParams }: Props) {
   const { draft, plan } = await searchParams;
-  const initialSelectedPlan = plan === "featured" || plan === "premium" ? plan : null;
+  const initialSelectedPlan = parsePaidBusinessPlan(plan);
   const admin = await requireAdmin();
 
   return (

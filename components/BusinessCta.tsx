@@ -73,8 +73,7 @@ export default function BusinessCta() {
 
               <p className="mt-4 max-w-2xl text-brand-body text-white/85 sm:text-brand-lead">
                 Crie gratuitamente uma página com a informação que os clientes
-                procuram. Não precisa de cartão e pode começar apenas com os
-                dados essenciais.
+                procuram e comece a ganhar visibilidade local.
               </p>
 
               <ul className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -169,7 +168,8 @@ export default function BusinessCta() {
                     </span>
                   </span>
                   <span className="mt-1 block text-brand-body-sm font-normal text-brand-forest/60">
-                    Sem cartão. Pode completar o perfil mais tarde.
+                    Comece com os dados essenciais e complete o perfil quando
+                    quiser.
                   </span>
                 </span>
               </Link>
