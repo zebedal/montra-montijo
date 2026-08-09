@@ -5,6 +5,7 @@ import { BarChart3, CalendarDays, Home, ImageIcon, MousePointerClick, Sparkles, 
 import { motion, useReducedMotion } from "framer-motion";
 
 import PageContainer from "@/components/PageContainer";
+import { CampaignTutorialCta } from "@/components/campaigns/CampaignTutorialAnalytics";
 
 const campaignImages = [
   {
@@ -63,6 +64,14 @@ export default function PremiumCampaignShowcase() {
             <p className="mt-4 max-w-xl leading-7 text-muted-foreground">
               Cada campanha aparece na página do negócio e no carrossel de campanhas da homepage, criando uma nova oportunidade de descoberta e permitindo acompanhar visualizações e cliques.
             </p>
+            <CampaignTutorialCta
+              href="/campanhas"
+              label="Ver como funcionam as campanhas"
+              source="plans_campaign_showcase"
+              showArrow
+              variant="outline"
+              className="mt-6"
+            />
 
             <div className="relative mt-10 h-[285px] max-w-[520px] sm:h-[340px]" aria-label="Exemplos de campanhas para restauração, eventos e beleza">
               <div aria-hidden="true" className="absolute bottom-3 left-1/2 h-24 w-4/5 -translate-x-1/2 rounded-full bg-emerald-950/20 blur-2xl" />

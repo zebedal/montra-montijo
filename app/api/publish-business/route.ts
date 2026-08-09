@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { moveDraftAssets, publishBusiness } from "@/lib/helpers";
 import { sendBusinessPublishedEmailOnce } from "@/lib/resend/sendBusinessPublishedEmailOnce";
@@ -12,8 +13,7 @@ export async function POST(req: Request) {
   const supabase = await createClient();
 
   try {
-    const { draftId, isTest } = await req.json();
-    const isFeatured = false;
+    const { draftId, isTest, testPlan } = await req.json();
 
     if (!draftId) {
       return NextResponse.json({ error: "DraftId em falta." }, { status: 400 });
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     }
 
     const isHiddenTestBusiness = isTest === true;
+    const hiddenTestPlan = testPlan === "premium" ? "premium" : "free";
 
     if (
       isHiddenTestBusiness &&
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
         ...draft.data,
         ...movedAssets
       },
-      isFeatured,
+      isFeatured: isHiddenTestBusiness && hiddenTestPlan === "premium",
       isVisible: !isHiddenTestBusiness
     });
 
@@ -99,7 +100,7 @@ export async function POST(req: Request) {
           email: user.email,
           businessName: draft.data.form.name,
           businessSlug: publishedBusiness.slug,
-          plan: isFeatured ? "premium" : "free"
+          plan: "free"
         });
 
         console.log(
@@ -127,7 +128,7 @@ export async function POST(req: Request) {
           businessName: draft.data.form.name,
           businessSlug: publishedBusiness.slug,
           creatorEmail: user.email,
-          plan: isFeatured ? "premium" : "free"
+          plan: "free"
         });
       } catch (emailError) {
         console.error(
@@ -167,6 +168,14 @@ export async function POST(req: Request) {
     }
 
     await finalizeBusinessDraftUploads(draftId);
+
+    // A área de cliente pode já ter sido prefetched antes da publicação.
+    // Invalidamos as páginas que passam a incluir o novo negócio para que a
+    // próxima navegação não reutilize uma resposta anterior à inserção.
+    revalidatePath("/area-cliente");
+    revalidatePath("/", "page");
+    revalidatePath("/negocios");
+    revalidatePath(`/negocio/${publishedBusiness.slug}`);
 
     return NextResponse.json({
       businessId: publishedBusiness.id,

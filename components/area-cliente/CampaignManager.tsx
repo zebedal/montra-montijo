@@ -192,7 +192,15 @@ export function CampaignManager({
     return (
       <div className="space-y-8">
         <header>
-          <h1 className="text-3xl font-bold">Campanhas</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-3xl font-bold">Campanhas</h1>
+            <Button asChild variant="outline" size="sm">
+              <Link href={Routes.CAMPANHAS_TUTORIAL}>
+                Como funcionam?
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
           <p className="mt-2 text-muted-foreground">
             Transforme uma promoção temporária numa ação concreta de potenciais
             clientes.
@@ -254,15 +262,23 @@ export function CampaignManager({
               : "Consulte e gira as campanhas dos seus negócios."}
           </p>
         </div>
-        {!editorMode && (
-          <Button
-            onClick={startCreating}
-            disabled={availableBusinesses.length === 0}
-          >
-            <Plus className="h-4 w-4" />
-            Criar nova campanha
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href={Routes.CAMPANHAS_TUTORIAL}>
+              Como funciona?
+              <ExternalLink className="h-4 w-4" />
+            </Link>
           </Button>
-        )}
+          {!editorMode && (
+            <Button
+              onClick={startCreating}
+              disabled={availableBusinesses.length === 0}
+            >
+              <Plus className="h-4 w-4" />
+              Criar nova campanha
+            </Button>
+          )}
+        </div>
       </header>
 
       <CampaignBenefit />

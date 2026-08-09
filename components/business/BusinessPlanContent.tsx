@@ -35,6 +35,7 @@ export default function BusinessPlanContent({
   const [isStartingPremium, setIsStartingPremium] = useState(false);
   const [selectedPaidPlan, setSelectedPaidPlan] = useState<"featured" | "premium" | null>(initialSelectedPlan);
   const [isPublishingTest, setIsPublishingTest] = useState(false);
+  const [selectedTestPlan, setSelectedTestPlan] = useState<"free" | "premium" | null>(null);
 
   const isSubmitting =
     isPublishingFree || isStartingPremium || isPublishingTest;
@@ -204,13 +205,14 @@ export default function BusinessPlanContent({
     }
   }
 
-  async function publishHiddenTestBusiness() {
+  async function publishHiddenTestBusiness(testPlan: "free" | "premium") {
     if (!draftId || isSubmitting || !canPublishTestBusiness) {
       return;
     }
 
     try {
       setIsPublishingTest(true);
+      setSelectedTestPlan(testPlan);
 
       const response = await fetch("/api/publish-business", {
         method: "POST",
@@ -219,8 +221,8 @@ export default function BusinessPlanContent({
         },
         body: JSON.stringify({
           draftId,
-          isFeatured: false,
-          isTest: true
+          isTest: true,
+          testPlan
         })
       });
 
@@ -234,11 +236,13 @@ export default function BusinessPlanContent({
 
       clearDraft();
 
-      toast.success("Negócio de teste criado e mantido oculto.", {
+      toast.success(`Negócio de teste ${testPlan === "premium" ? "Premium " : ""}criado e mantido oculto.`, {
         position: "top-center"
       });
 
-      router.replace("/area-cliente");
+      router.replace(
+        `/area-cliente?business_created=${encodeURIComponent(data.businessId)}`
+      );
     } catch (error) {
       console.error("Erro ao criar negócio de teste:", error);
 
@@ -252,6 +256,7 @@ export default function BusinessPlanContent({
       );
     } finally {
       setIsPublishingTest(false);
+      setSelectedTestPlan(null);
     }
   }
 
@@ -456,26 +461,38 @@ export default function BusinessPlanContent({
                 Ferramenta de administrador
               </p>
               <p className="mt-1 text-sm text-amber-800">
-                Cria este negócio no plano gratuito, mas mantém-no fora das
-                páginas públicas, pesquisas e sitemap.
+                Cria este negócio como Gratuito ou Premium sem pagamento e
+                mantém-no fora das páginas públicas, pesquisas e sitemap.
               </p>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={publishHiddenTestBusiness}
-              disabled={!draftId || isSubmitting}
-              className="shrink-0 border-amber-500 bg-white text-amber-950 hover:bg-amber-100"
-            >
-              {isPublishingTest ? (
-                <span className="flex items-center gap-2">
-                  <Spinner />A criar teste...
-                </span>
-              ) : (
-                "Criar negócio de teste (oculto)"
-              )}
-            </Button>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => publishHiddenTestBusiness("free")}
+                disabled={!draftId || isSubmitting}
+                className="border-amber-500 bg-white text-amber-950 hover:bg-amber-100"
+              >
+                {isPublishingTest && selectedTestPlan === "free" ? (
+                  <span className="flex items-center gap-2"><Spinner />A criar Gratuito...</span>
+                ) : (
+                  "Criar teste Gratuito"
+                )}
+              </Button>
+              <Button
+                type="button"
+                onClick={() => publishHiddenTestBusiness("premium")}
+                disabled={!draftId || isSubmitting}
+                className="bg-emerald-950 text-white hover:bg-emerald-900"
+              >
+                {isPublishingTest && selectedTestPlan === "premium" ? (
+                  <span className="flex items-center gap-2"><Spinner />A criar Premium...</span>
+                ) : (
+                  "Criar teste Premium"
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       )}
