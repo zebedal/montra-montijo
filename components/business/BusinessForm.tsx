@@ -24,6 +24,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { getCategorias } from "@/lib/supabase/getCategories";
+import { getBusinessPlanStepUrl } from "@/lib/business-plan";
 
 import {
   Combobox,
@@ -812,11 +813,7 @@ export default function BusinessForm({
       /**
        * 4. Ir para a escolha do plano
        */
-      const planParams = new URLSearchParams({ draft: draftId });
-      if (preferredPlan) {
-        planParams.set("plan", preferredPlan);
-      }
-      router.push(`${Routes.CRIAR_NEGOCIO_PLANO}?${planParams.toString()}`);
+      router.push(getBusinessPlanStepUrl(draftId, preferredPlan));
     } catch (error) {
       console.error(error);
 

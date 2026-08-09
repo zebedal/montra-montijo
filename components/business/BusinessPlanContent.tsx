@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BadgeCheck, Sparkles } from "lucide-react";
@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useCreateBusiness } from "@/contexts/CreateBusinessContext";
 import { supabase } from "@/lib/supabase/client";
 import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
+import { shouldStartAutomaticCheckout } from "@/lib/business-plan";
 
 type Props = {
   initialDraftId: string | null;
@@ -34,6 +35,8 @@ export default function BusinessPlanContent({
 
   const [isStartingPremium, setIsStartingPremium] = useState(false);
   const [selectedPaidPlan, setSelectedPaidPlan] = useState<"featured" | "premium" | null>(initialSelectedPlan);
+  const [autoCheckoutFailed, setAutoCheckoutFailed] = useState(false);
+  const autoCheckoutAttemptedRef = useRef(false);
   const [isPublishingTest, setIsPublishingTest] = useState(false);
   const [selectedTestPlan, setSelectedTestPlan] = useState<"free" | "premium" | null>(null);
 
@@ -152,7 +155,10 @@ export default function BusinessPlanContent({
     }
   }
 
-  async function choosePaidPlan(plan: "featured" | "premium") {
+  const choosePaidPlan = useCallback(async (
+    plan: "featured" | "premium",
+    automatic = false
+  ) => {
     if (!draftId || isSubmitting) {
       return;
     }
@@ -202,8 +208,28 @@ export default function BusinessPlanContent({
 
       setIsStartingPremium(false);
       setSelectedPaidPlan(null);
+
+      if (automatic) {
+        setAutoCheckoutFailed(true);
+      }
     }
-  }
+  }, [draftId, isSubmitting]);
+
+  useEffect(() => {
+    if (
+      !initialSelectedPlan ||
+      !shouldStartAutomaticCheckout({
+        draftId,
+        plan: initialSelectedPlan,
+        alreadyAttempted: autoCheckoutAttemptedRef.current
+      })
+    ) {
+      return;
+    }
+
+    autoCheckoutAttemptedRef.current = true;
+    void choosePaidPlan(initialSelectedPlan, true);
+  }, [choosePaidPlan, draftId, initialSelectedPlan]);
 
   async function publishHiddenTestBusiness(testPlan: "free" | "premium") {
     if (!draftId || isSubmitting || !canPublishTestBusiness) {
@@ -258,6 +284,25 @@ export default function BusinessPlanContent({
       setIsPublishingTest(false);
       setSelectedTestPlan(null);
     }
+  }
+
+  if (initialSelectedPlan && draftId && !autoCheckoutFailed) {
+    const planLabel = initialSelectedPlan === "premium" ? "Premium" : "Destaque";
+
+    return (
+      <main className="mx-auto flex min-h-[55vh] w-full max-w-2xl items-center justify-center px-4 py-12">
+        <div className="w-full rounded-3xl border bg-card px-6 py-12 text-center shadow-sm sm:px-10">
+          <Spinner className="mx-auto h-8 w-8" />
+          <h1 className="mt-6 text-2xl font-bold">
+            A preparar o Plano {planLabel}
+          </h1>
+          <p className="mt-3 text-muted-foreground">
+            A escolha já está feita. Estamos a encaminhar-te para o pagamento
+            seguro.
+          </p>
+        </div>
+      </main>
+    );
   }
 
   return (

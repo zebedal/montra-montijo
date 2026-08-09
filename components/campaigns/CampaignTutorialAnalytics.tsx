@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { LinkProps } from "next/link";
 import { useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 
@@ -16,7 +17,7 @@ export function CampaignTutorialView() {
 }
 
 type CampaignTutorialCtaProps = {
-  href: string;
+  href: LinkProps["href"];
   label: string;
   source: string;
   showArrow?: boolean;

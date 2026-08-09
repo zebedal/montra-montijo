@@ -23,7 +23,7 @@ import type {
 } from "@/lib/business-campaign";
 
 const homeDescription =
-  "Explore o comércio local do Montijo num só lugar. Encontre restaurantes, lojas, empresas e serviços com contactos, moradas e horários.";
+  "Explore o comércio local do Montijo num só lugar. Encontre negócios, serviços e profissionais com contactos, áreas de atuação, moradas e horários.";
 
 export const metadata: Metadata = {
   title: {

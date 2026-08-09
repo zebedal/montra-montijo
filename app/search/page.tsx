@@ -47,7 +47,7 @@ export async function generateMetadata({
 
   const description = query
     ? `Consulte os resultados da pesquisa por ${query} na Montra Montijo.`
-    : "Pesquise restaurantes, lojas, empresas e serviços locais no Montijo.";
+    : "Pesquise negócios, serviços e profissionais no Montijo.";
 
   return {
     title,

@@ -175,10 +175,13 @@ export function Header() {
             asChild
             variant="primary"
           >
-            <Link href={Routes.CRIAR_NEGOCIO}>
+            <Link
+              href={Routes.CRIAR_NEGOCIO}
+              aria-label="Adicionar negócio"
+            >
               <Plus className="h-4 w-4 sm:mr-2" />
 
-              <span className="hidden sm:inline">Criar negócio</span>
+              <span className="hidden sm:inline">Adicionar negócio</span>
             </Link>
           </Button>
 
@@ -333,7 +336,7 @@ export function Header() {
 
                     <div className="space-y-1">
                       <MobileNavLink href={Routes.CRIAR_NEGOCIO} icon={Plus}>
-                        Criar negócio
+                        Adicionar negócio
                       </MobileNavLink>
 
                       <MobileNavLink href="/plano-destaque" icon={Crown}>

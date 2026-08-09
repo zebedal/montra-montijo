@@ -35,16 +35,17 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
+import { getCampaignPrimaryCta } from "@/lib/business-plan";
 
 export const metadata: Metadata = {
-  title: "Campanhas para promover negócios locais",
+  title: "Campanhas para promover negócios no Montijo",
   description:
-    "Descubra como criar campanhas na Montra Montijo para divulgar ofertas, novidades e eventos com imagem, datas, ação e métricas próprias.",
+    "Crie campanhas na Montra Montijo para divulgar ofertas, novidades e eventos, chegar a clientes locais e acompanhar visualizações e cliques.",
   alternates: { canonical: "/campanhas" },
   openGraph: {
-    title: "Campanhas locais | Montra Montijo",
+    title: "Campanhas para negócios no Montijo | Montra Montijo",
     description:
-      "Transforme uma oferta, novidade ou evento numa oportunidade concreta de contacto com clientes locais.",
+      "Divulgue ofertas, novidades e eventos e transforme a atenção de clientes locais em contactos, reservas e visitas.",
     url: "/campanhas",
     type: "website",
     locale: "pt_PT",
@@ -60,8 +61,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Campanhas locais | Montra Montijo",
-    description: "Saiba como promover uma oferta, novidade ou evento local.",
+    title: "Campanhas para negócios no Montijo | Montra Montijo",
+    description: "Divulgue ofertas, novidades e eventos junto de clientes locais.",
     images: ["/images/default-og-image.jpg"]
   },
   robots: { index: true, follow: true }
@@ -159,17 +160,10 @@ export default async function CampaignTutorialPage() {
     hasPremiumBusiness = Boolean(data);
   }
 
-  const primaryCta = hasPremiumBusiness
-    ? {
-        href: "/area-cliente/campanhas",
-        label: "Gerir as minhas campanhas"
-      }
-    : user
-      ? { href: "/plano-destaque#planos", label: "Ativar o Plano Premium" }
-      : {
-          href: "/criar-negocio?plan=premium",
-          label: "Criar negócio e escolher Premium"
-        };
+  const primaryCta = getCampaignPrimaryCta({
+    hasPremiumBusiness,
+    isAuthenticated: Boolean(user)
+  });
 
   return (
     <main>
@@ -192,12 +186,12 @@ export default async function CampaignTutorialPage() {
                 Campanhas Montra Montijo
               </Badge>
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                Dê às pessoas uma razão para agir agora
+                Transforme ofertas e novidades em campanhas locais
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-                Transforme uma oferta, novidade ou evento numa campanha visual,
-                com datas e ação próprias, apresentada onde os clientes locais
-                já estão a descobrir negócios.
+                Dê às pessoas uma razão para contactar, reservar, visitar ou
+                saber mais, com uma campanha visual apresentada onde os clientes
+                locais já estão a descobrir negócios.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <CampaignTutorialCta
