@@ -15,7 +15,11 @@ export function BusinessFaqs({ faqs }: Props) {
   if (faqs.length === 0) return null;
 
   return (
-    <Card className="min-w-0 overflow-hidden">
+    <Card
+      id="perguntas-frequentes"
+      tabIndex={-1}
+      className="min-w-0 scroll-mt-32 overflow-hidden outline-none"
+    >
       <CardHeader>
         <CardTitle>Perguntas frequentes</CardTitle>
       </CardHeader>

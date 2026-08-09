@@ -29,6 +29,9 @@ import BusinessOwnerPremiumBanner from "@/components/business/BusinessOwnerPremi
 import { getSiteUrl } from "@/lib/site-url";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
 import { getBusinessTrustSignals } from "@/lib/business-trust-signals";
+import { BusinessSectionNavigation } from "@/components/business/BusinessSectionNavigation";
+import { BusinessMobileActions } from "@/components/business/BusinessMobileActions";
+import { StickyBusinessHours } from "@/components/business/StickyBusinessHours";
 
 interface Props {
   params: Promise<{
@@ -206,6 +209,15 @@ export default async function BusinessPage({ params }: Props) {
     servesAtCustomerLocation: serviceAreas.length > 0,
     acceptsQuoteRequests: isManagedByOwner
   });
+  const hasContacts = Boolean(
+    business.phone ||
+      business.whatsapp_phone ||
+      business.email ||
+      business.website ||
+      business.instagram ||
+      business.facebook ||
+      business.street
+  );
 
   const completedProfileItems = [
     (business.description?.trim().length ?? 0) >= 80,
@@ -233,7 +245,7 @@ export default async function BusinessPage({ params }: Props) {
   const businessUrl = `${siteUrl}/negocio/${business.slug}`;
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl space-y-6 px-4 pt-8 pb-28 sm:px-6 lg:px-8 lg:pb-8">
       <LocalBusinessJsonLd
         business={business}
         hours={hours}
@@ -270,6 +282,27 @@ export default async function BusinessPage({ params }: Props) {
           businessName={business.name}
         />
       )}
+
+      <BusinessSectionNavigation
+        items={[
+          { href: "#visao-geral", label: "Visão geral" },
+          { href: "#galeria", label: "Galeria" },
+          { href: "#servicos", label: "Serviços", visible: services.length > 0 },
+          { href: "#mapa", label: "Localização" },
+          {
+            href: "#areas-servico",
+            label: "Áreas de serviço",
+            visible: serviceAreas.length > 0
+          },
+          { href: "#contactos", label: "Contactos", visible: hasContacts },
+          { href: "#horario", label: "Horário" },
+          {
+            href: "#perguntas-frequentes",
+            label: "Perguntas frequentes",
+            visible: faqs.length > 0
+          }
+        ]}
+      />
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="min-w-0 space-y-6">
@@ -318,26 +351,42 @@ export default async function BusinessPage({ params }: Props) {
             longitude={business.longitude}
           />
           <BusinessServiceAreas areas={serviceAreas} />
-          <BusinessServices services={services} />
+          <BusinessServices
+            services={services}
+            canRequestQuote={canReceiveQuoteRequests}
+          />
           <BusinessFaqs faqs={faqs} />
         </div>
 
-        <div className="min-w-0 space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <div className="min-w-0 space-y-6">
           {canReceiveQuoteRequests && (
             <BusinessQuoteRequest
               businessId={business.id}
               businessName={business.name}
+              phone={business.phone}
+              whatsappPhone={business.whatsapp_phone}
             />
           )}
           <BusinessContact business={business} />
 
-          <BusinessHours
-            hours={hours}
-            is24Hours={business.is_24_hours}
-          />
+          <StickyBusinessHours>
+            <BusinessHours
+              hours={hours}
+              is24Hours={business.is_24_hours}
+            />
+          </StickyBusinessHours>
 
         </div>
       </div>
+
+      {!isBusinessOwner && !canReceiveQuoteRequests && (
+        <BusinessMobileActions
+          businessId={business.id}
+          businessName={business.name}
+          phone={business.phone}
+          whatsappPhone={business.whatsapp_phone}
+        />
+      )}
 
       {business.category && (
         <RelatedBusinesses

@@ -34,7 +34,11 @@ export function BusinessGallery({
 
   if (!images.length) {
     return (
-      <Card className="min-w-0 overflow-hidden">
+      <Card
+        id="galeria"
+        tabIndex={-1}
+        className="min-w-0 scroll-mt-32 overflow-hidden outline-none"
+      >
         <CardHeader>
           <CardTitle>Galeria</CardTitle>
         </CardHeader>
@@ -118,7 +122,9 @@ export function BusinessGallery({
     return (
       <>
         <div
-          className="overflow-hidden rounded-xl cursor-pointer"
+          id="galeria"
+          tabIndex={-1}
+          className="scroll-mt-32 overflow-hidden rounded-xl outline-none cursor-pointer"
           onClick={() => setSelectedIndex(0)}
         >
           <Image
@@ -148,7 +154,11 @@ export function BusinessGallery({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 md:h-[420px] md:grid-cols-4 md:grid-rows-3">
+      <div
+        id="galeria"
+        tabIndex={-1}
+        className="grid scroll-mt-32 grid-cols-2 gap-3 outline-none md:h-[420px] md:grid-cols-4 md:grid-rows-3"
+      >
         {visibleImages.map((image, index) => (
           <button
             key={image.id}

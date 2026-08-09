@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, FileText, Send } from "lucide-react";
+import { CheckCircle2, FileText, Phone, Send } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { trackAnalyticsEvent } from "@/lib/analytics/trackAnalyticsEvent";
+import { trackBusinessEvent } from "@/lib/analytics/trackBusinessEvent";
+import { getBusinessWhatsAppUrl } from "@/lib/business-contact";
 import {
   QUOTE_REQUEST_TIMINGS,
   quoteRequestSchema,
@@ -37,6 +40,8 @@ import {
 type Props = {
   businessId: string;
   businessName: string;
+  phone: string | null;
+  whatsappPhone: string | null;
 };
 
 const defaultValues: QuoteRequestInput = {
@@ -53,7 +58,9 @@ const defaultValues: QuoteRequestInput = {
 
 export function BusinessQuoteRequest({
   businessId,
-  businessName
+  businessName,
+  phone,
+  whatsappPhone
 }: Props) {
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -62,11 +69,41 @@ export function BusinessQuoteRequest({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting }
   } = useForm<QuoteRequestInput>({
     resolver: zodResolver(quoteRequestSchema),
     defaultValues: { ...defaultValues, businessId }
   });
+
+  function openQuoteRequest() {
+    trackAnalyticsEvent("quote_request_open", {
+      business_id: businessId
+    });
+    setOpen(true);
+  }
+
+  useEffect(() => {
+    function handleServiceQuoteRequest(event: Event) {
+      const serviceName = (event as CustomEvent<{ serviceName?: string }>).detail
+        ?.serviceName;
+
+      if (serviceName) {
+        setValue("description", `Pretendo pedir orçamento para: ${serviceName}. `);
+      }
+
+      openQuoteRequest();
+    }
+
+    window.addEventListener("business:request-quote", handleServiceQuoteRequest);
+    return () =>
+      window.removeEventListener(
+        "business:request-quote",
+        handleServiceQuoteRequest
+      );
+  // A função depende apenas dos identificadores estáveis desta ficha.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessId, setValue]);
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
@@ -97,7 +134,11 @@ export function BusinessQuoteRequest({
 
   return (
     <>
-      <Card className="overflow-hidden border-green-200 bg-green-50/70">
+      <Card
+        id="pedir-orcamento"
+        tabIndex={-1}
+        className="scroll-mt-32 overflow-hidden border-green-200 bg-green-50/70 outline-none"
+      >
         <CardContent className="p-5">
           <div className="flex items-start gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-green-700 text-white">
@@ -113,18 +154,44 @@ export function BusinessQuoteRequest({
           <Button
             type="button"
             className="mt-5 w-full"
-            onClick={() => {
-              trackAnalyticsEvent("quote_request_open", {
-                business_id: businessId
-              });
-              setOpen(true);
-            }}
+            onClick={openQuoteRequest}
           >
             Pedir orçamento
             <Send className="size-4" />
           </Button>
         </CardContent>
       </Card>
+
+      <div className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-2 gap-2 rounded-2xl border bg-background/95 p-2 shadow-2xl backdrop-blur lg:hidden">
+        {(whatsappPhone || phone) && (
+          <Button asChild size="lg" variant="outline" className="min-w-0">
+            <a
+              href={
+                whatsappPhone
+                  ? getBusinessWhatsAppUrl(whatsappPhone, businessName)
+                  : `tel:${phone}`
+              }
+              target={whatsappPhone ? "_blank" : undefined}
+              rel={whatsappPhone ? "noopener noreferrer" : undefined}
+              onClick={() => trackBusinessEvent(businessId, "phone_click")}
+            >
+              {whatsappPhone ? <SiWhatsapp /> : <Phone />}
+              <span className="truncate">
+                {whatsappPhone ? "WhatsApp" : "Ligar"}
+              </span>
+            </a>
+          </Button>
+        )}
+        <Button
+          type="button"
+          size="lg"
+          className={whatsappPhone || phone ? "min-w-0" : "col-span-2"}
+          onClick={openQuoteRequest}
+        >
+          <FileText />
+          <span className="truncate">Pedir orçamento</span>
+        </Button>
+      </div>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
