@@ -45,6 +45,7 @@ export async function updateMyBusiness(
     latitude: coordinates?.latitude ?? null,
     longitude: coordinates?.longitude ?? null,
     is_24_hours: data.is24Hours,
+    updated_at: new Date().toISOString(),
     ...(logoPath !== undefined ? { logo_url: logoPath } : {})
   };
 

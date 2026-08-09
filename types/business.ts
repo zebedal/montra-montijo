@@ -80,6 +80,7 @@ export type PublicBusinessDetails = {
   longitude: number | null;
   is_24_hours: boolean;
   is_visible: boolean;
+  updated_at: string;
   plan: BusinessPlan;
   primary_cta_enabled: boolean;
   primary_cta_type: string | null;
