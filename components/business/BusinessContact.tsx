@@ -10,6 +10,7 @@ import {
   trackBusinessEvent,
   type BusinessEventType
 } from "@/lib/analytics/trackBusinessEvent";
+import { getBusinessWhatsAppUrl } from "@/lib/business-contact";
 
 type BusinessContactProps = {
   business: {
@@ -48,18 +49,6 @@ function getDisplayUrl(value: string) {
   } catch {
     return value;
   }
-}
-
-function getWhatsAppUrl(phone: string, businessName: string) {
-  let digits = phone.replace(/\D/g, "");
-
-  if (digits.length === 9) {
-    digits = `351${digits}`;
-  }
-
-  const message = `Olá! Encontrei ${businessName} na Montra Montijo e gostaria de pedir mais informações.`;
-
-  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
 export function BusinessContact({ business }: BusinessContactProps) {
@@ -109,7 +98,10 @@ export function BusinessContact({ business }: BusinessContactProps) {
             label: "WhatsApp",
             value: business.whatsapp_phone,
             icon: SiWhatsapp,
-            href: getWhatsAppUrl(business.whatsapp_phone, business.name),
+            href: getBusinessWhatsAppUrl(
+              business.whatsapp_phone,
+              business.name
+            ),
             external: true,
             eventType: "phone_click" as const,
             iconClass: "bg-emerald-100 text-emerald-700"
@@ -200,7 +192,7 @@ export function BusinessContact({ business }: BusinessContactProps) {
   }
 
   return (
-    <Card className="mt-10">
+    <Card>
       <CardHeader>
         <CardTitle>Contactos</CardTitle>
       </CardHeader>

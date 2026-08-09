@@ -10,6 +10,8 @@ import { Pencil } from "lucide-react";
 import ShareButton from "./ShareButton";
 import { BusinessSpecialtyChips } from "./BusinessSpecialtyChips";
 import { BusinessPlanBadge } from "./BusinessPlanBadge";
+import { BusinessTrustSignals } from "./BusinessTrustSignals";
+import type { BusinessTrustSignal } from "@/lib/business-trust-signals";
 
 type BusinessHeaderProps = {
   business: {
@@ -23,6 +25,7 @@ type BusinessHeaderProps = {
   };
   businessUrl: string;
   specialties?: { id: string; name: string; slug: string }[];
+  trustSignals?: BusinessTrustSignal[];
   isBusinessOwner?: boolean;
 };
 
@@ -30,6 +33,7 @@ export function BusinessHeader({
   business,
   businessUrl,
   specialties = [],
+  trustSignals = [],
   isBusinessOwner = false
 }: BusinessHeaderProps) {
   return (
@@ -112,6 +116,8 @@ export function BusinessHeader({
                 {business.description}
               </p>
             )}
+
+            <BusinessTrustSignals signals={trustSignals} />
           </div>
         </div>
       </CardContent>

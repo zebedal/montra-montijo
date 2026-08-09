@@ -10,7 +10,9 @@ import {
   MapPinned,
   Megaphone,
   MousePointerClick,
-  Phone
+  Phone,
+  FileText,
+  MapPin
 } from "lucide-react";
 import {
   Bar,
@@ -41,6 +43,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { BusinessStatistics } from "@/lib/queries/getBusinessStatistics";
+import { calculateQuoteRequestConversion } from "@/lib/quote-request";
 
 type Props = {
   statistics: BusinessStatistics;
@@ -96,6 +99,10 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
 
   const interactionRate =
     totals.pageViews > 0 ? (totals.interactions / totals.pageViews) * 100 : 0;
+  const quoteConversion = calculateQuoteRequestConversion(
+    totals.quoteRequests,
+    totals.pageViews
+  );
 
   const cards = [
     {
@@ -121,6 +128,23 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
       description: "Cliques em relação às visualizações",
       icon: BarChart3,
       iconClass: "bg-emerald-100 text-emerald-700"
+    },
+    {
+      label: "Pedidos de orçamento",
+      value: totals.quoteRequests.toLocaleString("pt-PT"),
+      description: "Pedidos enviados por potenciais clientes",
+      icon: FileText,
+      iconClass: "bg-amber-100 text-amber-700"
+    },
+    {
+      label: "Conversão em pedidos",
+      value: `${quoteConversion.toLocaleString("pt-PT", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1
+      })}%`,
+      description: "Pedidos em relação às visualizações",
+      icon: BarChart3,
+      iconClass: "bg-teal-100 text-teal-700"
     },
     {
       label: business.primaryCtaLabel ?? "Ação principal",
@@ -260,6 +284,25 @@ export function BusinessStatisticsDashboard({ statistics }: Props) {
         </Card>
       ) : (
         <>
+          {totals.quoteRequests > 0 && (
+            <div className="grid min-w-0 gap-4">
+              <Card className="min-w-0">
+                <CardHeader>
+                  <CardTitle>Localidades dos pedidos</CardTitle>
+                  <CardDescription>Onde existe procura pelos seus serviços.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {statistics.quoteRequests.localities.map((item) => (
+                    <div key={item.label} className="flex items-center justify-between gap-4 rounded-lg border p-3 text-sm">
+                      <span className="flex min-w-0 items-center gap-2 truncate"><MapPin className="size-4 shrink-0 text-green-700" />{item.label}</span>
+                      <span className="shrink-0 font-semibold">{item.value}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           <Card className="min-w-0">
             <CardHeader>
               <CardTitle>Evolução diária</CardTitle>

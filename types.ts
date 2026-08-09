@@ -16,6 +16,7 @@ export const Routes = {
   SEARCH: "/search",
   FAVORITOS: "/area-cliente/favoritos",
   CAMPANHAS: "/area-cliente/campanhas",
+  PEDIDOS_ORCAMENTO: "/area-cliente/pedidos-orcamento",
   CAMPANHAS_TUTORIAL: "/campanhas",
   PLANO_DESTAQUE: "/plano-destaque",
   REIVINDICACOES: "/area-cliente/reivindicacoes",

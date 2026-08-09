@@ -16,6 +16,7 @@ import { BusinessServiceAreas } from "@/components/business/BusinessServiceAreas
 import { BusinessPageTracker } from "@/components/business/BusinessPageTracker";
 import { BusinessPrimaryCta } from "@/components/business/BusinessPrimaryCta";
 import { BusinessCampaign } from "@/components/business/BusinessCampaign";
+import { BusinessQuoteRequest } from "@/components/business/BusinessQuoteRequest";
 
 import { getBusinessBySlug } from "@/lib/queries/getBusinessBySlug";
 import { createClient } from "@/lib/supabase/server";
@@ -27,6 +28,7 @@ import BusinessClaimButton from "@/components/business/BusinessClaimButton";
 import BusinessOwnerPremiumBanner from "@/components/business/BusinessOwnerPremiumBanner";
 import { getSiteUrl } from "@/lib/site-url";
 import { getAdminPreviewUserId } from "@/lib/auth/getAdminPreviewUserId";
+import { getBusinessTrustSignals } from "@/lib/business-trust-signals";
 
 interface Props {
   params: Promise<{
@@ -188,6 +190,22 @@ export default async function BusinessPage({ params }: Props) {
   const adminPreviewUserId = await getAdminPreviewUserId();
 
   const canActivatePremium = isBusinessOwner && business.plan === "free";
+  const canReceiveQuoteRequests = Boolean(
+    business.user_id &&
+      business.user_id !== process.env.ADMIN_USER_ID &&
+      !isBusinessOwner
+  );
+  const isManagedByOwner = Boolean(
+    business.user_id && business.user_id !== process.env.ADMIN_USER_ID
+  );
+  const trustSignals = getBusinessTrustSignals({
+    managedByOwner: isManagedByOwner,
+    updatedAt: business.updated_at,
+    hasWhatsApp: Boolean(business.whatsapp_phone),
+    is24Hours: business.is_24_hours,
+    servesAtCustomerLocation: serviceAreas.length > 0,
+    acceptsQuoteRequests: isManagedByOwner
+  });
 
   const completedProfileItems = [
     (business.description?.trim().length ?? 0) >= 80,
@@ -246,18 +264,19 @@ export default async function BusinessPage({ params }: Props) {
         />
       )}
 
-      <div className="mt-14 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="min-w-0 space-y-6">
-          {business.category && (
-            <BusinessBreadcrumb
-              category={business.category}
-              businessName={business.name}
-            />
-          )}
+      {business.category && (
+        <BusinessBreadcrumb
+          category={business.category}
+          businessName={business.name}
+        />
+      )}
 
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-6">
           <BusinessHeader
             business={business}
             specialties={specialties}
+            trustSignals={trustSignals}
             businessUrl={businessUrl}
             isBusinessOwner={isBusinessOwner}
           />
@@ -304,6 +323,12 @@ export default async function BusinessPage({ params }: Props) {
         </div>
 
         <div className="min-w-0 space-y-6 lg:sticky lg:top-6 lg:self-start">
+          {canReceiveQuoteRequests && (
+            <BusinessQuoteRequest
+              businessId={business.id}
+              businessName={business.name}
+            />
+          )}
           <BusinessContact business={business} />
 
           <BusinessHours
