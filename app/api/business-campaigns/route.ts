@@ -102,7 +102,7 @@ export async function PUT(request: Request) {
 
   if (business.plan !== "premium") {
     return NextResponse.json(
-      { error: "As campanhas estão disponíveis no Plano Destaque." },
+      { error: "As campanhas estão disponíveis no Plano Premium." },
       { status: 403 }
     );
   }

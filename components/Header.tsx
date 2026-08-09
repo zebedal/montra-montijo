@@ -16,6 +16,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  Megaphone,
   Plus,
   ShieldQuestion,
   User
@@ -162,6 +163,10 @@ export function Header() {
 
           <Button asChild variant="ghost">
             <Link href="/plano-destaque">Planos</Link>
+          </Button>
+
+          <Button asChild variant="ghost">
+            <Link href={Routes.CAMPANHAS_TUTORIAL}>Campanhas</Link>
           </Button>
         </nav>
 
@@ -333,6 +338,13 @@ export function Header() {
 
                       <MobileNavLink href="/plano-destaque" icon={Crown}>
                         Planos
+                      </MobileNavLink>
+
+                      <MobileNavLink
+                        href={Routes.CAMPANHAS_TUTORIAL}
+                        icon={Megaphone}
+                      >
+                        Como criar campanhas
                       </MobileNavLink>
                     </div>
                   </section>

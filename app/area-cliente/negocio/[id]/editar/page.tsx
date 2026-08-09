@@ -100,24 +100,28 @@ export default async function EditBusinessPage({ params }: Props) {
     "Sábado",
     "Domingo"
   ];
-  const initialOpeningHours = orderedDays.map((day) => {
-    const dayHours = businessHours.filter((hour) => hour.day === day);
-    const isClosed =
-      dayHours.length === 0 || dayHours.every((hour) => hour.is_closed);
+  const initialOpeningHours =
+    businessHours.length === 0
+      ? []
+      : orderedDays.map((day) => {
+          const dayHours = businessHours.filter((hour) => hour.day === day);
+          const isClosed =
+            dayHours.length === 0 ||
+            dayHours.every((hour) => hour.is_closed);
 
-    return {
-      day,
-      periods: isClosed
-        ? []
-        : dayHours
-            .filter((hour) => !hour.is_closed)
-            .map((hour) => ({
-              open: hour.open_time ?? "",
-              close: hour.close_time ?? ""
-            })),
-      closed: isClosed
-    };
-  });
+          return {
+            day,
+            periods: isClosed
+              ? []
+              : dayHours
+                  .filter((hour) => !hour.is_closed)
+                  .map((hour) => ({
+                    open: hour.open_time ?? "",
+                    close: hour.close_time ?? ""
+                  })),
+            closed: isClosed
+          };
+        });
 
   const category = Array.isArray(business.category)
     ? business.category[0]

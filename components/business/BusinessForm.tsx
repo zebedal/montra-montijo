@@ -44,7 +44,7 @@ import { LogoUpload } from "./UploadLogo";
 import { BusinessImagesUpload } from "./BusinessImagesUpload";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
-import { CheckCircle2, Info, LocateFixed, LogIn, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, ChevronDown, Info, LocateFixed, LogIn, Plus, Trash2 } from "lucide-react";
 
 import {
   Dialog,
@@ -157,6 +157,7 @@ export default function BusinessForm({
         (initialData?.openingHours?.length ?? 0) > 0)
   );
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [selectedSectorId, setSelectedSectorId] = useState("");
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [images, setImages] = useState<UploadImage[]>(
@@ -168,6 +169,7 @@ export default function BusinessForm({
   );
   const [categorySearch, setCategorySearch] = useState<string>("");
   const [showSocials, setShowSocials] = useState(false);
+  const [showOptionalDetails, setShowOptionalDetails] = useState(mode === "edit");
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -623,12 +625,26 @@ export default function BusinessForm({
 
   useEffect(() => {
     async function load() {
-      const data = await getCategorias();
-      setCategorias(data);
+      try {
+        const data = await getCategorias();
+        const currentCategoryId = getValues("category_id");
+        const currentCategory = data.find(
+          (category) => category.id === currentCategoryId
+        );
+
+        setCategorias(data);
+
+        if (currentCategory) {
+          setCategorySearch(currentCategory.name);
+          setSelectedSectorId(currentCategory.sector?.id ?? "");
+        }
+      } finally {
+        setIsLoadingCategories(false);
+      }
     }
 
     load();
-  }, []);
+  }, [getValues]);
 
   useEffect(() => {
     if (!initialData) return;
@@ -713,7 +729,11 @@ export default function BusinessForm({
             : []
       });
 
+      // O utilizador já tinha avançado com estes dados antes da autenticação.
+      // Mantemos as secções adicionais visíveis para não esconder o conteúdo recuperado.
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowOptionalDetails(true);
+
       setShowHours(hasOpeningHours);
 
       setShowSocials(Boolean(parsed.form.instagram || parsed.form.facebook));
@@ -860,6 +880,15 @@ export default function BusinessForm({
             </p>
           </CardHeader>
         )}
+        {mode === "create" && (
+          <CardHeader className="border-b bg-muted/20">
+            <CardTitle>Dados essenciais</CardTitle>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Preencha o nome, a atividade, uma descrição curta e o telefone.
+              Tudo o resto pode ser adicionado agora ou mais tarde.
+            </p>
+          </CardHeader>
+        )}
 
         <CardContent>
           <form
@@ -930,6 +959,13 @@ export default function BusinessForm({
                   </div>
                 )}
 
+                {isLoadingCategories ? (
+                  <Input
+                    value="A carregar categoria..."
+                    disabled
+                    aria-label="A carregar categoria do negócio"
+                  />
+                ) : (
                 <Controller
                   control={control}
                   name="category_id"
@@ -1020,6 +1056,7 @@ export default function BusinessForm({
                     </>
                   )}
                 />
+                )}
               </div>
 
               {selectedCategoryId && specialties.length > 0 && (
@@ -1099,6 +1136,48 @@ export default function BusinessForm({
               {errors.phone && (
                 <p className="text-sm text-red-500">{errors.phone.message}</p>
               )}
+            </section>
+
+            {mode === "create" && !showOptionalDetails && (
+              <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="flex items-center gap-2 font-semibold text-green-950">
+                      <CheckCircle2 className="h-5 w-5 text-green-700" />
+                      Já tem o essencial para continuar
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-green-800">
+                      Pode escolher o plano agora e completar fotografias,
+                      localização, serviços e horários mais tarde.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0 border-green-300 bg-white text-green-900"
+                    onClick={() => {
+                      setShowOptionalDetails(true);
+                      trackAnalyticsEvent("business_optional_details_open");
+                    }}
+                  >
+                    Completar mais informações
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {(mode === "edit" || showOptionalDetails) && (
+              <>
+              <section className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    Contactos adicionais
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Opcional — facilite o contacto por outros canais.
+                  </p>
+                </div>
 
               <Controller
                 name="allowWhatsApp"
@@ -1195,7 +1274,7 @@ export default function BusinessForm({
             </section>
 
             {/* LOCALIZACAO */}
-            <section className="space-y-4">
+            <section id="localizacao" className="scroll-mt-24 space-y-4">
               <div>
                 <h2 className="text-lg font-semibold">Localização</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -1444,7 +1523,7 @@ export default function BusinessForm({
               )}
             </section>
 
-            <section className="space-y-4">
+            <section id="fotografias" className="scroll-mt-24 space-y-4">
               <h2 className="text-lg font-semibold">Logo</h2>
               <LogoUpload
                 onChange={setLogoFile}
@@ -1746,6 +1825,8 @@ export default function BusinessForm({
                 </>
               )}
             </section>
+              </>
+            )}
             <div className="flex justify-end gap-3 border-t pt-6">
               {mode === "edit" && (
                 <Button
@@ -1780,7 +1861,7 @@ export default function BusinessForm({
                         : "A guardar alterações..."}
                   </span>
                 ) : mode === "create" ? (
-                  "Publicar negócio"
+                  "Continuar para escolher o plano"
                 ) : (
                   "Guardar alterações"
                 )}

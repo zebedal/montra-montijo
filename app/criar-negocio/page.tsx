@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import BusinessForm from "@/components/business/BusinessForm";
-import { CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Search } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Divulgue o seu negócio no comércio local do Montijo",
@@ -54,16 +56,17 @@ export default async function CriarNegocioPage({ searchParams }: Props) {
         </p>
 
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          Crie gratuitamente a página do seu negócio
+          Dê visibilidade ao seu negócio no Montijo
         </h1>
 
         <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
-          Apareça quando alguém procura lojas, empresas e profissionais no
-          Montijo. Comece pelos dados essenciais e complete o perfil depois.
+          Crie gratuitamente a sua página com os dados essenciais. Depois pode
+          adicionar fotografias, horários, serviços e outras informações
+          quando lhe for mais conveniente.
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-foreground">
-          {["Sem cartão", "Publicação gratuita", "Editável a qualquer momento"].map(
+          {["Gratuito", "Aparece nas pesquisas da Montra", "Atualize quando quiser"].map(
             (benefit) => (
               <span key={benefit} className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-green-600" />
@@ -73,6 +76,24 @@ export default async function CriarNegocioPage({ searchParams }: Props) {
           )}
         </div>
       </section>
+
+      <aside className="mx-auto mb-6 flex max-w-4xl flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-semibold text-amber-950">
+            O seu negócio já aparece na Montra?
+          </p>
+          <p className="mt-1 text-sm leading-6 text-amber-900/75">
+            Não crie uma página duplicada. Pesquise primeiro pelo nome e, se a
+            encontrar, pode reivindicá-la gratuitamente.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="shrink-0 border-amber-300 bg-white">
+          <Link href="/negocios">
+            <Search className="h-4 w-4" />
+            Procurar o meu negócio
+          </Link>
+        </Button>
+      </aside>
 
       <BusinessForm
         shouldRestoreDraft={restoreDraft === "true"}
